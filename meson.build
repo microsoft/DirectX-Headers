@@ -17,7 +17,9 @@ dep_dxheaders = declare_dependency(
     link_with : guids_lib,
     include_directories : inc_dirs)
 
-subdir('test')
+if not meson.is_subproject()
+    subdir('test')
+endif
 
 pkg = import('pkgconfig')
 pkg.generate(name : 'DirectX-Headers',
