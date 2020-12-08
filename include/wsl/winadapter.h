@@ -193,11 +193,11 @@ typedef LONG HRESULT;
 #define DXGI_ERROR_DRIVER_INTERNAL_ERROR ((HRESULT)0x887A0020L)
 #define DXGI_ERROR_INVALID_CALL ((HRESULT)0x887A0001L)
 
-struct LUID 
+typedef struct _LUID 
 {
     ULONG LowPart;
     LONG HighPart;
-};
+} LUID;
 
 struct RECT
 {
