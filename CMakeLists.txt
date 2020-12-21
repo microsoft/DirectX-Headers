@@ -34,6 +34,7 @@ install(TARGETS DirectX-Headers DirectX-Guids
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 # Create the targets CMake file which contains the above definitions
 install(EXPORT DirectX-Headers-Targets FILE directx-headers-targets.cmake
+        NAMESPACE Microsoft::
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/directx-headers/cmake)
 
 # Install the actual includes
