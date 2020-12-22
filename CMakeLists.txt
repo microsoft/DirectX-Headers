@@ -6,6 +6,8 @@ project(DirectX-Headers
         LANGUAGES CXX
         VERSION 1.0)
 
+option(BUILD_TEST "Build the test" ON)
+
 include(GNUInstallDirs)
 
 # Enables consumers to add this library as a link target to automatically add
@@ -56,4 +58,6 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/directx-headers-config.cmake"
               "${CMAKE_CURRENT_BINARY_DIR}/directx-headers-config-version.cmake"
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/directx-headers/cmake)
 
-add_subdirectory(test)
+if (BUILD_TEST)
+    add_subdirectory(test)
+endif()
