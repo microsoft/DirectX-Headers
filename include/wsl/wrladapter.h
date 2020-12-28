@@ -126,7 +126,6 @@ namespace WRL
         }
 
     public:
-#pragma region constructors
         ComPtr() throw() : ptr_(nullptr)
         {
         }
@@ -169,16 +168,12 @@ namespace WRL
         {
             other.ptr_ = nullptr;
         }
-#pragma endregion
 
-#pragma region destructor
         ~ComPtr() throw()
         {
             InternalRelease();
         }
-#pragma endregion
 
-#pragma region assignment
         ComPtr& operator=(decltype(nullptr)) throw()
         {
             InternalRelease();
@@ -229,9 +224,7 @@ namespace WRL
             ComPtr(static_cast<ComPtr<U>&&>(other)).Swap(*this);
             return *this;
         }
-#pragma endregion
 
-#pragma region modifiers
         void Swap(_Inout_ ComPtr&& r) throw()
         {
             T* tmp = ptr_;
@@ -245,7 +238,6 @@ namespace WRL
             ptr_ = r.ptr_;
             r.ptr_ = tmp;
         }
-#pragma endregion
 
         operator Details::BoolType() const throw()
         {
@@ -402,9 +394,14 @@ namespace WRL
                     static_cast<IUnknown*>(*ppvObject)->AddRef();
                 }
 
-#pragma warning(suppress: 6102) // '*ppvObject' is used but may not be initialized
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 6102) // '*ppvObject' is used but may not be initialized
+#endif
                 _Analysis_assume_(SUCCEEDED(hr) || (*ppvObject == nullptr));
-
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
                 return hr;
             }
 
@@ -490,8 +487,6 @@ namespace WRL
                 return InterfaceTraits<I0>::CastToUnknown(this);
             }
         };
-
-#pragma region Implements helper templates
 
         // Helper template used by Implements. This template traverses a list of interfaces and adds them as base class and information
         // to enable QI.
@@ -650,8 +645,6 @@ namespace WRL
                 return ChainInterfaces<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>::CastToUnknown();
             }
         };
-
-#pragma endregion // Implements helper templates
 
         // Implements - template implementing QI using the information provided through its template parameters
         // Each template parameter has to be one of the following:
