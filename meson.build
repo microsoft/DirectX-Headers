@@ -18,7 +18,7 @@ dep_dxheaders = declare_dependency(
     link_with : guids_lib,
     include_directories : inc_dirs)
 
-if not meson.is_subproject()
+if not meson.is_subproject() and get_option('build-test')
     subdir('test')
 endif
 
