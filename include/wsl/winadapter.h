@@ -167,8 +167,10 @@ __inline int InlineIsEqualGUID(REFGUID rguid1, REFGUID rguid2)
 #define _Success_(x)
 #define _In_count_(x)
 #define _In_opt_count_(x)
+#define _Use_decl_annotations_
 
 // Calling conventions
+#define __cdecl
 #define __stdcall
 #define STDMETHODCALLTYPE
 #define STDAPICALLTYPE
@@ -181,12 +183,20 @@ __inline int InlineIsEqualGUID(REFGUID rguid1, REFGUID rguid2)
 
 // Error codes
 typedef LONG HRESULT;
-#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
-#define FAILED(hr) (((HRESULT)(hr)) < 0)
-#define S_OK ((HRESULT)0L)
-#define E_OUTOFMEMORY 0x80000002L
-#define E_INVALIDARG  0x80000003L
-#define E_NOINTERFACE 0x80000004L
+#define SUCCEEDED(hr)  (((HRESULT)(hr)) >= 0)
+#define FAILED(hr)     (((HRESULT)(hr)) < 0)
+#define S_OK           ((HRESULT)0L)
+#define S_FALSE        ((HRESULT)1L)
+#define E_NOTIMPL      ((HRESULT)0x80000001L)
+#define E_OUTOFMEMORY  ((HRESULT)0x80000002L)
+#define E_INVALIDARG   ((HRESULT)0x80000003L)
+#define E_NOINTERFACE  ((HRESULT)0x80000004L)
+#define E_POINTER      ((HRESULT)0x80000005L)
+#define E_HANDLE       ((HRESULT)0x80000006L)
+#define E_ABORT        ((HRESULT)0x80000007L)
+#define E_FAIL         ((HRESULT)0x80000008L)
+#define E_ACCESSDENIED ((HRESULT)0x80000009L)
+#define E_UNEXPECTED   ((HRESULT)0x8000FFFFL)
 #define DXGI_ERROR_DEVICE_HUNG ((HRESULT)0x887A0006L)
 #define DXGI_ERROR_DEVICE_REMOVED ((HRESULT)0x887A0005L)
 #define DXGI_ERROR_DEVICE_RESET ((HRESULT)0x887A0007L)
@@ -313,4 +323,18 @@ extern "C++"
 }
 
 #define IID_PPV_ARGS(ppType) __uuidof(**(ppType)), IID_PPV_ARGS_Helper(ppType)
+#endif
+
+#if defined(lint)
+// Note: lint -e530 says don't complain about uninitialized variables for
+// this variable.  Error 527 has to do with unreachable code.
+// -restore restores checking to the -save state
+#define UNREFERENCED_PARAMETER(P) \
+    /*lint -save -e527 -e530 */ \
+    { \
+        (P) = (P); \
+    } \
+    /*lint -restore */
+#else
+#define UNREFERENCED_PARAMETER(P) (P)
 #endif

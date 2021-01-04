@@ -7,6 +7,9 @@
 
 // defined by winadapter.h and needed by some windows headers, but conflicts
 // with some libc++ implementation headers
+#ifdef __in
+#undef __in
+#endif
 #ifdef __out
 #undef __out
 #endif
