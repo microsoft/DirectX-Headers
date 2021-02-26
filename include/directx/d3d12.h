@@ -1,6 +1,7 @@
 /*-------------------------------------------------------------------------------------
  *
  * Copyright (c) Microsoft Corporation
+ * Licensed under the MIT license
  *
  *-------------------------------------------------------------------------------------*/
 
@@ -8,7 +9,7 @@
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 
- /* File created by MIDL compiler version 8.01.0624 */
+ /* File created by MIDL compiler version 8.01.0625 */
 
 
 
@@ -4372,10 +4373,6 @@ EXTERN_C const IID IID_ID3D12Heap;
 
 
 
-
-
-
-
 #endif 	/* __ID3D12Heap_INTERFACE_DEFINED__ */
 
 
@@ -4591,10 +4588,6 @@ EXTERN_C const IID IID_ID3D12Resource;
 
 
 #endif 	/* C style interface */
-
-
-
-
 
 
 
@@ -5317,18 +5310,6 @@ EXTERN_C const IID IID_ID3D12DescriptorHeap;
 
 
 #endif 	/* C style interface */
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -8351,10 +8332,6 @@ EXTERN_C const IID IID_ID3D12CommandQueue;
 
 
 
-
-
-
-
 #endif 	/* __ID3D12CommandQueue_INTERFACE_DEFINED__ */
 
 
@@ -9074,18 +9051,6 @@ EXTERN_C const IID IID_ID3D12Device;
 
 
 #endif 	/* C style interface */
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -11564,10 +11529,6 @@ EXTERN_C const IID IID_ID3D12ProtectedResourceSession;
 
 
 
-
-
-
-
 #endif 	/* __ID3D12ProtectedResourceSession_INTERFACE_DEFINED__ */
 
 
@@ -12262,10 +12223,6 @@ EXTERN_C const IID IID_ID3D12Device4;
 
 
 
-
-
-
-
 #endif 	/* __ID3D12Device4_INTERFACE_DEFINED__ */
 
 
@@ -12482,10 +12439,6 @@ EXTERN_C const IID IID_ID3D12SwapChainAssistant;
 
 
 #endif 	/* C style interface */
-
-
-
-
 
 
 
@@ -15888,10 +15841,6 @@ EXTERN_C const IID IID_ID3D12ProtectedResourceSession1;
 
 
 
-
-
-
-
 #endif 	/* __ID3D12ProtectedResourceSession1_INTERFACE_DEFINED__ */
 
 
@@ -17542,10 +17491,6 @@ EXTERN_C const IID IID_ID3D12Device8;
 
 
 
-
-
-
-
 #endif 	/* __ID3D12Device8_INTERFACE_DEFINED__ */
 
 
@@ -17953,10 +17898,6 @@ EXTERN_C const IID IID_ID3D12Resource2;
 
 
 #endif 	/* C style interface */
-
-
-
-
 
 
 
@@ -20137,10 +20078,6 @@ EXTERN_C const IID IID_ID3D12ShaderCacheSession;
 
 
 #endif 	/* C style interface */
-
-
-
-
 
 
 

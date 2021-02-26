@@ -3,9 +3,6 @@
 //    Licensed under the MIT license
 //
 
-#ifndef __dxgicommon_h__
-#define __dxgicommon_h__
-
 
 typedef struct DXGI_RATIONAL
 {
@@ -52,6 +49,4 @@ typedef enum DXGI_COLOR_SPACE_TYPE
     DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_TOPLEFT_P2020     = 24,
     DXGI_COLOR_SPACE_CUSTOM                             = 0xFFFFFFFF
 } DXGI_COLOR_SPACE_TYPE;
-
-#endif // __dxgicommon_h__
 

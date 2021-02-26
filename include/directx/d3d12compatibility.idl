@@ -1,6 +1,7 @@
 /*-------------------------------------------------------------------------------------
  *
  * Copyright (c) Microsoft Corporation
+ * Licensed under the MIT license
  *
  *-------------------------------------------------------------------------------------*/
 import "oaidl.idl";
@@ -11,7 +12,7 @@ import "d3d11on12.idl";
 cpp_quote("#include <winapifamily.h>")
 
 #pragma region Desktop Family
-cpp_quote("#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)")
+cpp_quote("#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_GAMES)")
 
 typedef enum D3D12_COMPATIBILITY_SHARED_FLAGS
 {
@@ -76,7 +77,7 @@ interface OpenCLOn12CreatorID : IUnknown { };
 interface DirectMLTensorFlowCreatorID : IUnknown { };
 
 
-cpp_quote("#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */")
+cpp_quote("#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_GAMES) */")
 #pragma endregion
 
 cpp_quote( "DEFINE_GUID(IID_ID3D12CompatibilityDevice,0x8f1c0e3c,0xfae3,0x4a82,0xb0,0x98,0xbf,0xe1,0x70,0x82,0x07,0xff);" )
