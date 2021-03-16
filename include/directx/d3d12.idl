@@ -934,6 +934,7 @@ typedef enum D3D12_FEATURE
     D3D12_FEATURE_D3D12_OPTIONS8                        = 36,
     D3D12_FEATURE_D3D12_OPTIONS9                        = 37,
     D3D12_FEATURE_D3D12_OPTIONS10                       = 39,
+    D3D12_FEATURE_D3D12_OPTIONS11                       = 40,
 } D3D12_FEATURE;
 
 typedef enum D3D12_SHADER_MIN_PRECISION_SUPPORT
@@ -1385,6 +1386,12 @@ typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS10
     [annotation("_Out_")] BOOL VariableRateShadingSumCombinerSupported;
     [annotation("_Out_")] BOOL MeshShaderPerPrimitiveShadingRateSupported;
 } D3D12_FEATURE_DATA_D3D12_OPTIONS10;
+
+// D3D12_FEATURE_D3D12_OPTIONS11
+typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS11
+{
+    [annotation("_Out_")] BOOL AtomicInt64OnDescriptorHeapResourceSupported;
+} D3D12_FEATURE_DATA_D3D12_OPTIONS11;
 
 
 typedef struct D3D12_RESOURCE_ALLOCATION_INFO
