@@ -193,8 +193,8 @@ typedef interface ID3D12VideoEncodeCommandList1 ID3D12VideoEncodeCommandList1;
 
 
 /* header files for imported files */
-#include "oaidl.h"
-#include "ocidl.h"
+#include "OAIdl.h"
+#include "OCIdl.h"
 #include "dxgicommon.h"
 #include "d3d12.h"
 

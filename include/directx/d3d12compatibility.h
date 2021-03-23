@@ -95,8 +95,8 @@ typedef interface DirectMLTensorFlowCreatorID DirectMLTensorFlowCreatorID;
 
 
 /* header files for imported files */
-#include "oaidl.h"
-#include "ocidl.h"
+#include "OAIdl.h"
+#include "OCIdl.h"
 #include "d3d11on12.h"
 
 #ifdef __cplusplus
