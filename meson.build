@@ -18,6 +18,10 @@ dep_dxheaders = declare_dependency(
     link_with : guids_lib,
     include_directories : inc_dirs)
 
+if meson.version().version_compare('>=0.54.0')
+    meson.override_dependency('DirectX-Headers', dep_dxheaders)
+endif
+
 if not meson.is_subproject() and get_option('build-test')
     subdir('test')
 endif
