@@ -30,8 +30,12 @@ if (NOT WIN32)
     )
 endif()
 
+add_library(Micrsofot::DirectX-Headers ALIAS DirectX-Headers)
+
 add_library(DirectX-Guids STATIC src/dxguids.cpp)
 target_link_libraries(DirectX-Guids PRIVATE DirectX-Headers)
+
+add_library(Microsoft::DirectX-Guids ALIAS DirectX-Guids)
 
 # Install the targets
 install(TARGETS DirectX-Headers DirectX-Guids
@@ -62,5 +66,5 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/directx-headers-config.cmake"
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/directx-headers/cmake)
 
 if (BUILD_TEST)
-    add_subdirectory(test)
+    add_subdirectory(test) 
 endif()
