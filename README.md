@@ -39,6 +39,7 @@ There are various ways to consume the headers in this project:
 * Manually: Just copy the headers somewhere and point your project at them.
 * CMake subproject: Add this entire project as a subdirectory of your larger project, e.g. as a git submodule, and `add_subdirectory` into it. Use the resulting `DirectX-Headers` and/or `DirectX-Guids` targets as a link dependency
 * Installed CMake: After building/installing this project, it can be found through CMake's `find_package` functionality and will expose the same `DirectX-Headers` and `DirectX-Guids` targets.
+* FetchContent CMake (3.11+): Fetch this library using Git and easily add it to your project.
 * Meson subproject/wrap: Add this entire project as a subproject of your larger project, and use `subproject` or `dependency` to consume it.
 * Pkg-config: Use Meson to build this project, and the resulting installed package can be found via pkg-config.
 * vcpkg: A vcpkg port has [been added](https://github.com/microsoft/vcpkg/pull/15222).
