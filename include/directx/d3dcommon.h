@@ -385,6 +385,7 @@ enum D3D_SRV_DIMENSION
 #define D3D_SHADER_FEATURE_RESOURCE_DESCRIPTOR_HEAP_INDEXING                              0x2000000
 #define D3D_SHADER_FEATURE_SAMPLER_DESCRIPTOR_HEAP_INDEXING                               0x4000000
 #define D3D_SHADER_FEATURE_WAVE_MMA                                                       0x8000000
+#define D3D_SHADER_FEATURE_ATOMIC_INT64_ON_DESCRIPTOR_HEAP_RESOURCE                       0x10000000
 typedef struct _D3D_SHADER_MACRO
     {
     LPCSTR Name;

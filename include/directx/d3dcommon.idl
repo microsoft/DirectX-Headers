@@ -326,6 +326,7 @@ cpp_quote("#define D3D_SHADER_FEATURE_DERIVATIVES_IN_MESH_AND_AMPLIFICATION_SHAD
 cpp_quote("#define D3D_SHADER_FEATURE_RESOURCE_DESCRIPTOR_HEAP_INDEXING                              0x2000000")
 cpp_quote("#define D3D_SHADER_FEATURE_SAMPLER_DESCRIPTOR_HEAP_INDEXING                               0x4000000")
 cpp_quote("#define D3D_SHADER_FEATURE_WAVE_MMA                                                       0x8000000")
+cpp_quote("#define D3D_SHADER_FEATURE_ATOMIC_INT64_ON_DESCRIPTOR_HEAP_RESOURCE                       0x10000000")
 
 // Additional internal shader feature flags are listed in dxbcutils.h (not relevant/useful for public to see)
 // When adding entries here, make sure they don't conflict with what's there.
