@@ -42,7 +42,9 @@ There are various ways to consume the headers in this project:
 * FetchContent CMake (3.11+): Fetch this library using Git and easily add it to your project.
 * Meson subproject/wrap: Add this entire project as a subproject of your larger project, and use `subproject` or `dependency` to consume it.
 * Pkg-config: Use Meson to build this project, and the resulting installed package can be found via pkg-config.
-* vcpkg: A vcpkg port has [been added](https://github.com/microsoft/vcpkg/pull/15222).
+* vcpkg: A vcpkg port has [been added](https://github.com/microsoft/vcpkg/tree/master/ports/directx-headers).
+* NuGet: Download the [DirectX 12 Agility SDK](https://devblogs.microsoft.com/directx/announcing-dx12agility/) from [NuGet.org](https://www.nuget.org/packages/Microsoft.Direct3D.D3D12)
+  * For more info about the Agility SDK, see the [getting started guide](https://devblogs.microsoft.com/directx/gettingstarted-dx12agility/)
 
 Contributions for new mechanisms are welcome.
 
