@@ -31,6 +31,22 @@ typedef float FLOAT;
 typedef double DOUBLE;
 typedef unsigned char BYTE;
 typedef int HWND;
+typedef int PALETTEENTRY;
+typedef int HDC;
+typedef uint16_t WORD;
+typedef void* PVOID;
+typedef char BOOLEAN;
+typedef uint64_t ULONGLONG;
+typedef uint16_t USHORT, *PUSHORT;
+typedef int64_t LONGLONG, *PLONGLONG;
+typedef int64_t LONG_PTR, *PLONG_PTR;
+typedef int64_t LONG64, *PLONG64;
+typedef uint64_t ULONG64, *PULONG64;
+typedef wchar_t WCHAR, *PWSTR;
+typedef uint8_t UCHAR, *PUCHAR;
+typedef uint64_t ULONG_PTR, *PULONG_PTR;
+typedef uint64_t UINT_PTR, *PUINT_PTR;
+typedef int64_t INT_PTR, *PINT_PTR;
 
 // Note: WCHAR is not the same between Windows and Linux, to enable
 // string manipulation APIs to work with resulting strings.
@@ -59,6 +75,27 @@ typedef const wchar_t *LPCWSTR, *PCWSTR;
 #define DECLSPEC_NOVTABLE
 #define DECLSPEC_SELECTANY
 #define EXTERN_C extern "C"
+#define APIENTRY
+#define OUT
+#define IN
+#define CONST const
+#define MAX_PATH 260
+#define C_ASSERT(expr) static_assert((expr))
+#define _countof(a) (sizeof(a) / sizeof(*(a)))
+
+typedef struct tagRECTL
+{
+    LONG left;
+    LONG top;
+    LONG right;
+    LONG bottom;
+} RECTL;
+
+typedef struct tagPOINT
+{
+    int x;
+    int y;
+} POINT;
 
 typedef struct _GUID {
     uint32_t Data1;
@@ -203,7 +240,7 @@ typedef LONG HRESULT;
 #define DXGI_ERROR_DRIVER_INTERNAL_ERROR ((HRESULT)0x887A0020L)
 #define DXGI_ERROR_INVALID_CALL ((HRESULT)0x887A0001L)
 
-typedef struct _LUID 
+typedef struct _LUID
 {
     ULONG LowPart;
     LONG HighPart;
@@ -224,6 +261,7 @@ typedef union _LARGE_INTEGER {
   } u;
   int64_t QuadPart;
 } LARGE_INTEGER;
+typedef LARGE_INTEGER *PLARGE_INTEGER;
 
 typedef union _ULARGE_INTEGER {
   struct {
@@ -232,6 +270,13 @@ typedef union _ULARGE_INTEGER {
   } u;
   uint64_t QuadPart;
 } ULARGE_INTEGER;
+typedef ULARGE_INTEGER *PULARGE_INTEGER;
+
+#define DECLARE_HANDLE(name)                                                   \
+  struct name##__ {                                                            \
+    int unused;                                                                \
+  };                                                                           \
+  typedef struct name##__ *name
 
 struct SECURITY_ATTRIBUTES;
 struct STATSTG;
@@ -302,7 +347,7 @@ interface DECLSPEC_UUID("00000000-0000-0000-C000-000000000046") DECLSPEC_NOVTABL
    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) = 0;
    virtual ULONG STDMETHODCALLTYPE AddRef() = 0;
    virtual ULONG STDMETHODCALLTYPE Release() = 0;
-   
+
    template <class Q> HRESULT STDMETHODCALLTYPE QueryInterface(Q** pp) {
        return QueryInterface(uuidof<Q>(), (void **)pp);
    }
