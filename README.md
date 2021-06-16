@@ -4,6 +4,8 @@ This repository hosts the official Direct3D 12 headers. These headers are made a
 
 Additionally, this repository hosts several helpers for using these headers.
 
+Make sure that you visit the [DirectX Landing Page](https://devblogs.microsoft.com/directx/landing-page/) for more resources for DirectX developers.
+
 ## Directory Structure
 
 * `/`: Build files are available here for quick integration. CMake is provided, and can be referenced either via `subdirectory()` or after installation to a system location. Meson is also available for inclusion as a subproject/wrap.
