@@ -3293,6 +3293,7 @@ inline bool operator==( const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC &a, const D3D
 #define D3DX12_COM_PTR_GET(x) x.p
 #define D3DX12_COM_PTR_ADDRESSOF(x) &x.p
 #endif
+#include <variant>
 
 //------------------------------------------------------------------------------------------------
 class CD3DX12_STATE_OBJECT_DESC
@@ -4036,6 +4037,277 @@ private:
     void* Data() noexcept override { return &m_Desc; }
     D3D12_NODE_MASK m_Desc;
 };
+
+//------------------------------------------------------------------------------------------------
+// Peter: Implementation for the new CheckFeatureSupport API
+
+#define FEATURE_SUPPORT_GET(RETTYPE,FEATURE,OPTION) \
+RETTYPE OPTION() const \
+{ \
+    return FEATURE.OPTION; \
+}
+
+#define FEATURE_SUPPORT_GET_NAME(RETTYPE,FEATURE,OPTION,NAME) \
+RETTYPE NAME() const \
+{\
+    return FEATURE.OPTION; \
+}
+
+#define FEATURE_SUPPORT_GET_NODE_INDEXED(RETTYPE,FEATURE,OPTION) \
+RETTYPE OPTION(UINT NodeIndex=0) const \
+{\
+    return FEATURE[NodeIndex].OPTION; \
+}
+
+#define INITIALIZE_MEMBER_DATA_CHECKED(FEATURE, MEMBER) \
+if (FAILED(result = m_pDevice->CheckFeatureSupport(FEATURE, &MEMBER, sizeof(MEMBER)))) { \
+    return result; \
+}
+
+class CD3DX12FeatureSupport
+{
+public:
+    CD3DX12FeatureSupport(ID3D12Device* pDevice)
+    : m_pDevice(pDevice)
+    {
+        m_hStatus = Init();
+    }
+
+    HRESULT Init()
+    {
+        // TODO: Think about hot to catch and report errors
+        HRESULT result;
+        
+        // Initialize static feature support data structures
+        INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_D3D12_OPTIONS, m_dOptions);
+        INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, m_dGPUVASupport);
+        m_dShaderModel.HighestShaderModel = D3D_HIGHEST_SHADER_MODEL; // TODO: What to do if highest model is inconsistent in the DLL and in the header?
+        INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_SHADER_MODEL, m_dShaderModel);
+        INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_D3D12_OPTIONS1, m_dOptions1);
+        m_dRootSignature.HighestVersion = D3D_HIGHEST_ROOT_SIGNATURE_VERSION;
+        INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_ROOT_SIGNATURE, m_dRootSignature);
+        INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_D3D12_OPTIONS2, m_dOptions2);
+        INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_SHADER_CACHE, m_dShaderCache);
+
+        // Initialize per-node feature support data structures
+        const UINT uNodeCount = m_pDevice->GetNodeCount();
+        m_dProtectedResourceSessionSupport.resize(uNodeCount);
+        m_dArchitecture1.resize(uNodeCount);
+        for (UINT i = 0; i < uNodeCount; i++) {
+            INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_SUPPORT, m_dProtectedResourceSessionSupport[i]);
+            INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_ARCHITECTURE1, m_dArchitecture1[i]);
+        }
+
+        return result;
+    }
+
+    HRESULT GetStatus() const
+    {
+        return m_hStatus;
+    }
+
+    static std::variant<CD3DX12FeatureSupport, HRESULT> Create(ID3D12Device* pDevice)
+    {
+        CD3DX12FeatureSupport features(pDevice);
+        HRESULT result = features.Init();
+        if (FAILED(result)) {
+            return result;
+        }
+
+        return features;
+    }
+
+    // 0: D3D12_OPTIONS
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions, DoublePrecisionFloatShaderOps);
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions, OutputMergerLogicOp);
+    FEATURE_SUPPORT_GET(D3D12_SHADER_MIN_PRECISION_SUPPORT, m_dOptions, MinPrecisionSupport);
+    FEATURE_SUPPORT_GET(D3D12_TILED_RESOURCES_TIER, m_dOptions, TiledResourcesTier);
+    FEATURE_SUPPORT_GET(D3D12_RESOURCE_BINDING_TIER, m_dOptions, ResourceBindingTier);
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions, PSSpecifiedStencilRefSupported);
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions, TypedUAVLoadAdditionalFormats);
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions, ROVsSupported);
+    FEATURE_SUPPORT_GET(D3D12_CONSERVATIVE_RASTERIZATION_TIER, m_dOptions, ConservativeRasterizationTier);
+    FEATURE_SUPPORT_GET(UINT, m_dOptions, MaxGPUVirtualAddressBitsPerResource);
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions, StandardSwizzle64KBSupported);
+    FEATURE_SUPPORT_GET(D3D12_CROSS_NODE_SHARING_TIER, m_dOptions, CrossNodeSharingTier);
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions, CrossAdapterRowMajorTextureSupported);
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions, VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation);
+    FEATURE_SUPPORT_GET(D3D12_RESOURCE_HEAP_TIER, m_dOptions, ResourceHeapTier);
+
+    // 1: Architecture (Deprecated)
+    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, TileBasedRenderer);
+    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, UMA);
+    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, CacheCoherentUMA);
+
+    // 2: Feature Levels
+    // User inputs a list of feature levels. The function returns the highest level supported.
+    // Option 1: Straightforward implementation. Only perform forwarding
+    HRESULT HighestFeatureLevel(UINT NumFeatureLevels, const D3D_FEATURE_LEVEL* pFeatureLevelRequested, D3D_FEATURE_LEVEL& MaxSupportedFeatureLevel)
+    {
+        D3D12_FEATURE_DATA_FEATURE_LEVELS dFeatureLevels;
+        dFeatureLevels.NumFeatureLevels = NumFeatureLevels;
+        dFeatureLevels.pFeatureLevelsRequested = pFeatureLevelRequested;
+        
+        HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &dFeatureLevels, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
+
+        MaxSupportedFeatureLevel = dFeatureLevels.MaxSupportedFeatureLevel;
+        return result;
+    }
+
+    // Option 2: Checks if a specific feature level is supported. Returns S_OK if supported and DXGI_ERROR_UNSUPPORTED otherwise.
+    HRESULT FeatureLevelSupported(D3D_FEATURE_LEVEL FeatureLevelRequested)
+    {
+        D3D_FEATURE_LEVEL aFLevels[1];
+        aFLevels[0] = FeatureLevelRequested;
+        D3D12_FEATURE_DATA_FEATURE_LEVELS dFeatureLevels;
+        dFeatureLevels.NumFeatureLevels = 1;
+        dFeatureLevels.pFeatureLevelsRequested = aFLevels;
+
+        HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &dFeatureLevels, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
+
+        return result;
+    }
+
+    // 3: Feature Format Support
+    HRESULT FormatSupport(DXGI_FORMAT Format, D3D12_FORMAT_SUPPORT1& Support1, D3D12_FORMAT_SUPPORT2& Support2)
+    {
+        D3D12_FEATURE_DATA_FORMAT_SUPPORT dFormatSupport;
+        dFormatSupport.Format = Format;
+
+        // It is possible that the function call returns an error
+        HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &dFormatSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT));
+
+        Support1 = dFormatSupport.Support1;
+        Support2 = dFormatSupport.Support2; // Two outputs. Probably better just to take in the struct as an argument?
+        
+        return result;
+    }
+
+    // 4: Multisample Quality Levels
+    HRESULT MultisampleQualityLevels(DXGI_FORMAT Format, UINT SampleCount, D3D12_MULTISAMPLE_QUALITY_LEVEL_FLAGS Flags, UINT& NumQualityLevels)
+    {
+        D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS dMultisampleQualityLevels;
+        dMultisampleQualityLevels.Format = Format;
+        dMultisampleQualityLevels.SampleCount = SampleCount;
+        dMultisampleQualityLevels.Flags = Flags;
+
+        HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &dMultisampleQualityLevels, sizeof(D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS));
+        
+        NumQualityLevels = dMultisampleQualityLevels.NumQualityLevels;
+        return result;
+    }
+
+    // 5: Format Info
+    HRESULT FormatInfo(DXGI_FORMAT Format, UINT8& PlaneCount)
+    {
+        D3D12_FEATURE_DATA_FORMAT_INFO dFormatInfo;
+        dFormatInfo.Format = Format;
+
+        HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &dFormatInfo, sizeof(D3D12_FEATURE_DATA_FORMAT_INFO));
+
+        PlaneCount = dFormatInfo.PlaneCount;
+        return result;
+    }
+
+    // 6: GPU Virtual Address Support
+    // TODO: Check if it's exactly the same field as the one in the D3D12_Options feature
+    // FEATURE_SUPPORT_GET(UINT, m_dGPUVASupport, MaxGPUVirtualAddressBitsPerResource);
+    FEATURE_SUPPORT_GET(UINT, m_dGPUVASupport, MaxGPUVirtualAddressBitsPerProcess);
+
+    // 7: Shader Model
+    D3D_SHADER_MODEL HighestShaderModel(D3D_SHADER_MODEL RequestedShaderModel = D3D_HIGHEST_SHADER_MODEL)
+    {
+        if (RequestedShaderModel <= m_dShaderModel.HighestShaderModel) {
+            return RequestedShaderModel;
+        }
+
+        D3D12_FEATURE_DATA_SHADER_MODEL dShaderModel;
+        m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &dShaderModel, sizeof(D3D12_FEATURE_DATA_SHADER_MODEL));
+        return dShaderModel.HighestShaderModel;
+    }
+
+    // 8: D3D12 Options1
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions1, WaveOps);
+    FEATURE_SUPPORT_GET(UINT, m_dOptions1, WaveLaneCountMin);
+    FEATURE_SUPPORT_GET(UINT, m_dOptions1, WaveLaneCountMax);
+    FEATURE_SUPPORT_GET(UINT, m_dOptions1, TotalLaneCount);
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions1, ExpandedComputeResourceStates);
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions1, Int64ShaderOps);
+
+    // 10: Protected Resource Session Support
+    D3D12_PROTECTED_RESOURCE_SESSION_SUPPORT_FLAGS ProtectedResourceSessionSupport(UINT NodeIndex = 0) const
+    {
+        return m_dProtectedResourceSessionSupport[NodeIndex].Support;
+    }
+
+    // 12: Root Signature
+    D3D_ROOT_SIGNATURE_VERSION HighestRootSignatureVersion(D3D_ROOT_SIGNATURE_VERSION RequestedVersion = D3D_HIGHEST_ROOT_SIGNATURE_VERSION) const
+    {
+        if (RequestedVersion <= m_dRootSignature.HighestVersion)
+        {
+            return RequestedVersion;
+        }
+
+        D3D12_FEATURE_DATA_ROOT_SIGNATURE dRootSignature;
+        dRootSignature.HighestVersion = RequestedVersion;
+        m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &dRootSignature, sizeof(D3D12_FEATURE_DATA_ROOT_SIGNATURE));
+        return dRootSignature.HighestVersion;
+    }
+
+    // 16: Architecture1
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, TileBasedRenderer);
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, UMA);
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, CacheCoherentUMA);
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, IsolatedMMU);
+
+    // 18: D3D12 Options2
+    FEATURE_SUPPORT_GET(BOOL, m_dOptions2, DepthBoundsTestSupported);
+    FEATURE_SUPPORT_GET(D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER, m_dOptions2, ProgrammableSamplePositionsTier);
+
+    // 19: Shader Cache
+    FEATURE_SUPPORT_GET_NAME(D3D12_SHADER_CACHE_SUPPORT_FLAGS, m_dShaderCache, SupportFlags, ShaderCacheSupportFlags);
+
+private:
+    // Pointer to the underlying device
+    ID3D12Device* const m_pDevice;
+
+    // Stores the error code from initialization
+    HRESULT m_hStatus;
+
+    // Feature support data structs
+    D3D12_FEATURE_DATA_D3D12_OPTIONS m_dOptions;
+    std::vector<D3D12_FEATURE_DATA_ARCHITECTURE> m_dArchitecture; // Cat2 NodeIndex, should be deprecated
+    // D3D12_FEATURE_DATA_FEATURE_LEVELS m_dFeatureLevels; // Cat3
+    // D3D12_FEATURE_DATA_FORMAT_SUPPORT m_dFeatureSupport; // Cat3
+    // D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS m_dMultisampleQualityLevels; // Cat3
+    // D3D12_FEATURE_DATA_FORMAT_INFO m_dFormatInfo; // Cat3
+    D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT m_dGPUVASupport;
+    D3D12_FEATURE_DATA_SHADER_MODEL m_dShaderModel; // Cat2 Hint
+    D3D12_FEATURE_DATA_D3D12_OPTIONS1 m_dOptions1;
+    std::vector<D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_SUPPORT> m_dProtectedResourceSessionSupport; // Cat2 NodeIndex
+    D3D12_FEATURE_DATA_ROOT_SIGNATURE m_dRootSignature; // Cat2 Hint
+    std::vector<D3D12_FEATURE_DATA_ARCHITECTURE1> m_dArchitecture1;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS2 m_dOptions2;
+    D3D12_FEATURE_DATA_SHADER_CACHE m_dShaderCache;
+    D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY m_dCommandQueuePriority; // Cat3
+    D3D12_FEATURE_DATA_D3D12_OPTIONS3 m_dOptions3;
+    D3D12_FEATURE_DATA_EXISTING_HEAPS m_dExistingHeaps;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS4 m_dOptions4;
+    D3D12_FEATURE_DATA_SERIALIZATION m_dSerialization;
+    D3D12_FEATURE_DATA_CROSS_NODE m_dCrossNode;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS5 m_dOptions5;
+    D3D12_FEATURE_DATA_DISPLAYABLE m_dDisplayable;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS6 m_dOptions6;
+    D3D12_FEATURE_DATA_QUERY_META_COMMAND m_dQueryMetaCommand; // Cat3
+    D3D12_FEATURE_DATA_D3D12_OPTIONS7 m_dOptions7;
+    D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPE_COUNT m_dProtectedResourceSessionTypeCount; // Cat3
+    D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES m_dProtectedResourceSessionTypes; // Cat3
+    D3D12_FEATURE_DATA_D3D12_OPTIONS8 m_dOptions8;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS9 m_dOptions9;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS10 m_dOptions10;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS11 m_dOptions11;   
+};
+
 
 #undef D3DX12_COM_PTR
 #undef D3DX12_COM_PTR_GET
