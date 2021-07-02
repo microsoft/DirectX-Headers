@@ -57,11 +57,11 @@ int main()
     aFeatureLevels[1] = D3D_FEATURE_LEVEL_12_1;
     aFeatureLevels[2] = D3D_FEATURE_LEVEL_12_2;
     D3D_FEATURE_LEVEL MaxSupportedFeatureLevel;
-    if (FAILED(features->HighestFeatureLevel(3, aFeatureLevels, MaxSupportedFeatureLevel))) {
+    if (FAILED(features->FeatureLevelSupport(3, aFeatureLevels, MaxSupportedFeatureLevel))) {
         return -1;
     }
 
-    HRESULT LevelSupported = features->FeatureLevelSupported(D3D_FEATURE_LEVEL_11_0);
+    D3D_FEATURE_LEVEL HighestLevelSupported = features->HighestFeatureLevel();
 
     // 3: Format Support
     D3D12_FORMAT_SUPPORT1 Support1;
@@ -88,6 +88,7 @@ int main()
 
     // 7: Shader Model
     D3D_SHADER_MODEL HighestShaderModel = features->HighestShaderModel();
+    D3D_SHADER_MODEL LowerShaderModel = features->HighestShaderModel(D3D_SHADER_MODEL_6_0);
 
     // 8: Options1
     BOOL WaveOps = features->WaveOps();

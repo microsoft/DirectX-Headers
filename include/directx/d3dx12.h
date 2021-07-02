@@ -4041,53 +4041,75 @@ private:
 //------------------------------------------------------------------------------------------------
 // Peter: Implementation for the new CheckFeatureSupport API
 
+// Macro to set up a getter function for each entry in feature support data
+// The getter function will have the same name as the feature option name
 #define FEATURE_SUPPORT_GET(RETTYPE,FEATURE,OPTION) \
 RETTYPE OPTION() const \
 { \
     return FEATURE.OPTION; \
 }
 
+// Macro to set up a getter function for each entry in feature support data
+// Also specifies the name for the function which can be different from the feature name
 #define FEATURE_SUPPORT_GET_NAME(RETTYPE,FEATURE,OPTION,NAME) \
 RETTYPE NAME() const \
 {\
     return FEATURE.OPTION; \
 }
 
+// Macro to set up a getter function for feature data indexed by the graphics node ID
+// The default parameter is 0, or the first availabe graphics device node
 #define FEATURE_SUPPORT_GET_NODE_INDEXED(RETTYPE,FEATURE,OPTION) \
 RETTYPE OPTION(UINT NodeIndex=0) const \
 {\
     return FEATURE[NodeIndex].OPTION; \
 }
 
+// Macro to initialize a member feature data struct corresponding to the specified feature
+// Will stop the initialization process and return an error code upon failure
 #define INITIALIZE_MEMBER_DATA_CHECKED(FEATURE, MEMBER) \
-if (FAILED(result = m_pDevice->CheckFeatureSupport(FEATURE, &MEMBER, sizeof(MEMBER)))) { \
-    return result; \
+if (FAILED(m_hStatus = m_pDevice->CheckFeatureSupport(FEATURE, &MEMBER, sizeof(MEMBER)))) { \
+    return m_hStatus; \
 }
 
 class CD3DX12FeatureSupport
 {
 public:
+    CD3DX12FeatureSupport()
+    : m_pDevice(nullptr)
+    , m_hStatus(E_NOTIMPL)
+    {}
+
     CD3DX12FeatureSupport(ID3D12Device* pDevice)
-    : m_pDevice(pDevice)
     {
-        m_hStatus = Init();
+        m_hStatus = Init(pDevice);
     }
 
-    HRESULT Init()
+    HRESULT Init(ID3D12Device* pDevice)
     {
-        // TODO: Think about hot to catch and report errors
-        HRESULT result;
+        if (!pDevice) {
+            m_hStatus = E_NOTIMPL;
+            return m_hStatus;
+        }
+
+        m_pDevice = pDevice;
+
         
         // Initialize static feature support data structures
         INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_D3D12_OPTIONS, m_dOptions);
         INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, m_dGPUVASupport);
-        m_dShaderModel.HighestShaderModel = D3D_HIGHEST_SHADER_MODEL; // TODO: What to do if highest model is inconsistent in the DLL and in the header?
-        INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_SHADER_MODEL, m_dShaderModel);
         INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_D3D12_OPTIONS1, m_dOptions1);
-        m_dRootSignature.HighestVersion = D3D_HIGHEST_ROOT_SIGNATURE_VERSION;
-        INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_ROOT_SIGNATURE, m_dRootSignature);
         INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_D3D12_OPTIONS2, m_dOptions2);
         INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_SHADER_CACHE, m_dShaderCache);
+
+        // Initialize features that uses hints
+        if (FAILED(m_hStatus = QueryHighestShaderModel())) {
+            return m_hStatus;
+        }
+
+        if (FAILED(m_hStatus = QueryHighestRootSignatureVersion())) {
+            return m_hStatus;
+        }
 
         // Initialize per-node feature support data structures
         const UINT uNodeCount = m_pDevice->GetNodeCount();
@@ -4098,7 +4120,13 @@ public:
             INITIALIZE_MEMBER_DATA_CHECKED(D3D12_FEATURE_ARCHITECTURE1, m_dArchitecture1[i]);
         }
 
-        return result;
+        // Initialize Feature Levels data
+        if (FAILED(m_hStatus = QueryHighestFeatureLevel())) {
+            return m_hStatus;
+        }
+        
+
+        return m_hStatus;
     }
 
     HRESULT GetStatus() const
@@ -4108,8 +4136,8 @@ public:
 
     static std::variant<CD3DX12FeatureSupport, HRESULT> Create(ID3D12Device* pDevice)
     {
-        CD3DX12FeatureSupport features(pDevice);
-        HRESULT result = features.Init();
+        CD3DX12FeatureSupport features;
+        HRESULT result = features.Init(pDevice);
         if (FAILED(result)) {
             return result;
         }
@@ -4134,15 +4162,17 @@ public:
     FEATURE_SUPPORT_GET(BOOL, m_dOptions, VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation);
     FEATURE_SUPPORT_GET(D3D12_RESOURCE_HEAP_TIER, m_dOptions, ResourceHeapTier);
 
-    // 1: Architecture (Deprecated)
-    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, TileBasedRenderer);
-    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, UMA);
-    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, CacheCoherentUMA);
+    // 1: Architecture
+    // Kept for compatability with older versions
+    // TODO: Use Architecture1 conditionally when it's supported
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, TileBasedRenderer);
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, UMA);
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, CacheCoherentUMA);
 
     // 2: Feature Levels
     // User inputs a list of feature levels. The function returns the highest level supported.
     // Option 1: Straightforward implementation. Only perform forwarding
-    HRESULT HighestFeatureLevel(UINT NumFeatureLevels, const D3D_FEATURE_LEVEL* pFeatureLevelRequested, D3D_FEATURE_LEVEL& MaxSupportedFeatureLevel)
+    HRESULT FeatureLevelSupport(UINT NumFeatureLevels, const D3D_FEATURE_LEVEL* pFeatureLevelRequested, D3D_FEATURE_LEVEL& MaxSupportedFeatureLevel)
     {
         D3D12_FEATURE_DATA_FEATURE_LEVELS dFeatureLevels;
         dFeatureLevels.NumFeatureLevels = NumFeatureLevels;
@@ -4154,18 +4184,10 @@ public:
         return result;
     }
 
-    // Option 2: Checks if a specific feature level is supported. Returns S_OK if supported and DXGI_ERROR_UNSUPPORTED otherwise.
-    HRESULT FeatureLevelSupported(D3D_FEATURE_LEVEL FeatureLevelRequested)
+    // Option 2: Simply returns the highest supported feature level
+    D3D_FEATURE_LEVEL HighestFeatureLevel() const
     {
-        D3D_FEATURE_LEVEL aFLevels[1];
-        aFLevels[0] = FeatureLevelRequested;
-        D3D12_FEATURE_DATA_FEATURE_LEVELS dFeatureLevels;
-        dFeatureLevels.NumFeatureLevels = 1;
-        dFeatureLevels.pFeatureLevelsRequested = aFLevels;
-
-        HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &dFeatureLevels, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
-
-        return result;
+        return m_eMaxFeatureLevel;
     }
 
     // 3: Feature Format Support
@@ -4217,13 +4239,7 @@ public:
     // 7: Shader Model
     D3D_SHADER_MODEL HighestShaderModel(D3D_SHADER_MODEL RequestedShaderModel = D3D_HIGHEST_SHADER_MODEL)
     {
-        if (RequestedShaderModel <= m_dShaderModel.HighestShaderModel) {
-            return RequestedShaderModel;
-        }
-
-        D3D12_FEATURE_DATA_SHADER_MODEL dShaderModel;
-        m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &dShaderModel, sizeof(D3D12_FEATURE_DATA_SHADER_MODEL));
-        return dShaderModel.HighestShaderModel;
+        return min(RequestedShaderModel, m_dShaderModel.HighestShaderModel);
     }
 
     // 8: D3D12 Options1
@@ -4243,21 +4259,14 @@ public:
     // 12: Root Signature
     D3D_ROOT_SIGNATURE_VERSION HighestRootSignatureVersion(D3D_ROOT_SIGNATURE_VERSION RequestedVersion = D3D_HIGHEST_ROOT_SIGNATURE_VERSION) const
     {
-        if (RequestedVersion <= m_dRootSignature.HighestVersion)
-        {
-            return RequestedVersion;
-        }
-
-        D3D12_FEATURE_DATA_ROOT_SIGNATURE dRootSignature;
-        dRootSignature.HighestVersion = RequestedVersion;
-        m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &dRootSignature, sizeof(D3D12_FEATURE_DATA_ROOT_SIGNATURE));
-        return dRootSignature.HighestVersion;
+        return min(RequestedVersion, m_dRootSignature.HighestVersion);
     }
 
     // 16: Architecture1
-    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, TileBasedRenderer);
-    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, UMA);
-    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, CacheCoherentUMA);
+    // Same data fields can be queried from m_dArchitecture
+    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, TileBasedRenderer);
+    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, UMA);
+    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, CacheCoherentUMA);
     FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, IsolatedMMU);
 
     // 18: D3D12 Options2
@@ -4267,9 +4276,87 @@ public:
     // 19: Shader Cache
     FEATURE_SUPPORT_GET_NAME(D3D12_SHADER_CACHE_SUPPORT_FLAGS, m_dShaderCache, SupportFlags, ShaderCacheSupportFlags);
 
-private:
+private: // Private helpers
+    
+    // Helper function to decide the highest shader model supported by the system
+    // Stores the result in m_dShaderModel
+    // Must be updated whenever a new shader model is added to the d3d12.h header
+    HRESULT QueryHighestShaderModel()
+    {
+        // Check support in descending order
+        HRESULT result;
+
+        // SHADER_MODEL_6_X
+        for (int i = D3D_SHADER_MODEL_6_7; i >= D3D_SHADER_MODEL_6_0; i--) {
+            m_dShaderModel.HighestShaderModel = static_cast<D3D_SHADER_MODEL>(i);
+            result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &m_dShaderModel, sizeof(D3D12_FEATURE_DATA_SHADER_MODEL));
+            if (SUCCEEDED(result) || result != E_INVALIDARG) {
+                // Indicates that the version is recognizable by the runtime. 
+                // The highest version supported has been written in the member data structure
+                // Also terminate on unexpected error code
+                return result;
+            }
+        }
+
+        // SHADER_MODEL_5_1
+        // This is the last model included in the d3d12.h header. If this is not supported, there must be an issue
+        m_dShaderModel.HighestShaderModel = D3D_SHADER_MODEL_5_1;
+        result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &m_dShaderModel, sizeof(D3D12_FEATURE_DATA_SHADER_MODEL));
+        return result;
+    }
+
+    // Helper function to decide the highest root signature supported
+    // Must be updated whenever a new root signature version is added to the d3d12.h header
+    HRESULT QueryHighestRootSignatureVersion()
+    {
+        HRESULT result;
+
+        // ROOT_SIGNATURE_VERSION_1_X
+        for (int i = D3D_ROOT_SIGNATURE_VERSION_1_1; i >= D3D_ROOT_SIGNATURE_VERSION_1; i--) {
+            m_dRootSignature.HighestVersion = static_cast<D3D_ROOT_SIGNATURE_VERSION>(i);
+            result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &m_dRootSignature, sizeof(D3D12_FEATURE_DATA_ROOT_SIGNATURE));
+            if (SUCCEEDED(result) || result != E_INVALIDARG) {
+                return result;
+            }
+        }
+
+        // No version left
+        return E_INVALIDARG;
+    }
+
+    // Helper funcion to decide the highest feature level
+    HRESULT QueryHighestFeatureLevel()
+    {
+        HRESULT result;
+
+        // Check against a list of all feature levels present in d3dcommon.h
+        // Needs to be updated for future feature levels
+        D3D_FEATURE_LEVEL allLevels[] = {
+            D3D_FEATURE_LEVEL_12_2,
+            D3D_FEATURE_LEVEL_12_1,
+            D3D_FEATURE_LEVEL_12_0,
+            D3D_FEATURE_LEVEL_11_1,
+            D3D_FEATURE_LEVEL_11_0,
+            D3D_FEATURE_LEVEL_10_1,
+            D3D_FEATURE_LEVEL_10_0,
+            D3D_FEATURE_LEVEL_9_3,
+            D3D_FEATURE_LEVEL_9_2,
+            D3D_FEATURE_LEVEL_9_1,
+            D3D_FEATURE_LEVEL_1_0_CORE
+        };
+
+        D3D12_FEATURE_DATA_FEATURE_LEVELS dFeatureLevel;
+        dFeatureLevel.NumFeatureLevels = sizeof(allLevels) / sizeof(D3D_FEATURE_LEVEL);
+        dFeatureLevel.pFeatureLevelsRequested = allLevels;
+
+        result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &dFeatureLevel, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
+        m_eMaxFeatureLevel = dFeatureLevel.MaxSupportedFeatureLevel;
+        return result;
+    }
+
+private: // Member data
     // Pointer to the underlying device
-    ID3D12Device* const m_pDevice;
+    ID3D12Device* m_pDevice;
 
     // Stores the error code from initialization
     HRESULT m_hStatus;
@@ -4278,6 +4365,7 @@ private:
     D3D12_FEATURE_DATA_D3D12_OPTIONS m_dOptions;
     std::vector<D3D12_FEATURE_DATA_ARCHITECTURE> m_dArchitecture; // Cat2 NodeIndex, should be deprecated
     // D3D12_FEATURE_DATA_FEATURE_LEVELS m_dFeatureLevels; // Cat3
+    D3D_FEATURE_LEVEL m_eMaxFeatureLevel;
     // D3D12_FEATURE_DATA_FORMAT_SUPPORT m_dFeatureSupport; // Cat3
     // D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS m_dMultisampleQualityLevels; // Cat3
     // D3D12_FEATURE_DATA_FORMAT_INFO m_dFormatInfo; // Cat3
@@ -4307,6 +4395,11 @@ private:
     D3D12_FEATURE_DATA_D3D12_OPTIONS10 m_dOptions10;
     D3D12_FEATURE_DATA_D3D12_OPTIONS11 m_dOptions11;   
 };
+
+#undef FEATURE_SUPPORT_GET
+#undef FEATURE_SUPPORT_GET_NAME
+#undef FEATURE_SUPPORT_GET_NODE_INDEXED
+#undef INITIALIZE_MEMBER_DATA_CHECKED
 
 
 #undef D3DX12_COM_PTR
