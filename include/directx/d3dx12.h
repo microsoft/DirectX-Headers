@@ -4082,7 +4082,7 @@ public:
 
     CD3DX12FeatureSupport(ID3D12Device* pDevice)
     {
-        m_hStatus = Init(pDevice);
+        Init(pDevice);
     }
 
     HRESULT Init(ID3D12Device* pDevice)
@@ -4170,21 +4170,7 @@ public:
     FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, CacheCoherentUMA);
 
     // 2: Feature Levels
-    // User inputs a list of feature levels. The function returns the highest level supported.
-    // Option 1: Straightforward implementation. Only perform forwarding
-    HRESULT FeatureLevelSupport(UINT NumFeatureLevels, const D3D_FEATURE_LEVEL* pFeatureLevelRequested, D3D_FEATURE_LEVEL& MaxSupportedFeatureLevel)
-    {
-        D3D12_FEATURE_DATA_FEATURE_LEVELS dFeatureLevels;
-        dFeatureLevels.NumFeatureLevels = NumFeatureLevels;
-        dFeatureLevels.pFeatureLevelsRequested = pFeatureLevelRequested;
-        
-        HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &dFeatureLevels, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
-
-        MaxSupportedFeatureLevel = dFeatureLevels.MaxSupportedFeatureLevel;
-        return result;
-    }
-
-    // Option 2: Simply returns the highest supported feature level
+    // Simply returns the highest supported feature level
     D3D_FEATURE_LEVEL HighestFeatureLevel() const
     {
         return m_eMaxFeatureLevel;
@@ -4237,9 +4223,9 @@ public:
     FEATURE_SUPPORT_GET(UINT, m_dGPUVASupport, MaxGPUVirtualAddressBitsPerProcess);
 
     // 7: Shader Model
-    D3D_SHADER_MODEL HighestShaderModel(D3D_SHADER_MODEL RequestedShaderModel = D3D_HIGHEST_SHADER_MODEL)
+    D3D_SHADER_MODEL HighestShaderModel()
     {
-        return min(RequestedShaderModel, m_dShaderModel.HighestShaderModel);
+        return m_dShaderModel.HighestShaderModel;
     }
 
     // 8: D3D12 Options1
@@ -4257,9 +4243,9 @@ public:
     }
 
     // 12: Root Signature
-    D3D_ROOT_SIGNATURE_VERSION HighestRootSignatureVersion(D3D_ROOT_SIGNATURE_VERSION RequestedVersion = D3D_HIGHEST_ROOT_SIGNATURE_VERSION) const
+    D3D_ROOT_SIGNATURE_VERSION HighestRootSignatureVersion() const
     {
-        return min(RequestedVersion, m_dRootSignature.HighestVersion);
+        return m_dRootSignature.HighestVersion;
     }
 
     // 16: Architecture1

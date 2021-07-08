@@ -52,15 +52,6 @@ int main()
     D3D12_CONSERVATIVE_RASTERIZATION_TIER ConservativeRasterizationTier = features->ConservativeRasterizationTier();
 
     // 2: Feature Levels
-    D3D_FEATURE_LEVEL aFeatureLevels[3];
-    aFeatureLevels[0] = D3D_FEATURE_LEVEL_12_0;
-    aFeatureLevels[1] = D3D_FEATURE_LEVEL_12_1;
-    aFeatureLevels[2] = D3D_FEATURE_LEVEL_12_2;
-    D3D_FEATURE_LEVEL MaxSupportedFeatureLevel;
-    if (FAILED(features->FeatureLevelSupport(3, aFeatureLevels, MaxSupportedFeatureLevel))) {
-        return -1;
-    }
-
     D3D_FEATURE_LEVEL HighestLevelSupported = features->HighestFeatureLevel();
 
     // 3: Format Support
@@ -88,8 +79,7 @@ int main()
 
     // 7: Shader Model
     D3D_SHADER_MODEL HighestShaderModel = features->HighestShaderModel();
-    D3D_SHADER_MODEL LowerShaderModel = features->HighestShaderModel(D3D_SHADER_MODEL_6_0);
-
+    
     // 8: Options1
     BOOL WaveOps = features->WaveOps();
     UINT WaveLaneCountMin = features->WaveLaneCountMin();
@@ -100,7 +90,6 @@ int main()
 
     // 12: Root Signature
     D3D_ROOT_SIGNATURE_VERSION HighestRootSignatureVersion = features->HighestRootSignatureVersion();
-    D3D_ROOT_SIGNATURE_VERSION LowerRootSignatureVersion = features->HighestRootSignatureVersion(D3D_ROOT_SIGNATURE_VERSION_1);
 
     return 0;
 }
