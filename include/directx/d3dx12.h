@@ -4159,6 +4159,13 @@ public:
                 m_dProtectedResourceSessionSupport[i].Support = D3D12_PROTECTED_RESOURCE_SESSION_SUPPORT_FLAG_NONE;
             }
 
+            m_dArchitecture[i].NodeIndex = i;
+            if (INITIALIZE_FAILED(D3D12_FEATURE_ARCHITECTURE, m_dArchitecture[i])) {
+                m_dArchitecture[i].TileBasedRenderer = false;
+                m_dArchitecture[i].UMA = false;
+                m_dArchitecture[i].CacheCoherentUMA = false;
+            }
+
             m_dArchitecture1[i].NodeIndex = i;
             if (INITIALIZE_FAILED(D3D12_FEATURE_ARCHITECTURE1, m_dArchitecture1[i])) {
                 m_dArchitecture1[i].TileBasedRenderer = false;
@@ -4211,10 +4218,17 @@ public:
 
     // 1: Architecture
     // Kept for compatability with older versions
-    // TODO: Use Architecture1 conditionally when it's supported
-    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, TileBasedRenderer);
-    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, UMA);
-    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture, CacheCoherentUMA);
+    BOOL TileBasedRenderer(UINT NodeIndex = 0) {
+        return m_dArchitecture1[NodeIndex].TileBasedRenderer || m_dArchitecture[NodeIndex].TileBasedRenderer;
+    }
+
+    BOOL UMA(UINT NodeIndex = 0) {
+        return m_dArchitecture1[NodeIndex].UMA || m_dArchitecture[NodeIndex].UMA;
+    }
+
+    BOOL CacheCoherentUMA(UINT NodeIndex = 0) {
+        return m_dArchitecture1[NodeIndex].CacheCoherentUMA || m_dArchitecture[NodeIndex].CacheCoherentUMA;
+    }
 
     // 2: Feature Levels
     // Simply returns the highest supported feature level
