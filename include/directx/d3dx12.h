@@ -4074,7 +4074,7 @@ if (FAILED(m_hStatus = m_pDevice->CheckFeatureSupport(FEATURE, &MEMBER, sizeof(M
 
 // Macro to initialize a member feature data and report on failure
 // Does not stop the initialization process by itself
-#define INITIALIZE_FAILED(FEATURE, MEMBER) FAILED(m_hStatus = m_pDevice->CheckFeatureSupport(FEATURE, &MEMBER, sizeof(MEMBER)))
+#define INITIALIZE_FAILED(FEATURE, MEMBER) FAILED(m_pDevice->CheckFeatureSupport(FEATURE, &MEMBER, sizeof(MEMBER)))
 
 class CD3DX12FeatureSupport
 {
@@ -4154,7 +4154,6 @@ public:
         // Initialize per-node feature support data structures
         const UINT uNodeCount = m_pDevice->GetNodeCount();
         m_dProtectedResourceSessionSupport.resize(uNodeCount);
-        m_dArchitecture.resize(uNodeCount);
         m_dArchitecture1.resize(uNodeCount);
         for (UINT i = 0; i < uNodeCount; i++) {
             m_dProtectedResourceSessionSupport[i].NodeIndex = i;
@@ -4162,18 +4161,19 @@ public:
                 m_dProtectedResourceSessionSupport[i].Support = D3D12_PROTECTED_RESOURCE_SESSION_SUPPORT_FLAG_NONE;
             }
 
-            m_dArchitecture[i].NodeIndex = i;
-            if (INITIALIZE_FAILED(D3D12_FEATURE_ARCHITECTURE, m_dArchitecture[i])) {
-                m_dArchitecture[i].TileBasedRenderer = false;
-                m_dArchitecture[i].UMA = false;
-                m_dArchitecture[i].CacheCoherentUMA = false;
-            }
-
             m_dArchitecture1[i].NodeIndex = i;
             if (INITIALIZE_FAILED(D3D12_FEATURE_ARCHITECTURE1, m_dArchitecture1[i])) {
-                m_dArchitecture1[i].TileBasedRenderer = false;
-                m_dArchitecture1[i].UMA = false;
-                m_dArchitecture1[i].CacheCoherentUMA = false;
+                D3D12_FEATURE_DATA_ARCHITECTURE dArchLocal = {};
+                dArchLocal.NodeIndex = i;
+                if (INITIALIZE_FAILED(D3D12_FEATURE_ARCHITECTURE, dArchLocal)) {
+                    dArchLocal.TileBasedRenderer = false;
+                    dArchLocal.UMA = false;
+                    dArchLocal.CacheCoherentUMA = false;
+                }
+                
+                m_dArchitecture1[i].TileBasedRenderer = dArchLocal.TileBasedRenderer;
+                m_dArchitecture1[i].UMA = dArchLocal.UMA;
+                m_dArchitecture1[i].CacheCoherentUMA = dArchLocal.CacheCoherentUMA;
                 m_dArchitecture1[i].IsolatedMMU = false;
             }
         }
@@ -4220,18 +4220,7 @@ public:
     FEATURE_SUPPORT_GET(D3D12_RESOURCE_HEAP_TIER, m_dOptions, ResourceHeapTier);
 
     // 1: Architecture
-    // Kept for compatability with older versions
-    BOOL TileBasedRenderer(UINT NodeIndex = 0) {
-        return m_dArchitecture1[NodeIndex].TileBasedRenderer || m_dArchitecture[NodeIndex].TileBasedRenderer;
-    }
-
-    BOOL UMA(UINT NodeIndex = 0) {
-        return m_dArchitecture1[NodeIndex].UMA || m_dArchitecture[NodeIndex].UMA;
-    }
-
-    BOOL CacheCoherentUMA(UINT NodeIndex = 0) {
-        return m_dArchitecture1[NodeIndex].CacheCoherentUMA || m_dArchitecture[NodeIndex].CacheCoherentUMA;
-    }
+    // Combined with Architecture1
 
     // 2: Feature Levels
     // Simply returns the highest supported feature level
@@ -4314,9 +4303,9 @@ public:
 
     // 16: Architecture1
     // Same data fields can be queried from m_dArchitecture
-    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, TileBasedRenderer);
-    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, UMA);
-    // FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, CacheCoherentUMA);
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, TileBasedRenderer);
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, UMA);
+    FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, CacheCoherentUMA);
     FEATURE_SUPPORT_GET_NODE_INDEXED(BOOL, m_dArchitecture1, IsolatedMMU);
 
     // 18: D3D12 Options2
@@ -4425,7 +4414,7 @@ private: // Member data
 
     // Feature support data structs
     D3D12_FEATURE_DATA_D3D12_OPTIONS m_dOptions;
-    std::vector<D3D12_FEATURE_DATA_ARCHITECTURE> m_dArchitecture; // Cat2 NodeIndex, should be deprecated
+    // std::vector<D3D12_FEATURE_DATA_ARCHITECTURE> m_dArchitecture; // Cat2 NodeIndex, should be deprecated
     // D3D12_FEATURE_DATA_FEATURE_LEVELS m_dFeatureLevels; // Cat3
     D3D_FEATURE_LEVEL m_eMaxFeatureLevel;
     // D3D12_FEATURE_DATA_FORMAT_SUPPORT m_dFeatureSupport; // Cat3

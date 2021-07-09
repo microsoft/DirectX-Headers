@@ -91,5 +91,11 @@ int main()
     // 12: Root Signature
     D3D_ROOT_SIGNATURE_VERSION HighestRootSignatureVersion = features->HighestRootSignatureVersion();
 
+    // 16: Architecture1
+    BOOL TileBasedRenderer = features->TileBasedRenderer();
+    BOOL UMA = features->UMA();
+    BOOL CacheCoherentUMA = features->CacheCoherentUMA();
+    BOOL IsolatedMMU = features->IsolatedMMU();
+
     return 0;
 }
