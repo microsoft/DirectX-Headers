@@ -4152,6 +4152,7 @@ public:
         // Initialize per-node feature support data structures
         const UINT uNodeCount = m_pDevice->GetNodeCount();
         m_dProtectedResourceSessionSupport.resize(uNodeCount);
+        m_dArchitecture.resize(uNodeCount);
         m_dArchitecture1.resize(uNodeCount);
         for (UINT i = 0; i < uNodeCount; i++) {
             m_dProtectedResourceSessionSupport[i].NodeIndex = i;
