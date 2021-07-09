@@ -4072,6 +4072,8 @@ if (FAILED(m_hStatus = m_pDevice->CheckFeatureSupport(FEATURE, &MEMBER, sizeof(M
     return m_hStatus; \
 }
 
+// Macro to initialize a member feature data and report on failure
+// Does not stop the initialization process by itself
 #define INITIALIZE_FAILED(FEATURE, MEMBER) FAILED(m_hStatus = m_pDevice->CheckFeatureSupport(FEATURE, &MEMBER, sizeof(MEMBER)))
 
 class CD3DX12FeatureSupport
