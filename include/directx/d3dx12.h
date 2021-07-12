@@ -3293,7 +3293,6 @@ inline bool operator==( const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC &a, const D3D
 #define D3DX12_COM_PTR_GET(x) x.p
 #define D3DX12_COM_PTR_ADDRESSOF(x) &x.p
 #endif
-#include <variant>
 
 //------------------------------------------------------------------------------------------------
 class CD3DX12_STATE_OBJECT_DESC
@@ -4041,6 +4040,15 @@ private:
 //------------------------------------------------------------------------------------------------
 // Implementation for the new CheckFeatureSupport API
 
+#ifdef FEATURE_SUPPORT_USE_VARIANT
+#if (__cplusplus >= 201703L || _MSVC_LANG >= 201703L)
+#define FEATURE_SUPPORT_VARIANT_OPT_IN
+#include <variant>
+#else
+static_assert(false, "std::variant is only supported on compilers with C++17 enabled")
+#endif
+#endif
+
 // Macro to set up a getter function for each entry in feature support data
 // The getter function will have the same name as the feature option name
 #define FEATURE_SUPPORT_GET(RETTYPE,FEATURE,OPTION) \
@@ -4190,6 +4198,7 @@ public:
         return m_hStatus;
     }
 
+#ifdef FEATURE_SUPPORT_VARIANT_OPT_IN
     static std::variant<CD3DX12FeatureSupport, HRESULT> Create(ID3D12Device* pDevice)
     {
         CD3DX12FeatureSupport features;
@@ -4200,6 +4209,14 @@ public:
 
         return features;
     }
+#else
+    static CD3DX12FeatureSupport Create(ID3D12Device* pDevice)
+    {
+        CD3DX12FeatureSupport features;
+        features.Init(pDevice);
+        return features;
+    }
+#endif
 
     // 0: D3D12_OPTIONS
     FEATURE_SUPPORT_GET(BOOL, m_dOptions, DoublePrecisionFloatShaderOps);
@@ -4279,7 +4296,7 @@ public:
     FEATURE_SUPPORT_GET(UINT, m_dGPUVASupport, MaxGPUVirtualAddressBitsPerProcess);
 
     // 7: Shader Model
-    D3D_SHADER_MODEL HighestShaderModel()
+    D3D_SHADER_MODEL HighestShaderModel() const
     {
         return m_dShaderModel.HighestShaderModel;
     }
@@ -4329,15 +4346,15 @@ private: // Private helpers
         HRESULT result;
 
         D3D_SHADER_MODEL allModelVersions[] = {
-            D3D_SHADER_MODEL_5_1,
-            D3D_SHADER_MODEL_6_0,
-            D3D_SHADER_MODEL_6_1,
-            D3D_SHADER_MODEL_6_2,
-            D3D_SHADER_MODEL_6_3,
-            D3D_SHADER_MODEL_6_4,
-            D3D_SHADER_MODEL_6_5,
+            D3D_SHADER_MODEL_6_7,
             D3D_SHADER_MODEL_6_6,
-            D3D_SHADER_MODEL_6_7
+            D3D_SHADER_MODEL_6_5,
+            D3D_SHADER_MODEL_6_4,
+            D3D_SHADER_MODEL_6_3,
+            D3D_SHADER_MODEL_6_2,
+            D3D_SHADER_MODEL_6_1,
+            D3D_SHADER_MODEL_6_0,
+            D3D_SHADER_MODEL_5_1
         };
 
         UINT numModelVersions = sizeof(allModelVersions) / sizeof(D3D_SHADER_MODEL);
@@ -4348,7 +4365,9 @@ private: // Private helpers
             if (result != E_INVALIDARG) {
                 // Indicates that the version is recognizable by the runtime and stored in the struct
                 // Also terminate on unexpected error code
-                m_dShaderModel.HighestShaderModel = (D3D_SHADER_MODEL)0;
+                if (FAILED(result)) {
+                    m_dShaderModel.HighestShaderModel = (D3D_SHADER_MODEL)0;
+                }
                 return result;
             }
         }
@@ -4365,9 +4384,9 @@ private: // Private helpers
         HRESULT result;
 
         D3D_ROOT_SIGNATURE_VERSION allRootSignatureVersions[] = {
-            D3D_ROOT_SIGNATURE_VERSION_1,
+            D3D_ROOT_SIGNATURE_VERSION_1_1,
             D3D_ROOT_SIGNATURE_VERSION_1_0,
-            D3D_ROOT_SIGNATURE_VERSION_1_1
+            D3D_ROOT_SIGNATURE_VERSION_1,
         };
 
         UINT numRootSignatureVersions = sizeof(allRootSignatureVersions) / sizeof(D3D_ROOT_SIGNATURE_VERSION);
@@ -4378,7 +4397,10 @@ private: // Private helpers
             m_dRootSignature.HighestVersion = allRootSignatureVersions[i];
             result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &m_dRootSignature, sizeof(D3D12_FEATURE_DATA_ROOT_SIGNATURE));
             if (result != E_INVALIDARG) {
-                m_dRootSignature.HighestVersion = (D3D_ROOT_SIGNATURE_VERSION)0;
+                if (FAILED(result)) {
+                    m_dRootSignature.HighestVersion = (D3D_ROOT_SIGNATURE_VERSION)0;
+                }
+                // If succeeded, the highest version is already written into the member struct
                 return result;
             }
         }
@@ -4468,6 +4490,9 @@ private: // Member data
 #undef FEATURE_SUPPORT_GET_NODE_INDEXED
 #undef INITIALIZE_MEMBER_DATA_CHECKED
 
+#ifdef FEATURE_SUPPORT_VARIANT_OPT_IN
+#undef FEATURE_SUPPORT_VARIANT_OPT_IN
+#endif
 
 #undef D3DX12_COM_PTR
 #undef D3DX12_COM_PTR_GET

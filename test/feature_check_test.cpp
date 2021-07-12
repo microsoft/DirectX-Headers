@@ -5,6 +5,9 @@
 #include <wsl/winadapter.h>
 #endif
 
+#if ((__cplusplus >= 201703L) || _MSVC_LANG >= 201703L)
+#define FEATURE_SUPPORT_USE_VARIANT
+#endif
 #include <directx/d3d12.h>
 #include <directx/dxcore.h>
 #include <directx/d3dx12.h>
@@ -32,6 +35,7 @@ int main()
         return -1;
     }
 
+#ifdef FEATURE_SUPPORT_USE_VARIANT
      CD3DX12FeatureSupport* features = nullptr;
      auto features_requested = CD3DX12FeatureSupport::Create(device);
      if (auto failure = std::get_if<HRESULT>(&features_requested)) {
@@ -46,6 +50,13 @@ int main()
     if (FAILED(features->GetStatus())) {
         return -1;
     }
+#else
+    CD3DX12FeatureSupport feature_struct = CD3DX12FeatureSupport::Create(device);
+    if (FAILED(feature_struct.GetStatus())) {
+        return -1;
+    }
+    CD3DX12FeatureSupport* features = &feature_struct;
+#endif
 
     // 0: D3D12_OPTIONS
     BOOL DoublePrecisionFloatShaderOps = features->DoublePrecisionFloatShaderOps();
