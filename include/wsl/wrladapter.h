@@ -717,8 +717,8 @@ namespace WRL
                 ULONG ref = InternalRelease();
                 if (ref == 0)
                 {
-
-                    delete this;
+                    ~RuntimeClassImpl();
+                    delete[] static_cast<char*>(this);
                 }
 
                 return ref;
@@ -778,7 +778,13 @@ namespace WRL
     template <typename T, typename ...TArgs>
     ComPtr<T> Make(TArgs&&... args)
     {
-        return ComPtr<T>{new(std::nothrow) T(std::forward<TArgs>(args)...)};
+        std::unique_ptr<char[]> buffer(new(std::nothrow) char[sizeof(T)]);
+        if (buffer)
+        {
+            new (buffer.get())T(std::forward<TArgs>(args)...);
+        }
+
+        return ComPtr<T>{buffer.release()};
     }
 
     using Details::ChainInterfaces;
