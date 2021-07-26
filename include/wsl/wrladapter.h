@@ -17,6 +17,7 @@
 #include <type_traits>
 #include <atomic>
 #include <memory>
+#include <new>
 #include <climits>
 #include <cassert>
 
@@ -716,7 +717,8 @@ namespace WRL
                 ULONG ref = InternalRelease();
                 if (ref == 0)
                 {
-                    delete[] this;
+
+                    delete this;
                 }
 
                 return ref;
@@ -776,17 +778,7 @@ namespace WRL
     template <typename T, typename ...TArgs>
     ComPtr<T> Make(TArgs&&... args)
     {
-        ComPtr<T> object;
-
-        std::unique_ptr<unsigned char[]> buffer(new unsigned char[sizeof(T)]);
-        if (buffer)
-        {
-            T* ptr = new (buffer.get())T(std::forward<TArgs>(args)...);
-            object.Attach(ptr);
-            buffer.release();
-        }
-
-        return object;
+        return ComPtr<T>{new(std::nothrow) T(std::forward<TArgs>(args)...)};
     }
 
     using Details::ChainInterfaces;
