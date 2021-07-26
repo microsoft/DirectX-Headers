@@ -716,7 +716,7 @@ namespace WRL
                 ULONG ref = InternalRelease();
                 if (ref == 0)
                 {
-                    delete this;
+                    delete[] this;
                 }
 
                 return ref;
