@@ -4069,7 +4069,7 @@ public: // Function declaration
     UINT MaxGPUVirtualAddressBitsPerResource() const;
 
     // FEATURE_LEVELS
-    D3D_FEATURE_LEVEL HighestFeatureLevel() const;
+    D3D_FEATURE_LEVEL MaxSupportedFeatureLevel() const;
 
     // FORMAT_SUPPORT
     HRESULT FormatSupport(DXGI_FORMAT Format, D3D12_FORMAT_SUPPORT1& Support1, D3D12_FORMAT_SUPPORT2& Support2);
@@ -4534,7 +4534,7 @@ UINT CD3DX12FeatureSupport::MaxGPUVirtualAddressBitsPerResource() const
 
 // 2: Feature Levels
 // Simply returns the highest supported feature level
-inline D3D_FEATURE_LEVEL CD3DX12FeatureSupport::HighestFeatureLevel() const
+inline D3D_FEATURE_LEVEL CD3DX12FeatureSupport::MaxSupportedFeatureLevel() const
 {
     return m_eMaxFeatureLevel;
 }
@@ -4851,7 +4851,14 @@ HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT NodeIndex
     CurrentPRSTypes.TypeVec.resize(CurrentPRSTypes.Count);
     CurrentPRSTypes.pTypes = CurrentPRSTypes.TypeVec.data();
 
-    return m_pDevice->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPES, &m_dProtectedResourceSessionTypes[NodeIndex], sizeof(D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES));
+    HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPES, &m_dProtectedResourceSessionTypes[NodeIndex], sizeof(D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES));
+    if (FAILED(result))
+    {
+        // Resize TypeVec to empty
+        CurrentPRSTypes.TypeVec.clear();
+    }
+
+    return result;
 }
 
 #undef FEATURE_SUPPORT_GET
