@@ -459,7 +459,6 @@ int main()
     }
 
     // 25: Cross Node
-    //  D3D12_CROSS_NODE_SHARING_TIER CrossNodeSharingTier = features.CrossNodeSharingTier(); // Same option in D3D12Options
     {
         BOOL CrossNodeAtomicShaderInstructions = features.CrossNodeAtomicShaderInstructions();
         D3D12_FEATURE_DATA_CROSS_NODE Data;
@@ -507,6 +506,9 @@ int main()
     }
 
     // 31: Query Metacommand
+    // The function is simply a forwarding call to the old API
+    // Takes in a pointer to D3D12_FEATURE_DATA_QUERY_METACOMMAND as input parameter
+    // No need to test specifically
 
     // 32: Options7
     {
@@ -617,6 +619,6 @@ int main()
         VERIFY_FEATURE_CHECK(AtomicInt64OnDescriptorHeapResourceSupported, false);
     }
 
-    std::cout << "Test complete with no errors." << std::endl;
+    std::cout << "Test completed with no errors." << std::endl;
     return 0;
 }

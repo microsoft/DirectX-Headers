@@ -4583,8 +4583,14 @@ HRESULT CD3DX12FeatureSupport::FormatInfo(DXGI_FORMAT Format, UINT8& PlaneCount)
     dFormatInfo.Format = Format;
 
     HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &dFormatInfo, sizeof(D3D12_FEATURE_DATA_FORMAT_INFO));
-
-    PlaneCount = dFormatInfo.PlaneCount;
+    if (FAILED(result))
+    {
+        PlaneCount = 0;
+    }
+    else 
+    {
+        PlaneCount = dFormatInfo.PlaneCount;
+    }
     return result;
 }
 
@@ -4638,7 +4644,6 @@ BOOL CD3DX12FeatureSupport::CommandQueuePrioritySupported(D3D12_COMMAND_LIST_TYP
     m_dCommandQueuePriority.CommandListType = CommandListType;
     m_dCommandQueuePriority.Priority = Priority;
 
-    // TODO: Report invalid arguments?
     if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &m_dCommandQueuePriority, sizeof(D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY)))) 
     {
         return false;

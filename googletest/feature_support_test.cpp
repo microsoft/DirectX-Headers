@@ -286,7 +286,7 @@ TEST_F(FeatureSupportTest, FormatInfoNegative)
     HRESULT result = features.FormatInfo(inFormat, PlaneCount);
 
     EXPECT_EQ(result, E_INVALIDARG);
-    //EXPECT_EQ(PlaneCount, 0); TODO: Check if PlaneCount should be set to 0
+    EXPECT_EQ(PlaneCount, 0);
     EXPECT_EQ(device->m_FormatReceived, inFormat);
 }
 
