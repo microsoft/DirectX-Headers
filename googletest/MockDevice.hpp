@@ -634,7 +634,7 @@ public: // IUnknown
                 m_MultisampleQualityLevelFlagsReceived = pFData->Flags;
 
                 // The original check implementation may return E_FAIL
-                // Valid results include non-negative values including 0, smaller than D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT
+                // Valid results are non-negative values including 0, smaller than D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT
                 if (!m_MultisampleQualityLevelsSucceed) 
                 {
                     // NumQualityLevels will be set to 0 should the check fails
@@ -654,6 +654,7 @@ public: // IUnknown
                 }
 
                 m_FormatReceived = pFData->Format;
+                
                 // If the format is not supported, an E_INVALIDARG will be returned
                 if (!m_DXGIFormatSupported) 
                 {
@@ -675,19 +676,6 @@ public: // IUnknown
                 pFData->MaxGPUVirtualAddressBitsPerResource = m_MaxGPUVirtualAddressBitsPerResource;
 
             } return S_OK;
-    #ifdef DX_HARDWARE_JPEG_PROTOTYPE_ENABLED
-        case D3D12_FEATURE_JPEG_OPTIONS:
-            {
-                D3D12_FEATURE_DATA_JPEG_OPTIONS* pJpegOptions = 
-                    static_cast<D3D12_FEATURE_DATA_JPEG_OPTIONS*>( pFeatureSupportData );
-                if (FeatureSupportDataSize != sizeof( *pJpegOptions ))
-                {
-                    return E_INVALIDARG;
-                }
-
-                *pJpegOptions = D3D12JpegOptions();
-            } return S_OK;
-    #endif // DX_HARDWARE_JPEG_PROTOTYPE_ENABLED
         case D3D12_FEATURE_SHADER_MODEL:
             {
                 D3D12_FEATURE_DATA_SHADER_MODEL* pSM =
@@ -874,7 +862,6 @@ public: // IUnknown
                     return E_INVALIDARG;
                 }
 
-                // *pD3D12Options5 = m_ValidationInfo.m_Options5;
                 pD3D12Options5->RaytracingTier = m_RaytracingTier;
                 pD3D12Options5->RenderPassesTier = m_RenderPassesTier;
                 pD3D12Options5->SRVOnlyTiledResourceTier3 = m_SRVOnlyTiledResourceTier3;
@@ -1066,7 +1053,6 @@ public: // IUnknown
 public: // For simplicity, allow tests to set the internal state values for this mock class
     // General
     UINT m_NodeCount; // Simulated number of computing nodes
-    // std::unordered_map<D3D12_FEATURE, bool> m_AvailableFeatures; // Turn features on or off
 
     // 0: Options
     bool m_D3D12OptionsAvailable = true; 
@@ -1189,7 +1175,7 @@ public: // For simplicity, allow tests to set the internal state values for this
     // 28: Displayable
     bool m_DisplayableAvailable = true;
     bool m_DisplayableTexture = false;
-    // D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_0;
+    // SharedResourceCompatibilityTier is located in Options4
 
     // 30: Options6
     bool m_Options6Available = true;
