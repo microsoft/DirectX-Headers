@@ -717,8 +717,8 @@ namespace WRL
                 ULONG ref = InternalRelease();
                 if (ref == 0)
                 {
-                    ~RuntimeClassImpl();
-                    delete[] static_cast<char*>(this);
+                    this->~RuntimeClassImpl();
+                    delete[] reinterpret_cast<char*>(this);
                 }
 
                 return ref;
@@ -784,7 +784,7 @@ namespace WRL
             new (buffer.get())T(std::forward<TArgs>(args)...);
         }
 
-        return ComPtr<T>{buffer.release()};
+        return ComPtr<T>{reinterpret_cast<T*>(buffer.release())};
     }
 
     using Details::ChainInterfaces;
