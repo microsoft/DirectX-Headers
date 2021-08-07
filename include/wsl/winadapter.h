@@ -140,6 +140,17 @@ __inline int InlineIsEqualGUID(REFGUID rguid1, REFGUID rguid2)
         ((uint32_t *)&rguid1)[2] == ((uint32_t *)&rguid2)[2] &&
         ((uint32_t *)&rguid1)[3] == ((uint32_t *)&rguid2)[3]);
 }
+
+inline bool operator==(REFGUID guidOne, REFGUID guidOther)
+{
+    return !!InlineIsEqualGUID(guidOne, guidOther);
+}
+
+inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
+{
+    return !(guidOne == guidOther);
+}
+
 #else
 #define REFGUID const GUID *
 #define REFIID const IID *
