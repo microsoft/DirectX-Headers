@@ -779,12 +779,16 @@ namespace WRL
     ComPtr<T> Make(TArgs&&... args)
     {
         std::unique_ptr<char[]> buffer(new(std::nothrow) char[sizeof(T)]);
+        ComPtr<T> object;
+
         if (buffer)
         {
-            new (buffer.get())T(std::forward<TArgs>(args)...);
+            T* ptr = new (buffer.get())T(std::forward<TArgs>(args)...);
+            object.Attach(ptr);
+            buffer.release();
         }
 
-        return ComPtr<T>{reinterpret_cast<T*>(buffer.release())};
+        return object;
     }
 
     using Details::ChainInterfaces;
