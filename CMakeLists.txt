@@ -25,6 +25,7 @@ endif()
 # either via cmake or cmake-gui
 option(DXHEADERS_BUILD_TEST "Build the test" ${IS_TOPLEVEL_PROJECT})
 option(DXHEADERS_INSTALL "Installation logic" ${IS_TOPLEVEL_PROJECT})
+option(DXHEADERS_BUILD_GOOGLE_TEST "Build the google test suite" ${IS_TOPLEVEL_PROJECT})
 
 include(GNUInstallDirs)
 
@@ -84,4 +85,8 @@ endif()
 
 if (DXHEADERS_BUILD_TEST)
     add_subdirectory(test) 
+endif()
+
+if (DXHEADERS_BUILD_GOOGLE_TEST)
+    add_subdirectory(googletest)
 endif()
