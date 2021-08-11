@@ -4037,6 +4037,8 @@ private:
     D3D12_NODE_MASK m_Desc;
 };
 
+#endif // #ifndef D3DX12_NO_STATE_OBJECT_HELPERS
+
 //------------------------------------------------------------------------------------------------
 class CD3DX12FeatureSupport
 {
@@ -4876,7 +4878,6 @@ HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT NodeIndex
 #undef D3DX12_COM_PTR
 #undef D3DX12_COM_PTR_GET
 #undef D3DX12_COM_PTR_ADDRESSOF
-#endif // #ifndef D3DX12_NO_STATE_OBJECT_HELPERS
 
 #endif // defined( __cplusplus )
 
