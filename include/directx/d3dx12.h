@@ -4278,12 +4278,12 @@ inline RETTYPE CD3DX12FeatureSupport::NAME(UINT NodeIndex) const \
     return FEATURE[NodeIndex].OPTION; \
 }
 
-CD3DX12FeatureSupport::CD3DX12FeatureSupport()
+inline CD3DX12FeatureSupport::CD3DX12FeatureSupport()
 : m_pDevice(nullptr)
 , m_hStatus(E_INVALIDARG)
 {}
 
-HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
+inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
 {
     if (!pDevice) 
     {
@@ -4507,7 +4507,7 @@ FEATURE_SUPPORT_GET(BOOL, m_dOptions, VPAndRTArrayIndexFromAnyShaderFeedingRaste
 FEATURE_SUPPORT_GET(D3D12_RESOURCE_HEAP_TIER, m_dOptions, ResourceHeapTier);
 
 // Special procedure for handling caps that is also part of other features
-D3D12_CROSS_NODE_SHARING_TIER CD3DX12FeatureSupport::CrossNodeSharingTier() const
+inline D3D12_CROSS_NODE_SHARING_TIER CD3DX12FeatureSupport::CrossNodeSharingTier() const
 {
     if (m_dCrossNode.SharingTier > D3D12_CROSS_NODE_SHARING_TIER_NOT_SUPPORTED)
     {
@@ -4519,7 +4519,7 @@ D3D12_CROSS_NODE_SHARING_TIER CD3DX12FeatureSupport::CrossNodeSharingTier() cons
     }
 }
 
-UINT CD3DX12FeatureSupport::MaxGPUVirtualAddressBitsPerResource() const
+inline UINT CD3DX12FeatureSupport::MaxGPUVirtualAddressBitsPerResource() const
 {
     if (m_dOptions.MaxGPUVirtualAddressBitsPerResource > 0) 
     {
@@ -4542,7 +4542,7 @@ inline D3D_FEATURE_LEVEL CD3DX12FeatureSupport::MaxSupportedFeatureLevel() const
 }
 
 // 3: Feature Format Support
-HRESULT CD3DX12FeatureSupport::FormatSupport(DXGI_FORMAT Format, D3D12_FORMAT_SUPPORT1& Support1, D3D12_FORMAT_SUPPORT2& Support2)
+inline HRESULT CD3DX12FeatureSupport::FormatSupport(DXGI_FORMAT Format, D3D12_FORMAT_SUPPORT1& Support1, D3D12_FORMAT_SUPPORT2& Support2)
 {
     D3D12_FEATURE_DATA_FORMAT_SUPPORT dFormatSupport;
     dFormatSupport.Format = Format;
@@ -4557,7 +4557,7 @@ HRESULT CD3DX12FeatureSupport::FormatSupport(DXGI_FORMAT Format, D3D12_FORMAT_SU
 }
 
 // 4: Multisample Quality Levels
-HRESULT CD3DX12FeatureSupport::MultisampleQualityLevels(DXGI_FORMAT Format, UINT SampleCount, D3D12_MULTISAMPLE_QUALITY_LEVEL_FLAGS Flags, UINT& NumQualityLevels)
+inline HRESULT CD3DX12FeatureSupport::MultisampleQualityLevels(DXGI_FORMAT Format, UINT SampleCount, D3D12_MULTISAMPLE_QUALITY_LEVEL_FLAGS Flags, UINT& NumQualityLevels)
 {
     D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS dMultisampleQualityLevels;
     dMultisampleQualityLevels.Format = Format;
@@ -4579,7 +4579,7 @@ HRESULT CD3DX12FeatureSupport::MultisampleQualityLevels(DXGI_FORMAT Format, UINT
 }
 
 // 5: Format Info
-HRESULT CD3DX12FeatureSupport::FormatInfo(DXGI_FORMAT Format, UINT8& PlaneCount)
+inline HRESULT CD3DX12FeatureSupport::FormatInfo(DXGI_FORMAT Format, UINT8& PlaneCount)
 {
     D3D12_FEATURE_DATA_FORMAT_INFO dFormatInfo;
     dFormatInfo.Format = Format;
@@ -4641,7 +4641,7 @@ FEATURE_SUPPORT_GET(D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER, m_dOptions2, Progr
 FEATURE_SUPPORT_GET_NAME(D3D12_SHADER_CACHE_SUPPORT_FLAGS, m_dShaderCache, SupportFlags, ShaderCacheSupportFlags);
 
 // 20: Command Queue Priority
-BOOL CD3DX12FeatureSupport::CommandQueuePrioritySupported(D3D12_COMMAND_LIST_TYPE CommandListType, UINT Priority) 
+inline BOOL CD3DX12FeatureSupport::CommandQueuePrioritySupported(D3D12_COMMAND_LIST_TYPE CommandListType, UINT Priority)
 {
     m_dCommandQueuePriority.CommandListType = CommandListType;
     m_dCommandQueuePriority.Priority = Priority;
@@ -4730,7 +4730,7 @@ FEATURE_SUPPORT_GET(BOOL, m_dOptions11, AtomicInt64OnDescriptorHeapResourceSuppo
 // Helper function to decide the highest shader model supported by the system
 // Stores the result in m_dShaderModel
 // Must be updated whenever a new shader model is added to the d3d12.h header
-HRESULT CD3DX12FeatureSupport::QueryHighestShaderModel()
+inline HRESULT CD3DX12FeatureSupport::QueryHighestShaderModel()
 {
     // Check support in descending order
     HRESULT result;
@@ -4773,7 +4773,7 @@ HRESULT CD3DX12FeatureSupport::QueryHighestShaderModel()
 
 // Helper function to decide the highest root signature supported
 // Must be updated whenever a new root signature version is added to the d3d12.h header
-HRESULT CD3DX12FeatureSupport::QueryHighestRootSignatureVersion()
+inline HRESULT CD3DX12FeatureSupport::QueryHighestRootSignatureVersion()
 {
     HRESULT result;
 
@@ -4806,7 +4806,7 @@ HRESULT CD3DX12FeatureSupport::QueryHighestRootSignatureVersion()
 }
 
 // Helper funcion to decide the highest feature level
-HRESULT CD3DX12FeatureSupport::QueryHighestFeatureLevel()
+inline HRESULT CD3DX12FeatureSupport::QueryHighestFeatureLevel()
 {
     HRESULT result;
 
@@ -4850,7 +4850,7 @@ HRESULT CD3DX12FeatureSupport::QueryHighestFeatureLevel()
 }
 
 // Helper function to initialize local protected resource session types structs
-HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT NodeIndex, UINT Count)
+inline HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT NodeIndex, UINT Count)
 {
     auto& CurrentPRSTypes = m_dProtectedResourceSessionTypes[NodeIndex];
     CurrentPRSTypes.NodeIndex = NodeIndex;
