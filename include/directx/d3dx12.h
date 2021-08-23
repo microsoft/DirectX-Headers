@@ -3262,7 +3262,7 @@ inline bool operator==( const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC &a, const D3D
     return true;
 }
 
-
+#include <vector>
 #ifndef D3DX12_NO_STATE_OBJECT_HELPERS
 
 //================================================================================================
@@ -3279,7 +3279,6 @@ inline bool operator==( const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC &a, const D3D
 //
 //================================================================================================
 #include <list>
-#include <vector>
 #include <string>
 #include <memory>
 #ifndef D3DX12_USE_ATL
