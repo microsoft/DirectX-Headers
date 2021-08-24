@@ -3262,7 +3262,7 @@ inline bool operator==( const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC &a, const D3D
     return true;
 }
 
-#include <vector>
+
 #ifndef D3DX12_NO_STATE_OBJECT_HELPERS
 
 //================================================================================================
@@ -3280,6 +3280,7 @@ inline bool operator==( const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC &a, const D3D
 //================================================================================================
 #include <list>
 #include <string>
+#include <vector>
 #include <memory>
 #ifndef D3DX12_USE_ATL
 #include <wrl/client.h>
@@ -4038,7 +4039,12 @@ private:
 
 #endif // #ifndef D3DX12_NO_STATE_OBJECT_HELPERS
 
+
+#ifndef D3DX12_NO_CHECK_FEATURE_SUPPORT_CLASS
+
 //------------------------------------------------------------------------------------------------
+#include <vector>
+
 class CD3DX12FeatureSupport
 {
 public: // Function declaration
@@ -4873,6 +4879,8 @@ inline HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT No
 #undef FEATURE_SUPPORT_GET_NODE_INDEXED_NAME
 
 // end CD3DX12FeatureSupport
+
+#endif // #ifndef D3DX12_NO_CHECK_FEATURE_SUPPORT_CLASS
 
 #undef D3DX12_COM_PTR
 #undef D3DX12_COM_PTR_GET
