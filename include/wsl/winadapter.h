@@ -80,6 +80,7 @@ typedef const wchar_t *LPCWSTR, *PCWSTR;
 #define IN
 #define CONST const
 #define MAX_PATH 260
+#define GENERIC_ALL 0x10000000L
 #define C_ASSERT(expr) static_assert((expr))
 #define _countof(a) (sizeof(a) / sizeof(*(a)))
 
