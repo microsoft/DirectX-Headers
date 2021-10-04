@@ -360,7 +360,7 @@ const UINT D3D12_REQ_TEXTURECUBE_DIMENSION = 16384;
 const UINT D3D12_RESINFO_INSTRUCTION_MISSING_COMPONENT_RETVAL = 0;
 const UINT D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES = 0xffffffff;
 const UINT D3D12_RS_SET_SHADING_RATE_COMBINER_COUNT = 2;
-const UINT D3D12_SDK_VERSION = 4;
+const UINT D3D12_SDK_VERSION = 6;
 const UINT D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES = 32;
 const UINT D3D12_SHADER_MAJOR_VERSION = 5;
 const UINT D3D12_SHADER_MAX_INSTANCES = 65535;
@@ -935,6 +935,7 @@ typedef enum D3D12_FEATURE
     D3D12_FEATURE_D3D12_OPTIONS9                        = 37,
     D3D12_FEATURE_D3D12_OPTIONS10                       = 39,
     D3D12_FEATURE_D3D12_OPTIONS11                       = 40,
+    D3D12_FEATURE_D3D12_OPTIONS12                       = 41,
 } D3D12_FEATURE;
 
 typedef enum D3D12_SHADER_MIN_PRECISION_SUPPORT
@@ -1149,6 +1150,7 @@ typedef enum D3D_SHADER_MODEL
     D3D_SHADER_MODEL_6_5 = 0x65,
     D3D_SHADER_MODEL_6_6 = 0x66,
     D3D_SHADER_MODEL_6_7 = 0x67,
+    D3D_HIGHEST_SHADER_MODEL = D3D_SHADER_MODEL_6_7
 } D3D_SHADER_MODEL;
 
 typedef struct D3D12_FEATURE_DATA_SHADER_MODEL
@@ -1250,7 +1252,6 @@ typedef enum D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER
     D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_0, 
     D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1,
     D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2,
-    D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3,
 } D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER;
 
 typedef struct D3D12_FEATURE_DATA_DISPLAYABLE
@@ -1395,6 +1396,19 @@ typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS11
     [annotation("_Out_")] BOOL AtomicInt64OnDescriptorHeapResourceSupported;
 } D3D12_FEATURE_DATA_D3D12_OPTIONS11;
 
+typedef enum D3D12_TRI_STATE {
+    D3D12_TRI_STATE_UNKNOWN = -1,
+    D3D12_TRI_STATE_FALSE = 0,
+    D3D12_TRI_STATE_TRUE = 1,
+} D3D12_TRI_STATE;
+
+// D3D12_FEATURE_D3D12_OPTIONS12
+typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS12
+{
+    [annotation("_Out_")] D3D12_TRI_STATE MSPrimitivesPipelineStatisticIncludesCulledPrimitives;
+    [annotation("_Out_")] BOOL EnhancedBarriersSupported;
+} D3D12_FEATURE_DATA_D3D12_OPTIONS12;
+
 
 typedef struct D3D12_RESOURCE_ALLOCATION_INFO
 {
@@ -1502,6 +1516,7 @@ typedef enum D3D12_RESOURCE_FLAGS
     D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS = 0x20,
     D3D12_RESOURCE_FLAG_VIDEO_DECODE_REFERENCE_ONLY = 0x40, 
     D3D12_RESOURCE_FLAG_VIDEO_ENCODE_REFERENCE_ONLY = 0x80, 
+    D3D12_RESOURCE_FLAG_RAYTRACING_ACCELERATION_STRUCTURE = 0x100,
 
 } D3D12_RESOURCE_FLAGS;
 cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_RESOURCE_FLAGS );" )
@@ -4863,7 +4878,6 @@ interface ID3D12Device8 : ID3D12Device7
 };
 
 
-
 [uuid(9D5E227A-4430-4161-88B3-3ECA6BB16E19), object, local, pointer_default(unique)]
 interface ID3D12Resource1
     : ID3D12Resource
@@ -5094,6 +5108,181 @@ typedef struct D3D12_SHADER_CACHE_SESSION_DESC
     UINT64 Version;
 } D3D12_SHADER_CACHE_SESSION_DESC;
 
+typedef enum D3D12_BARRIER_LAYOUT
+{
+    D3D12_BARRIER_LAYOUT_UNDEFINED = 0xffffffff,
+    D3D12_BARRIER_LAYOUT_COMMON = 0,
+    D3D12_BARRIER_LAYOUT_PRESENT = 0,
+    D3D12_BARRIER_LAYOUT_GENERIC_READ,
+    D3D12_BARRIER_LAYOUT_RENDER_TARGET,
+    D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS,
+    D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE,
+    D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ,
+    D3D12_BARRIER_LAYOUT_SHADER_RESOURCE,
+    D3D12_BARRIER_LAYOUT_COPY_SOURCE,
+    D3D12_BARRIER_LAYOUT_COPY_DEST,
+    D3D12_BARRIER_LAYOUT_RESOLVE_SOURCE,
+    D3D12_BARRIER_LAYOUT_RESOLVE_DEST,
+    D3D12_BARRIER_LAYOUT_SHADING_RATE_SOURCE,
+    D3D12_BARRIER_LAYOUT_VIDEO_DECODE_READ,
+    D3D12_BARRIER_LAYOUT_VIDEO_DECODE_WRITE,
+    D3D12_BARRIER_LAYOUT_VIDEO_PROCESS_READ,
+    D3D12_BARRIER_LAYOUT_VIDEO_PROCESS_WRITE,
+    D3D12_BARRIER_LAYOUT_VIDEO_ENCODE_READ,
+    D3D12_BARRIER_LAYOUT_VIDEO_ENCODE_WRITE,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_COMMON,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_GENERIC_READ,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_UNORDERED_ACCESS,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_SHADER_RESOURCE,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_COPY_SOURCE,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_COPY_DEST,
+    D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_COMMON,
+    D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_GENERIC_READ,
+    D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_UNORDERED_ACCESS,
+    D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_SHADER_RESOURCE,
+    D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_COPY_SOURCE,
+    D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_COPY_DEST,
+    D3D12_BARRIER_LAYOUT_VIDEO_QUEUE_COMMON,
+} D3D12_BARRIER_LAYOUT;
+
+typedef enum D3D12_BARRIER_SYNC
+{
+    D3D12_BARRIER_SYNC_NONE                                                     = 0x0,
+    D3D12_BARRIER_SYNC_ALL                                                      = 0x1,
+    D3D12_BARRIER_SYNC_DRAW                                                     = 0x2,
+    D3D12_BARRIER_SYNC_INPUT_ASSEMBLER                                          = 0x4,
+    D3D12_BARRIER_SYNC_VERTEX_SHADING                                           = 0x8,
+    D3D12_BARRIER_SYNC_PIXEL_SHADING                                            = 0x10,
+    D3D12_BARRIER_SYNC_DEPTH_STENCIL                                            = 0x20,
+    D3D12_BARRIER_SYNC_RENDER_TARGET                                            = 0x40,
+    D3D12_BARRIER_SYNC_COMPUTE_SHADING                                          = 0x80,
+    D3D12_BARRIER_SYNC_RAYTRACING                                               = 0x100,
+    D3D12_BARRIER_SYNC_COPY                                                     = 0x200,
+    D3D12_BARRIER_SYNC_RESOLVE                                                  = 0x400,
+    D3D12_BARRIER_SYNC_EXECUTE_INDIRECT                                         = 0x800,
+    D3D12_BARRIER_SYNC_PREDICATION                                              = 0x800, // Aliased with SYNC_EXECUTE_INDIRECT
+    D3D12_BARRIER_SYNC_ALL_SHADING                                              = 0x1000,
+    D3D12_BARRIER_SYNC_NON_PIXEL_SHADING                                        = 0x2000,
+    D3D12_BARRIER_SYNC_EMIT_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO    = 0x4000,
+    D3D12_BARRIER_SYNC_VIDEO_DECODE                                             = 0x100000,
+    D3D12_BARRIER_SYNC_VIDEO_PROCESS                                            = 0x200000,
+    D3D12_BARRIER_SYNC_VIDEO_ENCODE                                             = 0x400000,
+    D3D12_BARRIER_SYNC_BUILD_RAYTRACING_ACCELERATION_STRUCTURE                  = 0x800000,
+    D3D12_BARRIER_SYNC_COPY_RAYTRACING_ACCELERATION_STRUCTURE                   = 0x1000000,
+    D3D12_BARRIER_SYNC_SPLIT                                                    = 0x80000000,
+} D3D12_BARRIER_SYNC;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_BARRIER_SYNC );" )
+
+typedef enum D3D12_BARRIER_ACCESS
+{
+    D3D12_BARRIER_ACCESS_COMMON                                     = 0,
+    D3D12_BARRIER_ACCESS_VERTEX_BUFFER                              = 0x1,
+    D3D12_BARRIER_ACCESS_CONSTANT_BUFFER                            = 0x2,
+    D3D12_BARRIER_ACCESS_INDEX_BUFFER                               = 0x4,
+    D3D12_BARRIER_ACCESS_RENDER_TARGET                              = 0x8,
+    D3D12_BARRIER_ACCESS_UNORDERED_ACCESS                           = 0x10,
+    D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE                        = 0x20,
+    D3D12_BARRIER_ACCESS_DEPTH_STENCIL_READ                         = 0x40,
+    D3D12_BARRIER_ACCESS_SHADER_RESOURCE                            = 0x80,
+    D3D12_BARRIER_ACCESS_STREAM_OUTPUT                              = 0x100,
+    D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT                          = 0x200,
+    D3D12_BARRIER_ACCESS_PREDICATION                                = 0x200, // Aliased with ACCESS_INDIRECT_ARGUMENT
+    D3D12_BARRIER_ACCESS_COPY_DEST                                  = 0x400,
+    D3D12_BARRIER_ACCESS_COPY_SOURCE                                = 0x800,
+    D3D12_BARRIER_ACCESS_RESOLVE_DEST                               = 0x1000,
+    D3D12_BARRIER_ACCESS_RESOLVE_SOURCE                             = 0x2000,
+    D3D12_BARRIER_ACCESS_RAYTRACING_ACCELERATION_STRUCTURE_READ     = 0x4000,
+    D3D12_BARRIER_ACCESS_RAYTRACING_ACCELERATION_STRUCTURE_WRITE    = 0x8000,
+    D3D12_BARRIER_ACCESS_SHADING_RATE_SOURCE                        = 0x10000,
+    D3D12_BARRIER_ACCESS_VIDEO_DECODE_READ                          = 0x20000,
+    D3D12_BARRIER_ACCESS_VIDEO_DECODE_WRITE                         = 0x40000,
+    D3D12_BARRIER_ACCESS_VIDEO_PROCESS_READ                         = 0x80000,
+    D3D12_BARRIER_ACCESS_VIDEO_PROCESS_WRITE                        = 0x100000,
+    D3D12_BARRIER_ACCESS_VIDEO_ENCODE_READ                          = 0x200000,
+    D3D12_BARRIER_ACCESS_VIDEO_ENCODE_WRITE                         = 0x400000,
+    D3D12_BARRIER_ACCESS_NO_ACCESS                                  = 0x80000000,
+} D3D12_BARRIER_ACCESS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_BARRIER_ACCESS );" )
+
+typedef enum D3D12_BARRIER_TYPE
+{
+    D3D12_BARRIER_TYPE_GLOBAL,
+    D3D12_BARRIER_TYPE_TEXTURE,
+    D3D12_BARRIER_TYPE_BUFFER,
+} D3D12_BARRIER_TYPE;
+
+typedef enum D3D12_TEXTURE_BARRIER_FLAGS
+{
+    D3D12_TEXTURE_BARRIER_FLAG_NONE = 0x0,
+    D3D12_TEXTURE_BARRIER_FLAG_DISCARD = 0x1,
+} D3D12_TEXTURE_BARRIER_FLAGS;
+cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_TEXTURE_BARRIER_FLAGS );")
+
+typedef struct D3D12_BARRIER_SUBRESOURCE_RANGE
+{
+    UINT IndexOrFirstMipLevel;
+    UINT NumMipLevels;
+    UINT FirstArraySlice;
+    UINT NumArraySlices;
+    UINT FirstPlane;
+    UINT NumPlanes;
+} D3D12_BARRIER_SUBRESOURCE_RANGE;
+
+typedef struct D3D12_GLOBAL_BARRIER
+{
+    D3D12_BARRIER_SYNC SyncBefore;
+    D3D12_BARRIER_SYNC SyncAfter;
+    D3D12_BARRIER_ACCESS AccessBefore;
+    D3D12_BARRIER_ACCESS AccessAfter;
+} D3D12_GLOBAL_BARRIER;
+
+typedef struct D3D12_TEXTURE_BARRIER
+{
+    D3D12_BARRIER_SYNC SyncBefore;
+    D3D12_BARRIER_SYNC SyncAfter;
+    D3D12_BARRIER_ACCESS AccessBefore;
+    D3D12_BARRIER_ACCESS AccessAfter;
+    D3D12_BARRIER_LAYOUT LayoutBefore;
+    D3D12_BARRIER_LAYOUT LayoutAfter;
+    [annotation("_In_")] ID3D12Resource *pResource;
+    D3D12_BARRIER_SUBRESOURCE_RANGE Subresources;
+    D3D12_TEXTURE_BARRIER_FLAGS Flags;
+} D3D12_TEXTURE_BARRIER;
+
+typedef struct D3D12_BUFFER_BARRIER
+{
+    D3D12_BARRIER_SYNC SyncBefore;
+    D3D12_BARRIER_SYNC SyncAfter;
+    D3D12_BARRIER_ACCESS AccessBefore;
+    D3D12_BARRIER_ACCESS AccessAfter;
+    [annotation("_In_")] ID3D12Resource *pResource;
+    UINT64 Offset;
+    UINT64 Size;
+} D3D12_BUFFER_BARRIER;
+
+typedef struct D3D12_RESOURCE_STATE_BARRIER
+{
+    D3D12_RESOURCE_STATES State;
+    [annotation("_In_")] ID3D12Resource *pResource;
+    UINT Subresource;
+    D3D12_BARRIER_SYNC Sync;
+    D3D12_BARRIER_ACCESS Access;
+    D3D12_BARRIER_LAYOUT Layout;
+} D3D12_RESOURCE_STATE_BARRIER;
+
+typedef struct D3D12_BARRIER_GROUP
+{
+    D3D12_BARRIER_TYPE Type;
+    UINT32 NumBarriers;
+    union
+    {
+        [annotation("_In_reads_(NumBarriers)")] const D3D12_GLOBAL_BARRIER *pGlobalBarriers;
+        [annotation("_In_reads_(NumBarriers)")] const D3D12_TEXTURE_BARRIER *pTextureBarriers;
+        [annotation("_In_reads_(NumBarriers)")] const D3D12_BUFFER_BARRIER *pBufferBarriers;
+        [annotation("_In_reads_(NumBarriers)")] const D3D12_RESOURCE_STATE_BARRIER *pStateBarriers;
+    };
+} D3D12_BARRIER_GROUP;
+
 [uuid(28e2495d-0f64-4ae4-a6ec-129255dc49a8), object, local, pointer_default(unique)]
 interface ID3D12ShaderCacheSession
     : ID3D12DeviceChild
@@ -5150,6 +5339,46 @@ interface ID3D12Device9
         [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppCommandQueue
     );
 };
+
+[uuid(517f8718-aa66-49f9-b02b-a7ab89c06031), object, local, pointer_default(unique)]
+interface ID3D12Device10
+    : ID3D12Device9
+{
+    HRESULT CreateCommittedResource3(
+        [annotation("_In_")] const D3D12_HEAP_PROPERTIES* pHeapProperties,
+        D3D12_HEAP_FLAGS HeapFlags,
+        [annotation("_In_")] const D3D12_RESOURCE_DESC1* pDesc,
+        D3D12_BARRIER_LAYOUT InitialLayout,
+        [annotation("_In_opt_")] const D3D12_CLEAR_VALUE* pOptimizedClearValue,
+        [annotation("_In_opt_")] ID3D12ProtectedResourceSession* pProtectedSession,
+        UINT32 NumCastableFormats,
+        [annotation("_In_opt_count_(NumCastableFormats)")] DXGI_FORMAT *pCastableFormats,
+        [in] REFIID riidResource, // Expected: ID3D12Resource1*
+        [out, iid_is(riidResource), annotation("_COM_Outptr_opt_")] void** ppvResource);
+
+    HRESULT CreatePlacedResource2(
+        [annotation("_In_")] ID3D12Heap* pHeap,
+        UINT64 HeapOffset,
+        [annotation("_In_")] const D3D12_RESOURCE_DESC1* pDesc,
+        D3D12_BARRIER_LAYOUT InitialLayout,
+        [annotation("_In_opt_")] const D3D12_CLEAR_VALUE* pOptimizedClearValue,
+        UINT32 NumCastableFormats,
+        [annotation("_In_opt_count_(NumCastableFormats)")] DXGI_FORMAT *pCastableFormats,
+        [in] REFIID riid, // Expected: ID3D12Resource*
+        [out, iid_is(riid), annotation("_COM_Outptr_opt_")] void** ppvResource);
+
+    HRESULT CreateReservedResource2(
+        [annotation("_In_")] const D3D12_RESOURCE_DESC* pDesc,
+        D3D12_BARRIER_LAYOUT InitialLayout,
+        [annotation("_In_opt_")] const D3D12_CLEAR_VALUE* pOptimizedClearValue,
+        [annotation("_In_opt_")] ID3D12ProtectedResourceSession *pProtectedSession,
+        UINT32 NumCastableFormats,
+        [annotation("_In_opt_count_(NumCastableFormats)")] DXGI_FORMAT *pCastableFormats,
+        [in] REFIID riid, // Expected: ID3D12Resource1*
+        [out, iid_is(riid), annotation("_COM_Outptr_opt_")] void** ppvResource
+    );
+};
+
 
 
 [uuid(7071e1f0-e84b-4b33-974f-12fa49de65c5), object, local, pointer_default(unique)]
@@ -5392,6 +5621,15 @@ interface ID3D12GraphicsCommandList6 : ID3D12GraphicsCommandList5
         );
 }
 
+[uuid(dd171223-8b61-4769-90e3-160ccde4e2c1), object, local, pointer_default(unique)]
+interface ID3D12GraphicsCommandList7 : ID3D12GraphicsCommandList6
+{
+    void Barrier(
+        UINT32 NumBarrierGroups,
+        [annotation("_In_reads_(NumBarrierGroups)")] const D3D12_BARRIER_GROUP *pBarrierGroups
+        );
+};
+
 
 //----------------------------------------------------------------------------------------------------------
 // Old types which are still supported by the runtime for app-compat
@@ -5451,7 +5689,9 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12MetaCommand,0xDBB84C27,0x36CE,0x4FC9,0xB8,0x01
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList4,0x8754318e,0xd3a9,0x4541,0x98,0xcf,0x64,0x5b,0x50,0xdc,0x48,0x74);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12ShaderCacheSession,0x28e2495d,0x0f64,0x4ae4,0xa6,0xec,0x12,0x92,0x55,0xdc,0x49,0xa8);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Device9,0x4c80e962,0xf032,0x4f60,0xbc,0x9e,0xeb,0xc2,0xcf,0xa1,0xd8,0x3c);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12Device10,0x517f8718,0xaa66,0x49f9,0xb0,0x2b,0xa7,0xab,0x89,0xc0,0x60,0x31);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Tools,0x7071e1f0,0xe84b,0x4b33,0x97,0x4f,0x12,0xfa,0x49,0xde,0x65,0xc5);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12SDKConfiguration,0xe9eb5314,0x33aa,0x42b2,0xa7,0x18,0xd7,0x7f,0x58,0xb1,0xf1,0xc7);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList5,0x55050859,0x4024,0x474c,0x87,0xf5,0x64,0x72,0xea,0xee,0x44,0xea);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList6,0xc3827890,0xe548,0x4cfa,0x96,0xcf,0x56,0x89,0xa9,0x37,0x0f,0x80);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList7,0xdd171223,0x8b61,0x4769,0x90,0xe3,0x16,0x0c,0xcd,0xe4,0xe2,0xc1);" )
