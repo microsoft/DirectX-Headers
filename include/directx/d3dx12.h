@@ -2935,10 +2935,10 @@ struct CD3DX12_PIPELINE_STATE_STREAM2_PARSE_HELPER : public ID3DX12PipelineParse
 {
     CD3DX12_PIPELINE_STATE_STREAM2 PipelineStream;
     CD3DX12_PIPELINE_STATE_STREAM2_PARSE_HELPER() noexcept
-        : SeenDSS(false)
+        : SeenDSS(false),
+        SeenTopology(false)
     {
-        // Adjust defaults to account for absent members.
-        PipelineStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        PipelineStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
 
         // Depth disabled if no DSV format specified.
         static_cast<D3D12_DEPTH_STENCIL_DESC1&>(PipelineStream.DepthStencilState).DepthEnable = false;
@@ -2950,8 +2950,19 @@ struct CD3DX12_PIPELINE_STATE_STREAM2_PARSE_HELPER : public ID3DX12PipelineParse
     void RootSignatureCb(ID3D12RootSignature* pRootSignature) override {PipelineStream.pRootSignature = pRootSignature;}
     void InputLayoutCb(const D3D12_INPUT_LAYOUT_DESC& InputLayout) override {PipelineStream.InputLayout = InputLayout;}
     void IBStripCutValueCb(D3D12_INDEX_BUFFER_STRIP_CUT_VALUE IBStripCutValue) override {PipelineStream.IBStripCutValue = IBStripCutValue;}
-    void PrimitiveTopologyTypeCb(D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyType) override {PipelineStream.PrimitiveTopologyType = PrimitiveTopologyType;}
-    void VSCb(const D3D12_SHADER_BYTECODE& VS) override {PipelineStream.VS = VS;}
+    void PrimitiveTopologyTypeCb(D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyType) override
+    {
+        PipelineStream.PrimitiveTopologyType = PrimitiveTopologyType;
+        SeenTopology = true;
+    }
+    void VSCb(const D3D12_SHADER_BYTECODE& VS) override
+    {
+        PipelineStream.VS = VS;
+        if (!SeenTopology)
+        {
+            PipelineStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        }
+    }
     void GSCb(const D3D12_SHADER_BYTECODE& GS) override {PipelineStream.GS = GS;}
     void StreamOutputCb(const D3D12_STREAM_OUTPUT_DESC& StreamOutput) override {PipelineStream.StreamOutput = StreamOutput;}
     void HSCb(const D3D12_SHADER_BYTECODE& HS) override {PipelineStream.HS = HS;}
@@ -2989,6 +3000,7 @@ struct CD3DX12_PIPELINE_STATE_STREAM2_PARSE_HELPER : public ID3DX12PipelineParse
 
 private:
     bool SeenDSS;
+    bool SeenTopology;
 };
 
 
@@ -2996,10 +3008,10 @@ struct CD3DX12_PIPELINE_STATE_STREAM_PARSE_HELPER : public ID3DX12PipelineParser
 {
     CD3DX12_PIPELINE_STATE_STREAM1 PipelineStream;
     CD3DX12_PIPELINE_STATE_STREAM_PARSE_HELPER() noexcept
-        : SeenDSS(false)
+        : SeenDSS(false),
+        SeenTopology(false)
     {
-        // Adjust defaults to account for absent members.
-        PipelineStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        PipelineStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
 
         // Depth disabled if no DSV format specified.
         static_cast<D3D12_DEPTH_STENCIL_DESC1&>(PipelineStream.DepthStencilState).DepthEnable = false;
@@ -3011,8 +3023,19 @@ struct CD3DX12_PIPELINE_STATE_STREAM_PARSE_HELPER : public ID3DX12PipelineParser
     void RootSignatureCb(ID3D12RootSignature* pRootSignature) override {PipelineStream.pRootSignature = pRootSignature;}
     void InputLayoutCb(const D3D12_INPUT_LAYOUT_DESC& InputLayout) override {PipelineStream.InputLayout = InputLayout;}
     void IBStripCutValueCb(D3D12_INDEX_BUFFER_STRIP_CUT_VALUE IBStripCutValue) override {PipelineStream.IBStripCutValue = IBStripCutValue;}
-    void PrimitiveTopologyTypeCb(D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyType) override {PipelineStream.PrimitiveTopologyType = PrimitiveTopologyType;}
-    void VSCb(const D3D12_SHADER_BYTECODE& VS) override {PipelineStream.VS = VS;}
+    void PrimitiveTopologyTypeCb(D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyType) override
+    {
+        PipelineStream.PrimitiveTopologyType = PrimitiveTopologyType;
+        SeenTopology = true;
+    }
+    void VSCb(const D3D12_SHADER_BYTECODE& VS) override
+    {
+        PipelineStream.VS = VS;
+        if (!SeenTopology)
+        {
+            PipelineStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        }
+    }
     void GSCb(const D3D12_SHADER_BYTECODE& GS) override {PipelineStream.GS = GS;}
     void StreamOutputCb(const D3D12_STREAM_OUTPUT_DESC& StreamOutput) override {PipelineStream.StreamOutput = StreamOutput;}
     void HSCb(const D3D12_SHADER_BYTECODE& HS) override {PipelineStream.HS = HS;}
@@ -3048,6 +3071,7 @@ struct CD3DX12_PIPELINE_STATE_STREAM_PARSE_HELPER : public ID3DX12PipelineParser
 
 private:
     bool SeenDSS;
+    bool SeenTopology;
 };
 
 inline D3D12_PIPELINE_STATE_SUBOBJECT_TYPE D3DX12GetBaseSubobjectType(D3D12_PIPELINE_STATE_SUBOBJECT_TYPE SubobjectType) noexcept
@@ -4170,10 +4194,10 @@ public: // Function declaration
 
     // PROTECTED_RESOURCE_SESSION_TYPE_COUNT
     UINT ProtectedResourceSessionTypeCount(UINT NodeIndex = 0) const;
-    
+
     // PROTECTED_RESOURCE_SESSION_TYPES
     std::vector<GUID> ProtectedResourceSessionTypes(UINT NodeIndex = 0) const;
-    
+
     // D3D12_OPTIONS8
     BOOL UnalignedBlockTexturesSupported() const;
 
@@ -4209,9 +4233,9 @@ private: // Private structs and helpers declaration
 
     // Helper funcion to decide the highest feature level
     HRESULT QueryHighestFeatureLevel();
-    
+
     // Helper function to initialize local protected resource session types structs
-    HRESULT QueryProtectedResourceSessionTypes(UINT NodeIndex, UINT Count); 
+    HRESULT QueryProtectedResourceSessionTypes(UINT NodeIndex, UINT Count);
 
 private: // Member data
     // Pointer to the underlying device
@@ -4246,7 +4270,7 @@ private: // Member data
     D3D12_FEATURE_DATA_D3D12_OPTIONS8 m_dOptions8;
     D3D12_FEATURE_DATA_D3D12_OPTIONS9 m_dOptions9;
     D3D12_FEATURE_DATA_D3D12_OPTIONS10 m_dOptions10;
-    D3D12_FEATURE_DATA_D3D12_OPTIONS11 m_dOptions11;   
+    D3D12_FEATURE_DATA_D3D12_OPTIONS11 m_dOptions11;
 };
 
 // Implementations for CD3DX12FeatureSupport functions
@@ -4290,7 +4314,7 @@ inline CD3DX12FeatureSupport::CD3DX12FeatureSupport()
 
 inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
 {
-    if (!pDevice) 
+    if (!pDevice)
     {
         m_hStatus = E_INVALIDARG;
         return m_hStatus;
@@ -4299,7 +4323,7 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
     m_pDevice = pDevice;
 
     // Initialize static feature support data structures
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &m_dOptions, sizeof(m_dOptions)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &m_dOptions, sizeof(m_dOptions))))
     {
         m_dOptions.DoublePrecisionFloatShaderOps = false;
         m_dOptions.OutputMergerLogicOp = false;
@@ -4318,13 +4342,13 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         m_dOptions.ResourceHeapTier = (D3D12_RESOURCE_HEAP_TIER)0;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &m_dGPUVASupport, sizeof(m_dGPUVASupport)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &m_dGPUVASupport, sizeof(m_dGPUVASupport))))
     {
         m_dGPUVASupport.MaxGPUVirtualAddressBitsPerProcess = 0;
         m_dGPUVASupport.MaxGPUVirtualAddressBitsPerResource = 0;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &m_dOptions1, sizeof(m_dOptions1)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &m_dOptions1, sizeof(m_dOptions1))))
     {
         m_dOptions1.WaveOps = false;
         m_dOptions1.WaveLaneCountMax = 0;
@@ -4334,18 +4358,18 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         m_dOptions1.Int64ShaderOps = 0;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &m_dOptions2, sizeof(m_dOptions2)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &m_dOptions2, sizeof(m_dOptions2))))
     {
         m_dOptions2.DepthBoundsTestSupported = false;
         m_dOptions2.ProgrammableSamplePositionsTier = D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_NOT_SUPPORTED;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &m_dShaderCache, sizeof(m_dShaderCache)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &m_dShaderCache, sizeof(m_dShaderCache))))
     {
         m_dShaderCache.SupportFlags = D3D12_SHADER_CACHE_SUPPORT_NONE;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &m_dOptions3, sizeof(m_dOptions3)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &m_dOptions3, sizeof(m_dOptions3))))
     {
         m_dOptions3.CopyQueueTimestampQueriesSupported = false;
         m_dOptions3.CastingFullyTypedFormatSupported = false;
@@ -4354,38 +4378,38 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         m_dOptions3.BarycentricsSupported = false;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &m_dExistingHeaps, sizeof(m_dExistingHeaps)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &m_dExistingHeaps, sizeof(m_dExistingHeaps))))
     {
         m_dExistingHeaps.Supported = false;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &m_dOptions4, sizeof(m_dOptions4)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &m_dOptions4, sizeof(m_dOptions4))))
     {
         m_dOptions4.MSAA64KBAlignedTextureSupported = false;
         m_dOptions4.Native16BitShaderOpsSupported = false;
         m_dOptions4.SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_0;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_CROSS_NODE, &m_dCrossNode, sizeof(m_dCrossNode)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_CROSS_NODE, &m_dCrossNode, sizeof(m_dCrossNode))))
     {
         m_dCrossNode.SharingTier = D3D12_CROSS_NODE_SHARING_TIER_NOT_SUPPORTED;
         m_dCrossNode.AtomicShaderInstructions = false;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &m_dOptions5, sizeof(m_dOptions5)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &m_dOptions5, sizeof(m_dOptions5))))
     {
         m_dOptions5.SRVOnlyTiledResourceTier3 = false;
         m_dOptions5.RenderPassesTier = D3D12_RENDER_PASS_TIER_0;
         m_dOptions5.RaytracingTier = D3D12_RAYTRACING_TIER_NOT_SUPPORTED;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_DISPLAYABLE, &m_dDisplayable, sizeof(m_dDisplayable)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_DISPLAYABLE, &m_dDisplayable, sizeof(m_dDisplayable))))
     {
         m_dDisplayable.DisplayableTexture = false;
         m_dDisplayable.SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_0;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &m_dOptions6, sizeof(m_dOptions6)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &m_dOptions6, sizeof(m_dOptions6))))
     {
         m_dOptions6.AdditionalShadingRatesSupported = false;
         m_dOptions6.PerPrimitiveShadingRateSupportedWithViewportIndexing = false;
@@ -4394,18 +4418,18 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         m_dOptions6.BackgroundProcessingSupported = false;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &m_dOptions7, sizeof(m_dOptions7)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &m_dOptions7, sizeof(m_dOptions7))))
     {
         m_dOptions7.MeshShaderTier = D3D12_MESH_SHADER_TIER_NOT_SUPPORTED;
         m_dOptions7.SamplerFeedbackTier = D3D12_SAMPLER_FEEDBACK_TIER_NOT_SUPPORTED;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &m_dOptions8, sizeof(m_dOptions8)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &m_dOptions8, sizeof(m_dOptions8))))
     {
         m_dOptions8.UnalignedBlockTexturesSupported = false;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &m_dOptions9, sizeof(m_dOptions9)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &m_dOptions9, sizeof(m_dOptions9))))
     {
         m_dOptions9.MeshShaderPipelineStatsSupported = false;
         m_dOptions9.MeshShaderSupportsFullRangeRenderTargetArrayIndex = false;
@@ -4415,13 +4439,13 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         m_dOptions9.WaveMMATier = D3D12_WAVE_MMA_TIER_NOT_SUPPORTED;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &m_dOptions10, sizeof(m_dOptions10)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &m_dOptions10, sizeof(m_dOptions10))))
     {
         m_dOptions10.MeshShaderPerPrimitiveShadingRateSupported = false;
         m_dOptions10.VariableRateShadingSumCombinerSupported = false;
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &m_dOptions11, sizeof(m_dOptions11)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &m_dOptions11, sizeof(m_dOptions11))))
     {
         m_dOptions11.AtomicInt64OnDescriptorHeapResourceSupported = false;
     }
@@ -4433,10 +4457,10 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
     m_dSerialization.resize(uNodeCount);
     m_dProtectedResourceSessionTypeCount.resize(uNodeCount);
     m_dProtectedResourceSessionTypes.resize(uNodeCount);
-    for (UINT NodeIndex = 0; NodeIndex < uNodeCount; NodeIndex++) 
+    for (UINT NodeIndex = 0; NodeIndex < uNodeCount; NodeIndex++)
     {
         m_dProtectedResourceSessionSupport[NodeIndex].NodeIndex = NodeIndex;
-        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_SUPPORT, &m_dProtectedResourceSessionSupport[NodeIndex], sizeof(m_dProtectedResourceSessionSupport[NodeIndex])))) 
+        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_SUPPORT, &m_dProtectedResourceSessionSupport[NodeIndex], sizeof(m_dProtectedResourceSessionSupport[NodeIndex]))))
         {
             m_dProtectedResourceSessionSupport[NodeIndex].Support = D3D12_PROTECTED_RESOURCE_SESSION_SUPPORT_FLAG_NONE;
         }
@@ -4446,13 +4470,13 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         {
             D3D12_FEATURE_DATA_ARCHITECTURE dArchLocal = {};
             dArchLocal.NodeIndex = NodeIndex;
-            if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &dArchLocal, sizeof(dArchLocal)))) 
+            if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &dArchLocal, sizeof(dArchLocal))))
             {
                 dArchLocal.TileBasedRenderer = false;
                 dArchLocal.UMA = false;
                 dArchLocal.CacheCoherentUMA = false;
             }
-            
+
             m_dArchitecture1[NodeIndex].TileBasedRenderer = dArchLocal.TileBasedRenderer;
             m_dArchitecture1[NodeIndex].UMA = dArchLocal.UMA;
             m_dArchitecture1[NodeIndex].CacheCoherentUMA = dArchLocal.CacheCoherentUMA;
@@ -4460,13 +4484,13 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         }
 
         m_dSerialization[NodeIndex].NodeIndex = NodeIndex;
-        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SERIALIZATION, &m_dSerialization[NodeIndex], sizeof(m_dSerialization[NodeIndex])))) 
+        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SERIALIZATION, &m_dSerialization[NodeIndex], sizeof(m_dSerialization[NodeIndex]))))
         {
             m_dSerialization[NodeIndex].HeapSerializationTier = D3D12_HEAP_SERIALIZATION_TIER_0;
         }
 
         m_dProtectedResourceSessionTypeCount[NodeIndex].NodeIndex = NodeIndex;
-        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPE_COUNT, &m_dProtectedResourceSessionTypeCount[NodeIndex], sizeof(m_dProtectedResourceSessionTypeCount[NodeIndex])))) 
+        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPE_COUNT, &m_dProtectedResourceSessionTypeCount[NodeIndex], sizeof(m_dProtectedResourceSessionTypeCount[NodeIndex]))))
         {
             m_dProtectedResourceSessionTypeCount[NodeIndex].Count = 0;
         }
@@ -4477,22 +4501,22 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
     }
 
     // Initialize features that requires highest version check
-    if (FAILED(m_hStatus = QueryHighestShaderModel())) 
+    if (FAILED(m_hStatus = QueryHighestShaderModel()))
     {
         return m_hStatus;
     }
 
-    if (FAILED(m_hStatus = QueryHighestRootSignatureVersion())) 
+    if (FAILED(m_hStatus = QueryHighestRootSignatureVersion()))
     {
         return m_hStatus;
     }
 
     // Initialize Feature Levels data
-    if (FAILED(m_hStatus = QueryHighestFeatureLevel())) 
+    if (FAILED(m_hStatus = QueryHighestFeatureLevel()))
     {
         return m_hStatus;
     }
-    
+
     return m_hStatus;
 }
 
@@ -4526,11 +4550,11 @@ inline D3D12_CROSS_NODE_SHARING_TIER CD3DX12FeatureSupport::CrossNodeSharingTier
 
 inline UINT CD3DX12FeatureSupport::MaxGPUVirtualAddressBitsPerResource() const
 {
-    if (m_dOptions.MaxGPUVirtualAddressBitsPerResource > 0) 
+    if (m_dOptions.MaxGPUVirtualAddressBitsPerResource > 0)
     {
         return m_dOptions.MaxGPUVirtualAddressBitsPerResource;
     }
-    else 
+    else
     {
         return m_dGPUVASupport.MaxGPUVirtualAddressBitsPerResource;
     }
@@ -4557,7 +4581,7 @@ inline HRESULT CD3DX12FeatureSupport::FormatSupport(DXGI_FORMAT Format, D3D12_FO
 
     Support1 = dFormatSupport.Support1;
     Support2 = dFormatSupport.Support2; // Two outputs. Probably better just to take in the struct as an argument?
-    
+
     return result;
 }
 
@@ -4570,12 +4594,12 @@ inline HRESULT CD3DX12FeatureSupport::MultisampleQualityLevels(DXGI_FORMAT Forma
     dMultisampleQualityLevels.Flags = Flags;
 
     HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &dMultisampleQualityLevels, sizeof(D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS));
-    
-    if (SUCCEEDED(result)) 
+
+    if (SUCCEEDED(result))
     {
         NumQualityLevels = dMultisampleQualityLevels.NumQualityLevels;
-    } 
-    else 
+    }
+    else
     {
         NumQualityLevels = 0;
     }
@@ -4594,7 +4618,7 @@ inline HRESULT CD3DX12FeatureSupport::FormatInfo(DXGI_FORMAT Format, UINT8& Plan
     {
         PlaneCount = 0;
     }
-    else 
+    else
     {
         PlaneCount = dFormatInfo.PlaneCount;
     }
@@ -4651,7 +4675,7 @@ inline BOOL CD3DX12FeatureSupport::CommandQueuePrioritySupported(D3D12_COMMAND_L
     m_dCommandQueuePriority.CommandListType = CommandListType;
     m_dCommandQueuePriority.Priority = Priority;
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &m_dCommandQueuePriority, sizeof(D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY)))) 
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &m_dCommandQueuePriority, sizeof(D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY))))
     {
         return false;
     }
@@ -4699,7 +4723,7 @@ FEATURE_SUPPORT_GET(BOOL, m_dOptions6, BackgroundProcessingSupported);
 
 // 31: Query Meta Command
 // Keep the original call routine
-inline HRESULT CD3DX12FeatureSupport::QueryMetaCommand(D3D12_FEATURE_DATA_QUERY_META_COMMAND& dQueryMetaCommand) 
+inline HRESULT CD3DX12FeatureSupport::QueryMetaCommand(D3D12_FEATURE_DATA_QUERY_META_COMMAND& dQueryMetaCommand)
 {
     return m_pDevice->CheckFeatureSupport(D3D12_FEATURE_QUERY_META_COMMAND, &dQueryMetaCommand, sizeof(D3D12_FEATURE_DATA_QUERY_META_COMMAND));
 }
@@ -4740,7 +4764,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestShaderModel()
     // Check support in descending order
     HRESULT result;
 
-    D3D_SHADER_MODEL allModelVersions[] = 
+    D3D_SHADER_MODEL allModelVersions[] =
     {
         D3D_SHADER_MODEL_6_7,
         D3D_SHADER_MODEL_6_6,
@@ -4755,15 +4779,15 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestShaderModel()
 
     UINT numModelVersions = sizeof(allModelVersions) / sizeof(D3D_SHADER_MODEL);
 
-    for (UINT i = 0; i < numModelVersions; i++) 
+    for (UINT i = 0; i < numModelVersions; i++)
     {
         m_dShaderModel.HighestShaderModel = allModelVersions[i];
         result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &m_dShaderModel, sizeof(D3D12_FEATURE_DATA_SHADER_MODEL));
-        if (result != E_INVALIDARG) 
+        if (result != E_INVALIDARG)
         {
             // Indicates that the version is recognizable by the runtime and stored in the struct
             // Also terminate on unexpected error code
-            if (FAILED(result)) 
+            if (FAILED(result))
             {
                 m_dShaderModel.HighestShaderModel = (D3D_SHADER_MODEL)0;
             }
@@ -4782,7 +4806,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestRootSignatureVersion()
 {
     HRESULT result;
 
-    D3D_ROOT_SIGNATURE_VERSION allRootSignatureVersions[] = 
+    D3D_ROOT_SIGNATURE_VERSION allRootSignatureVersions[] =
     {
         D3D_ROOT_SIGNATURE_VERSION_1_1,
         D3D_ROOT_SIGNATURE_VERSION_1_0,
@@ -4790,13 +4814,13 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestRootSignatureVersion()
     };
     UINT numRootSignatureVersions = sizeof(allRootSignatureVersions) / sizeof(D3D_ROOT_SIGNATURE_VERSION);
 
-    for (UINT i = 0; i < numRootSignatureVersions; i++) 
+    for (UINT i = 0; i < numRootSignatureVersions; i++)
     {
         m_dRootSignature.HighestVersion = allRootSignatureVersions[i];
         result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &m_dRootSignature, sizeof(D3D12_FEATURE_DATA_ROOT_SIGNATURE));
-        if (result != E_INVALIDARG) 
+        if (result != E_INVALIDARG)
         {
-            if (FAILED(result)) 
+            if (FAILED(result))
             {
                 m_dRootSignature.HighestVersion = (D3D_ROOT_SIGNATURE_VERSION)0;
             }
@@ -4817,7 +4841,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestFeatureLevel()
 
     // Check against a list of all feature levels present in d3dcommon.h
     // Needs to be updated for future feature levels
-    D3D_FEATURE_LEVEL allLevels[] = 
+    D3D_FEATURE_LEVEL allLevels[] =
     {
         D3D_FEATURE_LEVEL_12_2,
         D3D_FEATURE_LEVEL_12_1,
@@ -4837,16 +4861,16 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestFeatureLevel()
     dFeatureLevel.pFeatureLevelsRequested = allLevels;
 
     result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &dFeatureLevel, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
-    if (SUCCEEDED(result)) 
+    if (SUCCEEDED(result))
     {
         m_eMaxFeatureLevel = dFeatureLevel.MaxSupportedFeatureLevel;
-    } 
-    else 
+    }
+    else
     {
         m_eMaxFeatureLevel = (D3D_FEATURE_LEVEL)0;
 
-        if (result == DXGI_ERROR_UNSUPPORTED) 
-        { 
+        if (result == DXGI_ERROR_UNSUPPORTED)
+        {
             // Indicates that none supported. Continue initialization
             result = S_OK;
         }
@@ -4889,5 +4913,3 @@ inline HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT No
 #endif // defined( __cplusplus )
 
 #endif //__D3DX12_H__
-
-
