@@ -807,7 +807,7 @@ struct CD3DX12_SUBRESOURCE_FOOTPRINT : public D3D12_SUBRESOURCE_FOOTPRINT
         Format = resDesc.Format;
         Width = UINT( resDesc.Width );
         Height = resDesc.Height;
-        Depth = (resDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? resDesc.DepthOrArraySize : 1);
+        Depth = (resDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? resDesc.DepthOrArraySize : 1u);
         RowPitch = rowPitch;
     }
 };
@@ -1679,7 +1679,7 @@ struct CD3DX12_GPU_DESCRIPTOR_HANDLE : public D3D12_GPU_DESCRIPTOR_HANDLE
 };
 
 //------------------------------------------------------------------------------------------------
-inline constexpr UINT D3D12CalcSubresource( UINT MipSlice, UINT ArraySlice, UINT PlaneSlice, UINT MipLevels, UINT ArraySize ) noexcept
+constexpr UINT D3D12CalcSubresource( UINT MipSlice, UINT ArraySlice, UINT PlaneSlice, UINT MipLevels, UINT ArraySize ) noexcept
 {
     return MipSlice + ArraySlice * MipLevels + PlaneSlice * MipLevels * ArraySize;
 }
@@ -1795,13 +1795,13 @@ struct CD3DX12_RESOURCE_DESC : public D3D12_RESOURCE_DESC
             mipLevels, format, 1, 0, layout, flags );
     }
     inline UINT16 Depth() const noexcept
-    { return (Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1); }
+    { return (Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1u); }
     inline UINT16 ArraySize() const noexcept
-    { return (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1); }
+    { return (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1u); }
     inline UINT8 PlaneCount(_In_ ID3D12Device* pDevice) const noexcept
     { return D3D12GetFormatPlaneCount(pDevice, Format); }
     inline UINT Subresources(_In_ ID3D12Device* pDevice) const noexcept
-    { return MipLevels * ArraySize() * PlaneCount(pDevice); }
+    { return static_cast<UINT>(MipLevels) * ArraySize() * PlaneCount(pDevice); }
     inline UINT CalcSubresource(UINT MipSlice, UINT ArraySlice, UINT PlaneSlice) noexcept
     { return D3D12CalcSubresource(MipSlice, ArraySlice, PlaneSlice, MipLevels, ArraySize()); }
 };
@@ -1920,13 +1920,13 @@ struct CD3DX12_RESOURCE_DESC1 : public D3D12_RESOURCE_DESC1
             mipLevels, format, 1, 0, layout, flags, 0, 0, 0 );
     }
     inline UINT16 Depth() const noexcept
-    { return (Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1); }
+    { return (Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1u); }
     inline UINT16 ArraySize() const noexcept
-    { return (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1); }
+    { return (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1u); }
     inline UINT8 PlaneCount(_In_ ID3D12Device* pDevice) const noexcept
     { return D3D12GetFormatPlaneCount(pDevice, Format); }
     inline UINT Subresources(_In_ ID3D12Device* pDevice) const noexcept
-    { return MipLevels * ArraySize() * PlaneCount(pDevice); }
+    { return static_cast<UINT>(MipLevels) * ArraySize() * PlaneCount(pDevice); }
     inline UINT CalcSubresource(UINT MipSlice, UINT ArraySlice, UINT PlaneSlice) noexcept
     { return D3D12CalcSubresource(MipSlice, ArraySlice, PlaneSlice, MipLevels, ArraySize()); }
 };
@@ -2283,7 +2283,7 @@ inline UINT64 UpdateSubresources(
 }
 
 //------------------------------------------------------------------------------------------------
-inline constexpr bool D3D12IsLayoutOpaque( D3D12_TEXTURE_LAYOUT Layout ) noexcept
+constexpr bool D3D12IsLayoutOpaque( D3D12_TEXTURE_LAYOUT Layout ) noexcept
 { return Layout == D3D12_TEXTURE_LAYOUT_UNKNOWN || Layout == D3D12_TEXTURE_LAYOUT_64KB_UNDEFINED_SWIZZLE; }
 
 //------------------------------------------------------------------------------------------------
@@ -3079,7 +3079,7 @@ inline HRESULT D3DX12ParsePipelineStream(const D3D12_PIPELINE_STATE_STREAM_DESC&
     {
         BYTE* pStream = static_cast<BYTE*>(Desc.pPipelineStateSubobjectStream)+CurOffset;
         auto SubobjectType = *reinterpret_cast<D3D12_PIPELINE_STATE_SUBOBJECT_TYPE*>(pStream);
-        if (SubobjectType < 0 || SubobjectType >= D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MAX_VALID)
+        if (SubobjectType >= D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MAX_VALID)
         {
             pCallbacks->ErrorUnknownSubobject(SubobjectType);
             return E_INVALIDARG;
@@ -3792,7 +3792,7 @@ private:
     }
     void* Data() noexcept override { return &m_Desc; }
     D3D12_HIT_GROUP_DESC m_Desc;
-    static const UINT m_NumStrings = 4;
+    static constexpr UINT m_NumStrings = 4;
     CD3DX12_STATE_OBJECT_DESC::StringContainer
         m_Strings[m_NumStrings]; // one string for every entrypoint name
 };
@@ -4055,7 +4055,7 @@ public: // Function declaration
     HRESULT Init(ID3D12Device* pDevice);
 
     // Retreives the status of the object. If an error occurred in the initialization process, the function returns the error code.
-    HRESULT GetStatus() const { return m_hStatus; }
+    HRESULT GetStatus() const noexcept { return m_hStatus; }
 
     // Getter functions for each feature class
     // D3D12_OPTIONS
@@ -4305,7 +4305,7 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         m_dOptions.OutputMergerLogicOp = false;
         m_dOptions.MinPrecisionSupport = D3D12_SHADER_MIN_PRECISION_SUPPORT_NONE;
         m_dOptions.TiledResourcesTier = D3D12_TILED_RESOURCES_TIER_NOT_SUPPORTED;
-        m_dOptions.ResourceBindingTier = (D3D12_RESOURCE_BINDING_TIER)0;
+        m_dOptions.ResourceBindingTier = static_cast<D3D12_RESOURCE_BINDING_TIER>(0);
         m_dOptions.PSSpecifiedStencilRefSupported = false;
         m_dOptions.TypedUAVLoadAdditionalFormats = false;
         m_dOptions.ROVsSupported = false;
@@ -4315,7 +4315,7 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         m_dOptions.CrossNodeSharingTier = D3D12_CROSS_NODE_SHARING_TIER_NOT_SUPPORTED;
         m_dOptions.CrossAdapterRowMajorTextureSupported = false;
         m_dOptions.VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation = false;
-        m_dOptions.ResourceHeapTier = (D3D12_RESOURCE_HEAP_TIER)0;
+        m_dOptions.ResourceHeapTier = static_cast<D3D12_RESOURCE_HEAP_TIER>(0);
     }
 
     if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &m_dGPUVASupport, sizeof(m_dGPUVASupport)))) 
@@ -4765,14 +4765,14 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestShaderModel()
             // Also terminate on unexpected error code
             if (FAILED(result)) 
             {
-                m_dShaderModel.HighestShaderModel = (D3D_SHADER_MODEL)0;
+                m_dShaderModel.HighestShaderModel = static_cast<D3D_SHADER_MODEL>(0);
             }
             return result;
         }
     }
 
     // Shader model may not be supported. Continue the rest initializations
-    m_dShaderModel.HighestShaderModel = (D3D_SHADER_MODEL)0;
+    m_dShaderModel.HighestShaderModel = static_cast<D3D_SHADER_MODEL>(0);
     return S_OK;
 }
 
@@ -4798,7 +4798,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestRootSignatureVersion()
         {
             if (FAILED(result)) 
             {
-                m_dRootSignature.HighestVersion = (D3D_ROOT_SIGNATURE_VERSION)0;
+                m_dRootSignature.HighestVersion = static_cast<D3D_ROOT_SIGNATURE_VERSION>(0);
             }
             // If succeeded, the highest version is already written into the member struct
             return result;
@@ -4806,7 +4806,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestRootSignatureVersion()
     }
 
     // No version left. Set to invalid value and continue.
-    m_dRootSignature.HighestVersion = (D3D_ROOT_SIGNATURE_VERSION)0;
+    m_dRootSignature.HighestVersion = static_cast<D3D_ROOT_SIGNATURE_VERSION>(0);
     return S_OK;
 }
 
@@ -4843,7 +4843,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestFeatureLevel()
     } 
     else 
     {
-        m_eMaxFeatureLevel = (D3D_FEATURE_LEVEL)0;
+        m_eMaxFeatureLevel = static_cast<D3D_FEATURE_LEVEL>(0);
 
         if (result == DXGI_ERROR_UNSUPPORTED) 
         { 
