@@ -4761,7 +4761,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestShaderModel()
     // Check support in descending order
     HRESULT result;
 
-    D3D_SHADER_MODEL allModelVersions[] =
+    const D3D_SHADER_MODEL allModelVersions[] =
     {
         D3D_SHADER_MODEL_6_7,
         D3D_SHADER_MODEL_6_6,
@@ -4773,8 +4773,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestShaderModel()
         D3D_SHADER_MODEL_6_0,
         D3D_SHADER_MODEL_5_1
     };
-
-    const size_t numModelVersions = sizeof(allModelVersions) / sizeof(D3D_SHADER_MODEL);
+    constexpr size_t numModelVersions = sizeof(allModelVersions) / sizeof(D3D_SHADER_MODEL);
 
     for (size_t i = 0; i < numModelVersions; i++)
     {
@@ -4803,13 +4802,13 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestRootSignatureVersion()
 {
     HRESULT result;
 
-    D3D_ROOT_SIGNATURE_VERSION allRootSignatureVersions[] =
+    const D3D_ROOT_SIGNATURE_VERSION allRootSignatureVersions[] =
     {
         D3D_ROOT_SIGNATURE_VERSION_1_1,
         D3D_ROOT_SIGNATURE_VERSION_1_0,
         D3D_ROOT_SIGNATURE_VERSION_1,
     };
-    const size_t numRootSignatureVersions = sizeof(allRootSignatureVersions) / sizeof(D3D_ROOT_SIGNATURE_VERSION);
+    constexpr size_t numRootSignatureVersions = sizeof(allRootSignatureVersions) / sizeof(D3D_ROOT_SIGNATURE_VERSION);
 
     for (size_t i = 0; i < numRootSignatureVersions; i++)
     {
@@ -4838,7 +4837,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestFeatureLevel()
 
     // Check against a list of all feature levels present in d3dcommon.h
     // Needs to be updated for future feature levels
-    D3D_FEATURE_LEVEL allLevels[] =
+    const D3D_FEATURE_LEVEL allLevels[] =
     {
         D3D_FEATURE_LEVEL_12_2,
         D3D_FEATURE_LEVEL_12_1,
