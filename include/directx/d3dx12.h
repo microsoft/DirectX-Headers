@@ -76,7 +76,7 @@ struct CD3DX12_VIEWPORT : public D3D12_VIEWPORT
         FLOAT minDepth = D3D12_MIN_DEPTH,
         FLOAT maxDepth = D3D12_MAX_DEPTH ) noexcept
     {
-        auto Desc = pResource->GetDesc();
+        const auto Desc = pResource->GetDesc();
         const UINT64 SubresourceWidth = Desc.Width >> mipSlice;
         const UINT64 SubresourceHeight = Desc.Height >> mipSlice;
         switch (Desc.Dimension)
@@ -2026,7 +2026,7 @@ inline UINT64 GetRequiredIntermediateSize(
     _In_range_(0,D3D12_REQ_SUBRESOURCES) UINT FirstSubresource,
     _In_range_(0,D3D12_REQ_SUBRESOURCES-FirstSubresource) UINT NumSubresources) noexcept
 {
-    auto Desc = pDestinationResource->GetDesc();
+    const auto Desc = pDestinationResource->GetDesc();
     UINT64 RequiredSize = 0;
 
     ID3D12Device* pDevice = nullptr;
@@ -2052,8 +2052,8 @@ inline UINT64 UpdateSubresources(
     _In_reads_(NumSubresources) const D3D12_SUBRESOURCE_DATA* pSrcData) noexcept
 {
     // Minor validation
-    auto IntermediateDesc = pIntermediate->GetDesc();
-    auto DestinationDesc = pDestinationResource->GetDesc();
+    const auto IntermediateDesc = pIntermediate->GetDesc();
+    const auto DestinationDesc = pDestinationResource->GetDesc();
     if (IntermediateDesc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER ||
         IntermediateDesc.Width < RequiredSize + pLayouts[0].Offset ||
         RequiredSize > SIZE_T(-1) ||
@@ -2111,8 +2111,8 @@ inline UINT64 UpdateSubresources(
     _In_reads_(NumSubresources) const D3D12_SUBRESOURCE_INFO* pSrcData) noexcept
 {
     // Minor validation
-    auto IntermediateDesc = pIntermediate->GetDesc();
-    auto DestinationDesc = pDestinationResource->GetDesc();
+    const auto IntermediateDesc = pIntermediate->GetDesc();
+    const auto DestinationDesc = pDestinationResource->GetDesc();
     if (IntermediateDesc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER ||
         IntermediateDesc.Width < RequiredSize + pLayouts[0].Offset ||
         RequiredSize > SIZE_T(-1) ||
@@ -2166,7 +2166,7 @@ inline UINT64 UpdateSubresources(
     _In_reads_(NumSubresources) const D3D12_SUBRESOURCE_DATA* pSrcData) noexcept
 {
     UINT64 RequiredSize = 0;
-    auto MemToAlloc = static_cast<UINT64>(sizeof(D3D12_PLACED_SUBRESOURCE_FOOTPRINT) + sizeof(UINT) + sizeof(UINT64)) * NumSubresources;
+    const auto MemToAlloc = static_cast<UINT64>(sizeof(D3D12_PLACED_SUBRESOURCE_FOOTPRINT) + sizeof(UINT) + sizeof(UINT64)) * NumSubresources;
     if (MemToAlloc > SIZE_MAX)
     {
        return 0;
@@ -2180,13 +2180,13 @@ inline UINT64 UpdateSubresources(
     auto pRowSizesInBytes = reinterpret_cast<UINT64*>(pLayouts + NumSubresources);
     auto pNumRows = reinterpret_cast<UINT*>(pRowSizesInBytes + NumSubresources);
 
-    auto Desc = pDestinationResource->GetDesc();
+    const auto Desc = pDestinationResource->GetDesc();
     ID3D12Device* pDevice = nullptr;
     pDestinationResource->GetDevice(IID_ID3D12Device, reinterpret_cast<void**>(&pDevice));
     pDevice->GetCopyableFootprints(&Desc, FirstSubresource, NumSubresources, IntermediateOffset, pLayouts, pNumRows, pRowSizesInBytes, &RequiredSize);
     pDevice->Release();
 
-    UINT64 Result = UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pSrcData);
+    const UINT64 Result = UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pSrcData);
     HeapFree(GetProcessHeap(), 0, pMem);
     return Result;
 }
@@ -2204,7 +2204,7 @@ inline UINT64 UpdateSubresources(
     _In_reads_(NumSubresources) D3D12_SUBRESOURCE_INFO* pSrcData) noexcept
 {
     UINT64 RequiredSize = 0;
-    auto MemToAlloc = static_cast<UINT64>(sizeof(D3D12_PLACED_SUBRESOURCE_FOOTPRINT) + sizeof(UINT) + sizeof(UINT64)) * NumSubresources;
+    const auto MemToAlloc = static_cast<UINT64>(sizeof(D3D12_PLACED_SUBRESOURCE_FOOTPRINT) + sizeof(UINT) + sizeof(UINT64)) * NumSubresources;
     if (MemToAlloc > SIZE_MAX)
     {
         return 0;
@@ -2214,17 +2214,17 @@ inline UINT64 UpdateSubresources(
     {
         return 0;
     }
-    auto pLayouts = reinterpret_cast<D3D12_PLACED_SUBRESOURCE_FOOTPRINT*>(pMem);
+    auto pLayouts = static_cast<D3D12_PLACED_SUBRESOURCE_FOOTPRINT*>(pMem);
     auto pRowSizesInBytes = reinterpret_cast<UINT64*>(pLayouts + NumSubresources);
     auto pNumRows = reinterpret_cast<UINT*>(pRowSizesInBytes + NumSubresources);
 
-    auto Desc = pDestinationResource->GetDesc();
+    const auto Desc = pDestinationResource->GetDesc();
     ID3D12Device* pDevice = nullptr;
     pDestinationResource->GetDevice(IID_ID3D12Device, reinterpret_cast<void**>(&pDevice));
     pDevice->GetCopyableFootprints(&Desc, FirstSubresource, NumSubresources, IntermediateOffset, pLayouts, pNumRows, pRowSizesInBytes, &RequiredSize);
     pDevice->Release();
 
-    UINT64 Result = UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pResourceData, pSrcData);
+    const UINT64 Result = UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pResourceData, pSrcData);
     HeapFree(GetProcessHeap(), 0, pMem);
     return Result;
 }
@@ -4286,6 +4286,27 @@ inline RETTYPE CD3DX12FeatureSupport::NAME(UINT NodeIndex) const \
 inline CD3DX12FeatureSupport::CD3DX12FeatureSupport() noexcept
 : m_pDevice(nullptr)
 , m_hStatus(E_INVALIDARG)
+, m_dOptions{}
+, m_eMaxFeatureLevel{}
+, m_dGPUVASupport{}
+, m_dShaderModel{}
+, m_dOptions1{}
+, m_dRootSignature{}
+, m_dOptions2{}
+, m_dShaderCache{}
+, m_dCommandQueuePriority{}
+, m_dOptions3{}
+, m_dExistingHeaps{}
+, m_dOptions4{}
+, m_dCrossNode{}
+, m_dOptions5{}
+, m_dDisplayable{}
+, m_dOptions6{}
+, m_dOptions7{}
+, m_dOptions8{}
+, m_dOptions9{}
+, m_dOptions10{}
+, m_dOptions11{}
 {}
 
 inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
