@@ -6,6 +6,7 @@
 #endif
 
 #include <directx/d3d12.h>
+#include <directx/d3d12video.h>
 #include <directx/dxcore.h>
 #include <directx/d3dx12.h>
 #include "dxguids/dxguids.h"

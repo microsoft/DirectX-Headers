@@ -6216,10 +6216,10 @@ EXTERN_C const IID IID_ID3D12VideoEncoder;
         virtual D3D12_VIDEO_ENCODER_CODEC STDMETHODCALLTYPE GetCodec( void) = 0;
         
         virtual HRESULT STDMETHODCALLTYPE GetCodecProfile( 
-            _Out_  D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile) = 0;
+            _Inout_  D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile) = 0;
         
         virtual HRESULT STDMETHODCALLTYPE GetCodecConfiguration( 
-            _Out_  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION dstCodecConfig) = 0;
+            _Inout_  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION dstCodecConfig) = 0;
         
         virtual DXGI_FORMAT STDMETHODCALLTYPE GetInputFormat( void) = 0;
         
@@ -6404,10 +6404,10 @@ EXTERN_C const IID IID_ID3D12VideoEncoderHeap;
         virtual D3D12_VIDEO_ENCODER_CODEC STDMETHODCALLTYPE GetCodec( void) = 0;
         
         virtual HRESULT STDMETHODCALLTYPE GetCodecProfile( 
-            _Out_  D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile) = 0;
+            _Inout_  D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile) = 0;
         
         virtual HRESULT STDMETHODCALLTYPE GetCodecLevel( 
-            _Out_  D3D12_VIDEO_ENCODER_LEVEL_SETTING dstLevel) = 0;
+            _Inout_  D3D12_VIDEO_ENCODER_LEVEL_SETTING dstLevel) = 0;
         
         virtual UINT STDMETHODCALLTYPE GetResolutionListCount( void) = 0;
         
