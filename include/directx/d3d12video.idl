@@ -2079,8 +2079,8 @@ interface ID3D12VideoEncoder
     UINT GetNodeMask(); 
     D3D12_VIDEO_ENCODER_FLAGS GetEncoderFlags(); 
     D3D12_VIDEO_ENCODER_CODEC GetCodec(); 
-    HRESULT GetCodecProfile([annotation("_Out_")] D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile);
-    HRESULT GetCodecConfiguration([annotation("_Out_")] D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION dstCodecConfig);
+    HRESULT GetCodecProfile([annotation("_Inout_")] D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile);
+    HRESULT GetCodecConfiguration([annotation("_Inout_")] D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION dstCodecConfig);
     DXGI_FORMAT GetInputFormat();
     D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE GetMaxMotionEstimationPrecision();
 }
@@ -2092,8 +2092,8 @@ interface ID3D12VideoEncoderHeap
     UINT GetNodeMask(); 
     D3D12_VIDEO_ENCODER_HEAP_FLAGS GetEncoderHeapFlags(); 
     D3D12_VIDEO_ENCODER_CODEC GetCodec(); 
-    HRESULT GetCodecProfile([annotation("_Out_")] D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile); 
-    HRESULT GetCodecLevel([annotation("_Out_")] D3D12_VIDEO_ENCODER_LEVEL_SETTING dstLevel); 
+    HRESULT GetCodecProfile([annotation("_Inout_")] D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile); 
+    HRESULT GetCodecLevel([annotation("_Inout_")] D3D12_VIDEO_ENCODER_LEVEL_SETTING dstLevel); 
     UINT GetResolutionListCount(); 
     HRESULT GetResolutionList(
         const UINT ResolutionsListCount,
