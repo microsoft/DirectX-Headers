@@ -47,6 +47,16 @@ struct CD3DX12_RECT : public D3D12_RECT
 };
 
 //------------------------------------------------------------------------------------------------
+inline bool operator==(const D3D12_RECT& l, const D3D12_RECT& r) noexcept
+{
+	return l.bottom == r.bottom && l.left == r.left && l.right == r.right && l.top == r.top;
+}
+
+//------------------------------------------------------------------------------------------------
+inline bool operator!=(const D3D12_RECT& l, const D3D12_RECT& r) noexcept
+{ return !(l == r); }
+
+//------------------------------------------------------------------------------------------------
 struct CD3DX12_VIEWPORT : public D3D12_VIEWPORT
 {
     CD3DX12_VIEWPORT() = default;
