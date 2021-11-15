@@ -4040,11 +4040,11 @@ private:
 class CD3DX12_BARRIER_SUBRESOURCE_RANGE : public D3D12_BARRIER_SUBRESOURCE_RANGE
 {
 public:
-    CD3DX12_BARRIER_SUBRESOURCE_RANGE() noexcept = default;
+    CD3DX12_BARRIER_SUBRESOURCE_RANGE() = default;
     CD3DX12_BARRIER_SUBRESOURCE_RANGE(const D3D12_BARRIER_SUBRESOURCE_RANGE &o) noexcept :
         D3D12_BARRIER_SUBRESOURCE_RANGE(o)
     {}
-    CD3DX12_BARRIER_SUBRESOURCE_RANGE(UINT Subresource) :
+    explicit CD3DX12_BARRIER_SUBRESOURCE_RANGE(UINT Subresource) noexcept :
         D3D12_BARRIER_SUBRESOURCE_RANGE{ Subresource, 0, 0, 0, 0, 0 }
     {}
     CD3DX12_BARRIER_SUBRESOURCE_RANGE(
@@ -4053,7 +4053,7 @@ public:
         UINT FirstArraySlice,
         UINT NumArraySlices,
         UINT FirstPlane = 0,
-        UINT NumPlanes = UINT_MAX) :
+        UINT NumPlanes = UINT_MAX) noexcept :
         D3D12_BARRIER_SUBRESOURCE_RANGE
         {
             FirstMipLevel,
@@ -4069,13 +4069,13 @@ public:
 class CD3DX12_GLOBAL_BARRIER : public D3D12_GLOBAL_BARRIER
 {
 public:
-    CD3DX12_GLOBAL_BARRIER() noexcept = default;
+    CD3DX12_GLOBAL_BARRIER() = default;
     CD3DX12_GLOBAL_BARRIER(const D3D12_GLOBAL_BARRIER &o) noexcept : D3D12_GLOBAL_BARRIER(o){}
     CD3DX12_GLOBAL_BARRIER(
         D3D12_BARRIER_SYNC syncBefore,
         D3D12_BARRIER_SYNC syncAfter,
         D3D12_BARRIER_ACCESS accessBefore,
-        D3D12_BARRIER_ACCESS accessAfter) : D3D12_GLOBAL_BARRIER {
+        D3D12_BARRIER_ACCESS accessAfter) noexcept : D3D12_GLOBAL_BARRIER {
             syncBefore,
             syncAfter,
             accessBefore,
@@ -4087,20 +4087,20 @@ public:
 class CD3DX12_BUFFER_BARRIER : public D3D12_BUFFER_BARRIER
 {
 public:
-    CD3DX12_BUFFER_BARRIER() noexcept = default;
+    CD3DX12_BUFFER_BARRIER() = default;
     CD3DX12_BUFFER_BARRIER(const D3D12_BUFFER_BARRIER &o) noexcept : D3D12_BUFFER_BARRIER(o){}
     CD3DX12_BUFFER_BARRIER(
         D3D12_BARRIER_SYNC syncBefore,
         D3D12_BARRIER_SYNC syncAfter,
         D3D12_BARRIER_ACCESS accessBefore,
         D3D12_BARRIER_ACCESS accessAfter,
-        ID3D12Resource *pRes) : D3D12_BUFFER_BARRIER {
+        ID3D12Resource *pRes) noexcept : D3D12_BUFFER_BARRIER {
             syncBefore,
             syncAfter,
             accessBefore,
             accessAfter,
             pRes,
-            0, UINT64_MAX
+            0, ULLONG_MAX
         }
     {}
 };
@@ -4108,7 +4108,7 @@ public:
 class CD3DX12_TEXTURE_BARRIER : public D3D12_TEXTURE_BARRIER
 {
 public:
-    CD3DX12_TEXTURE_BARRIER() noexcept = default;
+    CD3DX12_TEXTURE_BARRIER() = default;
     CD3DX12_TEXTURE_BARRIER(const D3D12_TEXTURE_BARRIER &o) noexcept : D3D12_TEXTURE_BARRIER(o){}
     CD3DX12_TEXTURE_BARRIER(
         D3D12_BARRIER_SYNC syncBefore,
@@ -4119,7 +4119,7 @@ public:
         D3D12_BARRIER_LAYOUT layoutAfter,
         ID3D12Resource *pRes,
         const D3D12_BARRIER_SUBRESOURCE_RANGE &subresources,
-        D3D12_TEXTURE_BARRIER_FLAGS flag = D3D12_TEXTURE_BARRIER_FLAG_NONE) : D3D12_TEXTURE_BARRIER {
+        D3D12_TEXTURE_BARRIER_FLAGS flag = D3D12_TEXTURE_BARRIER_FLAG_NONE) noexcept : D3D12_TEXTURE_BARRIER {
             syncBefore,
             syncAfter,
             accessBefore,
@@ -4136,7 +4136,7 @@ public:
 class CD3DX12_BARRIER_GROUP : public D3D12_BARRIER_GROUP
 {
 public:
-    CD3DX12_BARRIER_GROUP() noexcept = default;
+    CD3DX12_BARRIER_GROUP() = default;
     CD3DX12_BARRIER_GROUP(const D3D12_BARRIER_GROUP &o) noexcept : D3D12_BARRIER_GROUP(o){}
     CD3DX12_BARRIER_GROUP(UINT32 numBarriers, const D3D12_BUFFER_BARRIER *pBarriers) noexcept
     {

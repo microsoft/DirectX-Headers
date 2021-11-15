@@ -423,6 +423,13 @@ typedef interface ID3D12Device10 ID3D12Device10;
 #endif 	/* __ID3D12Device10_FWD_DEFINED__ */
 
 
+#ifndef __ID3D12VirtualizationGuestDevice_FWD_DEFINED__
+#define __ID3D12VirtualizationGuestDevice_FWD_DEFINED__
+typedef interface ID3D12VirtualizationGuestDevice ID3D12VirtualizationGuestDevice;
+
+#endif 	/* __ID3D12VirtualizationGuestDevice_FWD_DEFINED__ */
+
+
 #ifndef __ID3D12Tools_FWD_DEFINED__
 #define __ID3D12Tools_FWD_DEFINED__
 typedef interface ID3D12Tools ID3D12Tools;
@@ -22155,6 +22162,106 @@ EXTERN_C const IID IID_ID3D12Device10;
 #endif 	/* __ID3D12Device10_INTERFACE_DEFINED__ */
 
 
+#ifndef __ID3D12VirtualizationGuestDevice_INTERFACE_DEFINED__
+#define __ID3D12VirtualizationGuestDevice_INTERFACE_DEFINED__
+
+/* interface ID3D12VirtualizationGuestDevice */
+/* [unique][local][object][uuid] */ 
+
+
+EXTERN_C const IID IID_ID3D12VirtualizationGuestDevice;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+    
+    MIDL_INTERFACE("bc66d368-7373-4943-8757-fc87dc79e476")
+    ID3D12VirtualizationGuestDevice : public IUnknown
+    {
+    public:
+        virtual HRESULT STDMETHODCALLTYPE ShareWithHost( 
+            _In_  ID3D12DeviceChild *pObject,
+            _Out_  HANDLE *pHandle) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE CreateFenceFd( 
+            _In_  ID3D12Fence *pFence,
+            UINT64 FenceValue,
+            _Out_  int *pFenceFd) = 0;
+        
+    };
+    
+    
+#else 	/* C style interface */
+
+    typedef struct ID3D12VirtualizationGuestDeviceVtbl
+    {
+        BEGIN_INTERFACE
+        
+        DECLSPEC_XFGVIRT(IUnknown, QueryInterface)
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+            ID3D12VirtualizationGuestDevice * This,
+            REFIID riid,
+            _COM_Outptr_  void **ppvObject);
+        
+        DECLSPEC_XFGVIRT(IUnknown, AddRef)
+        ULONG ( STDMETHODCALLTYPE *AddRef )( 
+            ID3D12VirtualizationGuestDevice * This);
+        
+        DECLSPEC_XFGVIRT(IUnknown, Release)
+        ULONG ( STDMETHODCALLTYPE *Release )( 
+            ID3D12VirtualizationGuestDevice * This);
+        
+        DECLSPEC_XFGVIRT(ID3D12VirtualizationGuestDevice, ShareWithHost)
+        HRESULT ( STDMETHODCALLTYPE *ShareWithHost )( 
+            ID3D12VirtualizationGuestDevice * This,
+            _In_  ID3D12DeviceChild *pObject,
+            _Out_  HANDLE *pHandle);
+        
+        DECLSPEC_XFGVIRT(ID3D12VirtualizationGuestDevice, CreateFenceFd)
+        HRESULT ( STDMETHODCALLTYPE *CreateFenceFd )( 
+            ID3D12VirtualizationGuestDevice * This,
+            _In_  ID3D12Fence *pFence,
+            UINT64 FenceValue,
+            _Out_  int *pFenceFd);
+        
+        END_INTERFACE
+    } ID3D12VirtualizationGuestDeviceVtbl;
+
+    interface ID3D12VirtualizationGuestDevice
+    {
+        CONST_VTBL struct ID3D12VirtualizationGuestDeviceVtbl *lpVtbl;
+    };
+
+    
+
+#ifdef COBJMACROS
+
+
+#define ID3D12VirtualizationGuestDevice_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define ID3D12VirtualizationGuestDevice_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define ID3D12VirtualizationGuestDevice_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define ID3D12VirtualizationGuestDevice_ShareWithHost(This,pObject,pHandle)	\
+    ( (This)->lpVtbl -> ShareWithHost(This,pObject,pHandle) ) 
+
+#define ID3D12VirtualizationGuestDevice_CreateFenceFd(This,pFence,FenceValue,pFenceFd)	\
+    ( (This)->lpVtbl -> CreateFenceFd(This,pFence,FenceValue,pFenceFd) ) 
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __ID3D12VirtualizationGuestDevice_INTERFACE_DEFINED__ */
+
+
 #ifndef __ID3D12Tools_INTERFACE_DEFINED__
 #define __ID3D12Tools_INTERFACE_DEFINED__
 
@@ -22247,7 +22354,7 @@ EXTERN_C const IID IID_ID3D12Tools;
 #endif 	/* __ID3D12Tools_INTERFACE_DEFINED__ */
 
 
-/* interface __MIDL_itf_d3d12_0000_0054 */
+/* interface __MIDL_itf_d3d12_0000_0055 */
 /* [local] */ 
 
 typedef struct D3D12_SUBRESOURCE_DATA
@@ -22395,8 +22502,8 @@ HRESULT WINAPI D3D12GetInterface( _In_ REFCLSID rclsid, _In_ REFIID riid, _COM_O
 
 
 
-extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0054_v0_0_c_ifspec;
-extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0054_v0_0_s_ifspec;
+extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0055_v0_0_c_ifspec;
+extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0055_v0_0_s_ifspec;
 
 #ifndef __ID3D12SDKConfiguration_INTERFACE_DEFINED__
 #define __ID3D12SDKConfiguration_INTERFACE_DEFINED__
@@ -22483,7 +22590,7 @@ EXTERN_C const IID IID_ID3D12SDKConfiguration;
 #endif 	/* __ID3D12SDKConfiguration_INTERFACE_DEFINED__ */
 
 
-/* interface __MIDL_itf_d3d12_0000_0055 */
+/* interface __MIDL_itf_d3d12_0000_0056 */
 /* [local] */ 
 
 typedef 
@@ -22523,8 +22630,8 @@ enum D3D12_SHADING_RATE_COMBINER
 
 
 
-extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0055_v0_0_c_ifspec;
-extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0055_v0_0_s_ifspec;
+extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0056_v0_0_c_ifspec;
+extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0056_v0_0_s_ifspec;
 
 #ifndef __ID3D12GraphicsCommandList5_INTERFACE_DEFINED__
 #define __ID3D12GraphicsCommandList5_INTERFACE_DEFINED__
@@ -23359,7 +23466,7 @@ EXTERN_C const IID IID_ID3D12GraphicsCommandList5;
 #endif 	/* __ID3D12GraphicsCommandList5_INTERFACE_DEFINED__ */
 
 
-/* interface __MIDL_itf_d3d12_0000_0056 */
+/* interface __MIDL_itf_d3d12_0000_0057 */
 /* [local] */ 
 
 typedef struct D3D12_DISPATCH_MESH_ARGUMENTS
@@ -23371,8 +23478,8 @@ typedef struct D3D12_DISPATCH_MESH_ARGUMENTS
 
 
 
-extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0056_v0_0_c_ifspec;
-extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0056_v0_0_s_ifspec;
+extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0057_v0_0_c_ifspec;
+extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0057_v0_0_s_ifspec;
 
 #ifndef __ID3D12GraphicsCommandList6_INTERFACE_DEFINED__
 #define __ID3D12GraphicsCommandList6_INTERFACE_DEFINED__
@@ -25067,7 +25174,7 @@ EXTERN_C const IID IID_ID3D12GraphicsCommandList7;
 #endif 	/* __ID3D12GraphicsCommandList7_INTERFACE_DEFINED__ */
 
 
-/* interface __MIDL_itf_d3d12_0000_0058 */
+/* interface __MIDL_itf_d3d12_0000_0059 */
 /* [local] */ 
 
 #endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_GAMES) */
@@ -25125,6 +25232,7 @@ DEFINE_GUID(IID_ID3D12GraphicsCommandList4,0x8754318e,0xd3a9,0x4541,0x98,0xcf,0x
 DEFINE_GUID(IID_ID3D12ShaderCacheSession,0x28e2495d,0x0f64,0x4ae4,0xa6,0xec,0x12,0x92,0x55,0xdc,0x49,0xa8);
 DEFINE_GUID(IID_ID3D12Device9,0x4c80e962,0xf032,0x4f60,0xbc,0x9e,0xeb,0xc2,0xcf,0xa1,0xd8,0x3c);
 DEFINE_GUID(IID_ID3D12Device10,0x517f8718,0xaa66,0x49f9,0xb0,0x2b,0xa7,0xab,0x89,0xc0,0x60,0x31);
+DEFINE_GUID(IID_ID3D12VirtualizationGuestDevice,0xbc66d368,0x7373,0x4943,0x87,0x57,0xfc,0x87,0xdc,0x79,0xe4,0x76);
 DEFINE_GUID(IID_ID3D12Tools,0x7071e1f0,0xe84b,0x4b33,0x97,0x4f,0x12,0xfa,0x49,0xde,0x65,0xc5);
 DEFINE_GUID(IID_ID3D12SDKConfiguration,0xe9eb5314,0x33aa,0x42b2,0xa7,0x18,0xd7,0x7f,0x58,0xb1,0xf1,0xc7);
 DEFINE_GUID(IID_ID3D12GraphicsCommandList5,0x55050859,0x4024,0x474c,0x87,0xf5,0x64,0x72,0xea,0xee,0x44,0xea);
@@ -25132,8 +25240,8 @@ DEFINE_GUID(IID_ID3D12GraphicsCommandList6,0xc3827890,0xe548,0x4cfa,0x96,0xcf,0x
 DEFINE_GUID(IID_ID3D12GraphicsCommandList7,0xdd171223,0x8b61,0x4769,0x90,0xe3,0x16,0x0c,0xcd,0xe4,0xe2,0xc1);
 
 
-extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0058_v0_0_c_ifspec;
-extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0058_v0_0_s_ifspec;
+extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0059_v0_0_c_ifspec;
+extern RPC_IF_HANDLE __MIDL_itf_d3d12_0000_0059_v0_0_s_ifspec;
 
 /* Additional Prototypes for ALL interfaces */
 

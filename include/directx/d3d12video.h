@@ -6941,12 +6941,12 @@ EXTERN_C const IID IID_ID3D12VideoEncoder;
         DECLSPEC_XFGVIRT(ID3D12VideoEncoder, GetCodecProfile)
         HRESULT ( STDMETHODCALLTYPE *GetCodecProfile )( 
             ID3D12VideoEncoder * This,
-            _Out_  D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile);
+            _Inout_  D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile);
         
         DECLSPEC_XFGVIRT(ID3D12VideoEncoder, GetCodecConfiguration)
         HRESULT ( STDMETHODCALLTYPE *GetCodecConfiguration )( 
             ID3D12VideoEncoder * This,
-            _Out_  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION dstCodecConfig);
+            _Inout_  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION dstCodecConfig);
         
         DECLSPEC_XFGVIRT(ID3D12VideoEncoder, GetInputFormat)
         DXGI_FORMAT ( STDMETHODCALLTYPE *GetInputFormat )( 
@@ -7131,12 +7131,12 @@ EXTERN_C const IID IID_ID3D12VideoEncoderHeap;
         DECLSPEC_XFGVIRT(ID3D12VideoEncoderHeap, GetCodecProfile)
         HRESULT ( STDMETHODCALLTYPE *GetCodecProfile )( 
             ID3D12VideoEncoderHeap * This,
-            _Out_  D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile);
+            _Inout_  D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile);
         
         DECLSPEC_XFGVIRT(ID3D12VideoEncoderHeap, GetCodecLevel)
         HRESULT ( STDMETHODCALLTYPE *GetCodecLevel )( 
             ID3D12VideoEncoderHeap * This,
-            _Out_  D3D12_VIDEO_ENCODER_LEVEL_SETTING dstLevel);
+            _Inout_  D3D12_VIDEO_ENCODER_LEVEL_SETTING dstLevel);
         
         DECLSPEC_XFGVIRT(ID3D12VideoEncoderHeap, GetResolutionListCount)
         UINT ( STDMETHODCALLTYPE *GetResolutionListCount )( 
