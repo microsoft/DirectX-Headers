@@ -20103,16 +20103,6 @@ typedef struct D3D12_BUFFER_BARRIER
     UINT64 Size;
     } 	D3D12_BUFFER_BARRIER;
 
-typedef struct D3D12_RESOURCE_STATE_BARRIER
-    {
-    D3D12_RESOURCE_STATES State;
-    _In_  ID3D12Resource *pResource;
-    UINT Subresource;
-    D3D12_BARRIER_SYNC Sync;
-    D3D12_BARRIER_ACCESS Access;
-    D3D12_BARRIER_LAYOUT Layout;
-    } 	D3D12_RESOURCE_STATE_BARRIER;
-
 typedef struct D3D12_BARRIER_GROUP
     {
     D3D12_BARRIER_TYPE Type;
@@ -20122,7 +20112,6 @@ typedef struct D3D12_BARRIER_GROUP
         _In_reads_(NumBarriers)  const D3D12_GLOBAL_BARRIER *pGlobalBarriers;
         _In_reads_(NumBarriers)  const D3D12_TEXTURE_BARRIER *pTextureBarriers;
         _In_reads_(NumBarriers)  const D3D12_BUFFER_BARRIER *pBufferBarriers;
-        _In_reads_(NumBarriers)  const D3D12_RESOURCE_STATE_BARRIER *pStateBarriers;
         } 	;
     } 	D3D12_BARRIER_GROUP;
 
