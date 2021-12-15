@@ -1043,7 +1043,21 @@ public: // IUnknown
 
             pD3D12Options11->AtomicInt64OnDescriptorHeapResourceSupported = m_AtomicInt64OnDescriptorHeapResourceSupported;
         } return S_OK;
-        
+        case D3D12_FEATURE_D3D12_OPTIONS12:
+        {
+            if (!m_Options12Available)
+            {
+                return E_INVALIDARG;
+            }
+			D3D12_FEATURE_DATA_D3D12_OPTIONS12* pD3D12Options12 = static_cast<D3D12_FEATURE_DATA_D3D12_OPTIONS12*>(pFeatureSupportData);
+			if (FeatureSupportDataSize != sizeof(*pD3D12Options12))
+			{
+				return E_INVALIDARG;
+			}
+
+            pD3D12Options12->MSPrimitivesPipelineStatisticIncludesCulledPrimitives = m_MSPrimitivesPipelineStatisticIncludesCulledPrimitives;
+            pD3D12Options12->EnhancedBarriersSupported = m_EnhancedBarriersSupported;
+        } return S_OK;
 
         default:
             return E_INVALIDARG;
@@ -1228,6 +1242,11 @@ public: // For simplicity, allow tests to set the internal state values for this
     // 40: Options11
     bool m_Options11Available = true;
     bool m_AtomicInt64OnDescriptorHeapResourceSupported = false;
+
+    // 41: Options12
+    bool m_Options12Available = true;
+    D3D12_TRI_STATE m_MSPrimitivesPipelineStatisticIncludesCulledPrimitives = D3D12_TRI_STATE_UNKNOWN;
+    bool m_EnhancedBarriersSupported = false;
 };
 
 #endif

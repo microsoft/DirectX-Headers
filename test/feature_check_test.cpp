@@ -619,6 +619,17 @@ int main()
         VERIFY_FEATURE_CHECK(AtomicInt64OnDescriptorHeapResourceSupported, false);
     }
 
+    // 41: Options12
+    {
+        D3D12_TRI_STATE MSPrimitivesPipelineStatisticIncludesCulledPrimitives = features.MSPrimitivesPipelineStatisticIncludesCulledPrimitives();
+        BOOL EnhancedBarriersSupported = features.EnhancedBarriersSupported();
+
+        D3D12_FEATURE_DATA_D3D12_OPTIONS12 Data;
+        INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS12);
+        VERIFY_FEATURE_CHECK(MSPrimitivesPipelineStatisticIncludesCulledPrimitives, D3D12_TRI_STATE_UNKNOWN);
+        VERIFY_FEATURE_CHECK(EnhancedBarriersSupported, false);
+    }
+
     std::cout << "Test completed with no errors." << std::endl;
     return 0;
 }
