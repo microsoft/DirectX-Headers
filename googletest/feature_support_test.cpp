@@ -608,12 +608,12 @@ TEST_F(FeatureSupportTest, ExistingHeapsUnavailable)
 TEST_F(FeatureSupportTest, Options4Basic)
 {
     device->m_MSAA64KBAlignedTextureSupported = true;
-    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3; // Duplicate member
+    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2; // Duplicate member
     device->m_Native16BitShaderOpsSupported = true;
 
     INIT_FEATURES();
     EXPECT_TRUE(features.MSAA64KBAlignedTextureSupported());
-    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3);
+    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2);
     EXPECT_TRUE(features.Native16BitShaderOpsSupported());
 }
 
@@ -622,7 +622,7 @@ TEST_F(FeatureSupportTest, Options4Unavailable)
 {
     device->m_Options4Available = false;
     device->m_MSAA64KBAlignedTextureSupported = true;
-    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3; // Duplicate member
+    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2; // Duplicate member
     device->m_Native16BitShaderOpsSupported = true;
 
     INIT_FEATURES();
@@ -740,12 +740,12 @@ TEST_F(FeatureSupportTest, Options5Unavailable)
 TEST_F(FeatureSupportTest, DisplayableBasic)
 {
     device->m_DisplayableTexture = true;
-    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3;
+    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2;
 
     INIT_FEATURES();
 
     EXPECT_TRUE(features.DisplayableTexture());
-    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3);
+    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2);
 }
 
 // Unavailable Test
@@ -753,12 +753,12 @@ TEST_F(FeatureSupportTest, DisplayableUnavailable)
 {
     device->m_DisplayableAvailable = false;
     device->m_DisplayableTexture = true;
-    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3;
+    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2;
 
     INIT_FEATURES();
 
     EXPECT_FALSE(features.DisplayableTexture());
-    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3); // Still initialized by Options4
+    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2); // Still initialized by Options4
 }
 
 // 30: D3D12 Options6
@@ -1062,6 +1062,28 @@ TEST_F(FeatureSupportTest, Options11Unavailable)
     EXPECT_FALSE(features.AtomicInt64OnDescriptorHeapResourceSupported());
 }
 
+// 41: Options12
+// Basic Test
+TEST_F(FeatureSupportTest, Options12Basic)
+{
+    device->m_MSPrimitivesPipelineStatisticIncludesCulledPrimitives = D3D12_TRI_STATE_TRUE;
+    device->m_EnhancedBarriersSupported = true;
+    INIT_FEATURES();
+    EXPECT_EQ(features.MSPrimitivesPipelineStatisticIncludesCulledPrimitives(), D3D12_TRI_STATE_TRUE);
+    EXPECT_TRUE(features.EnhancedBarriersSupported());
+}
+
+// Unavailable Test
+TEST_F(FeatureSupportTest, Options12Unavailable)
+{
+	device->m_Options12Available = false;
+	device->m_MSPrimitivesPipelineStatisticIncludesCulledPrimitives = D3D12_TRI_STATE_TRUE;
+	device->m_EnhancedBarriersSupported = true;
+	INIT_FEATURES();
+	EXPECT_EQ(features.MSPrimitivesPipelineStatisticIncludesCulledPrimitives(), D3D12_TRI_STATE_UNKNOWN);
+    EXPECT_FALSE(features.EnhancedBarriersSupported());
+}
+
 // Duplicate Caps Tests
 // This test ensures that caps that are present in more than one features reports correctly
 // when either of them are unavailable on the runtime
@@ -1080,17 +1102,17 @@ TEST_F(FeatureSupportTest, DuplicateCrossNodeSharingTier)
 // Shared Resource Compatibility Tier: D3D12Options4, Displayable
 TEST_F(FeatureSupportTest, DuplicateSharedResourceCompatibilityTier)
 {
-    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3;
+    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2;
     device->m_DisplayableAvailable = false;
 
     INIT_FEATURES();
-    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3);
+    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2);
 }
 
 // Test where both features are unavailable
 TEST_F(FeatureSupportTest, DuplicateSharedResourceCompatibilityTierNegatvie)
 {
-    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3;
+    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2;
     device->m_DisplayableAvailable = false;
     device->m_Options4Available = false;
 
@@ -1171,7 +1193,7 @@ TEST_F(FeatureSupportTest, SystemTest)
     device->m_ExistingHeapCaps = true;
 
     device->m_MSAA64KBAlignedTextureSupported = true;
-    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3;
+    device->m_SharedResourceCompatibilityTier = D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2;
     device->m_Native16BitShaderOpsSupported = true;
 
     device->m_HeapSerializationTier = 
@@ -1217,6 +1239,9 @@ TEST_F(FeatureSupportTest, SystemTest)
     device->m_MeshShaderPerPrimitiveShadingRateSupported = true;
 
     device->m_AtomicInt64OnDescriptorHeapResourceSupported = true;
+
+    device->m_MSPrimitivesPipelineStatisticIncludesCulledPrimitives = D3D12_TRI_STATE_TRUE;
+    device->m_EnhancedBarriersSupported = true;
 
     INIT_FEATURES();
 
@@ -1279,7 +1304,7 @@ TEST_F(FeatureSupportTest, SystemTest)
     EXPECT_TRUE(features.ExistingHeapsSupported());
 
     EXPECT_TRUE(features.MSAA64KBAlignedTextureSupported());
-    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_3);
+    EXPECT_EQ(features.SharedResourceCompatibilityTier(), D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2);
     EXPECT_TRUE(features.Native16BitShaderOpsSupported());
 
     EXPECT_EQ(features.HeapSerializationTier(), D3D12_HEAP_SERIALIZATION_TIER_10);
@@ -1321,4 +1346,7 @@ TEST_F(FeatureSupportTest, SystemTest)
     EXPECT_TRUE(features.MeshShaderPerPrimitiveShadingRateSupported());
 
     EXPECT_TRUE(features.AtomicInt64OnDescriptorHeapResourceSupported());
+
+    EXPECT_EQ(features.MSPrimitivesPipelineStatisticIncludesCulledPrimitives(), D3D12_TRI_STATE_TRUE);
+    EXPECT_TRUE(features.EnhancedBarriersSupported());
 }

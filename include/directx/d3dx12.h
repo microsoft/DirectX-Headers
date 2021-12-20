@@ -4313,6 +4313,10 @@ public: // Function declaration
     // D3D12_OPTIONS11
     BOOL AtomicInt64OnDescriptorHeapResourceSupported() const noexcept;
 
+    // D3D12_OPTIONS12
+    D3D12_TRI_STATE MSPrimitivesPipelineStatisticIncludesCulledPrimitives() const noexcept;
+    BOOL EnhancedBarriersSupported() const noexcept;
+
 private: // Private structs and helpers declaration
     struct ProtectedResourceSessionTypesLocal : D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES
     {
@@ -4368,6 +4372,7 @@ private: // Member data
     D3D12_FEATURE_DATA_D3D12_OPTIONS9 m_dOptions9;
     D3D12_FEATURE_DATA_D3D12_OPTIONS10 m_dOptions10;
     D3D12_FEATURE_DATA_D3D12_OPTIONS11 m_dOptions11;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS12 m_dOptions12;
 };
 
 // Implementations for CD3DX12FeatureSupport functions
@@ -4566,6 +4571,12 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
     if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &m_dOptions11, sizeof(m_dOptions11))))
     {
         m_dOptions11.AtomicInt64OnDescriptorHeapResourceSupported = false;
+    }
+
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &m_dOptions12, sizeof(m_dOptions12))))
+    {
+        m_dOptions12.MSPrimitivesPipelineStatisticIncludesCulledPrimitives = D3D12_TRI_STATE_UNKNOWN;
+        m_dOptions12.EnhancedBarriersSupported = false;
     }
 
     // Initialize per-node feature support data structures
@@ -4873,6 +4884,10 @@ FEATURE_SUPPORT_GET(BOOL, m_dOptions10, MeshShaderPerPrimitiveShadingRateSupport
 
 // 40: Options11
 FEATURE_SUPPORT_GET(BOOL, m_dOptions11, AtomicInt64OnDescriptorHeapResourceSupported);
+
+// 41: Options12
+FEATURE_SUPPORT_GET(D3D12_TRI_STATE, m_dOptions12, MSPrimitivesPipelineStatisticIncludesCulledPrimitives);
+FEATURE_SUPPORT_GET(BOOL, m_dOptions12, EnhancedBarriersSupported);
 
 // Helper function to decide the highest shader model supported by the system
 // Stores the result in m_dShaderModel
