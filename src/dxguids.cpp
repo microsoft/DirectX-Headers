@@ -10,3 +10,4 @@
 
 #include <directx/dxcore.h>
 #include <directx/d3d12.h>
+#include <directx/d3d12video.h>

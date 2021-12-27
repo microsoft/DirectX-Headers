@@ -74,11 +74,7 @@ typedef const wchar_t *LPCWSTR, *PCWSTR;
 #define DECLSPEC_UUID(x)
 #define DECLSPEC_NOVTABLE
 #define DECLSPEC_SELECTANY
-#ifdef __cplusplus
 #define EXTERN_C extern "C"
-#else
-#define EXTERN_C
-#endif
 #define APIENTRY
 #define OUT
 #define IN
@@ -200,6 +196,7 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define _Field_size_opt_(x)
 #define _Field_size_bytes_(x)
 #define _Field_size_full_(x)
+#define _Field_size_full_opt_(x)
 #define _Field_size_bytes_full_(x)
 #define _Field_size_bytes_full_opt_(x)
 #define _Field_size_bytes_part_(x, y)
@@ -265,13 +262,13 @@ typedef struct _LUID
     LONG HighPart;
 } LUID;
 
-typedef struct _RECT
+struct RECT
 {
     int left;
     int top;
     int right;
     int bottom;
-} RECT;
+};
 
 typedef union _LARGE_INTEGER {
   struct {
