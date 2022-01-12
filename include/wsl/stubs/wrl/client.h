@@ -3,4 +3,4 @@
 
 // Stub to satisfy d3dx12.h include
 #pragma once
-#include "../wrladapter.h"
+#include <wsl/wrladapter.h>
