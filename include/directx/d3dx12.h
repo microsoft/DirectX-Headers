@@ -1831,7 +1831,7 @@ struct CD3DX12_RESOURCE_DESC1 : public D3D12_RESOURCE_DESC1
     {}
     explicit CD3DX12_RESOURCE_DESC1( const D3D12_RESOURCE_DESC& o ) noexcept
     {
-        Dimension = o.Dimension;;
+        Dimension = o.Dimension;
         Alignment = o.Alignment;
         Width = o.Width;
         Height = o.Height;
