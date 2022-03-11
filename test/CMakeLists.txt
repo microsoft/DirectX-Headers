@@ -8,7 +8,7 @@ if(EXISTS "/dev/dxg" AND EXISTS "/lib/wsl/lib/")
   find_library(libdxcore dxcore HINTS /lib/wsl/lib)
   list(APPEND dxlibs ${libd3d12} ${libdxcore})
 else()
-# Fallback to default: let CMake to looking for libs
+# Fallback to default: let CMake look for libs
   list(APPEND dxlibs d3d12 dxcore)
 endif()
 

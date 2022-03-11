@@ -117,7 +117,7 @@ std::string get_driver_description(ComPtr<IDXCoreAdapter> adapter) {
 }
 
 // -----------------------------------------------------------------------------------------------------------------
-// Run test on a specific device which is created from the adapter
+// Run tests on a specific device which is created from the input adapter
 // -----------------------------------------------------------------------------------------------------------------
 int run_per_adapter(IUnknown* adapter)
 {
@@ -669,20 +669,23 @@ int main()
         IID_PPV_ARGS(&adapter_list))))
         return -1;
 
-    // Generate all devices object;
+    // Test all adapters
     for (uint32_t i = 0; i < adapter_list->GetAdapterCount(); i++) {
 
         ComPtr<IDXCoreAdapter> adapter;
         if(FAILED(adapter_list->GetAdapter(i, IID_PPV_ARGS(&adapter))))
-            return -1;
+        {
+            std::cout << "Cannot get number " << i << " adapter." << std::endl;
+            continue;
+        }
 
         std::string driver_desc_str = get_driver_description(adapter);
         if(driver_desc_str.empty())
-            return -1;
+            std::cout << "Cannot get number " << i << " adapter's driver description." << std::endl;
         std::cout << "Test on device driver: " << driver_desc_str << std::endl;
 
         if(FAILED(run_per_adapter(adapter.Get())))
-            return -1;
+            std::cout << "Some tests failed with error on number " << i << " adapter." << std::endl;
     }
     return 0;
 }
