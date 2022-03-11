@@ -1,23 +1,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
+include(FetchContent)
 
-# Assume to use vcpkg to install gtest
-list(APPEND gtestlibs "")
-if("${CMAKE_TOOLCHAIN_FILE}" MATCHES "vcpkg.cmake$")
-  find_package(GTest CONFIG REQUIRED)
-  list(APPEND gtestlibs GTest::gtest_main)
-else()
-  include(FetchContent)
-
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  FetchContent_Declare(
-      googletest
-      GIT_REPOSITORY https://github.com/google/googletest.git
-      GIT_TAG main # Live at head
-  )
-  FetchContent_MakeAvailable(googletest)
-  list(APPEND gtestlibs gtest_main)
-endif()
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG main # Live at head
+)
+FetchContent_MakeAvailable(googletest)
 
 list(APPEND dxlibs "")
 if(EXISTS "/dev/dxg" AND EXISTS "/lib/wsl/lib/")
@@ -31,4 +22,4 @@ endif()
 
 project(DirectX-Headers-GoogleTest-Suite CXX)
 add_executable(Feature-Support-Test feature_support_test.cpp)
-target_link_libraries(Feature-Support-Test DirectX-Headers DirectX-Guids ${dxlibs} ${gtestlibs})
+target_link_libraries(Feature-Support-Test DirectX-Headers DirectX-Guids ${dxlibs} gtest_main)
