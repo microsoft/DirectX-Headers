@@ -4,6 +4,10 @@
 #define DIRECTX_HEADERS_MOCK_DEVICE_HPP
 #include <unordered_map>
 
+#ifndef __RPC_FAR
+#define __RPC_FAR
+#endif
+
 #include <directx/d3d12.h>
 #include <directx/dxcore.h>
 #include <directx/d3dx12.h>
@@ -502,7 +506,7 @@ public: // IUnknown
             default:
                 return E_INVALIDARG;
             }
-            pRootSig->HighestVersion = min(pRootSig->HighestVersion, m_RootSignatureHighestVersion); 
+            pRootSig->HighestVersion = std::min(pRootSig->HighestVersion, m_RootSignatureHighestVersion); 
         } return S_OK;
         
 
@@ -699,7 +703,7 @@ public: // IUnknown
                 default:
                     return E_INVALIDARG;
                 }
-                pSM->HighestShaderModel = min(pSM->HighestShaderModel,m_HighestSupportedShaderModel);
+                pSM->HighestShaderModel = std::min(pSM->HighestShaderModel,m_HighestSupportedShaderModel);
             } return S_OK;
         case D3D12_FEATURE_SHADER_CACHE:
             {
