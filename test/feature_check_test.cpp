@@ -668,6 +668,7 @@ int run_per_adapter(IUnknown* adapter)
         VERIFY_FEATURE_CHECK(UnrestrictedBufferTextureCopyPitchSupported, false);
         VERIFY_FEATURE_CHECK(UnrestrictedVertexElementAlignmentSupported, false);
         VERIFY_FEATURE_CHECK(InvertedViewportHeightFlipsYSupported, false);
+        VERIFY_FEATURE_CHECK(InvertedViewportDepthFlipsZSupported, false);
         VERIFY_FEATURE_CHECK(TextureCopyBetweenDimensionsSupported, false);
         VERIFY_FEATURE_CHECK(AlphaBlendFactorSupported, false);
     }
