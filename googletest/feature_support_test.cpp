@@ -2,6 +2,10 @@
 // Licensed under the MIT License.
 #include "gtest/gtest.h"
 
+#ifndef _WIN32
+#include <wsl/winadapter.h>
+#endif
+
 #include <directx/d3d12.h>
 #include <directx/dxcore.h>
 #include <directx/d3dx12.h>

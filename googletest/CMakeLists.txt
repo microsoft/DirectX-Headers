@@ -10,6 +10,16 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
+list(APPEND dxlibs "")
+if(EXISTS "/dev/dxg" AND EXISTS "/lib/wsl/lib/")
+  find_library(libd3d12 d3d12 HINTS /lib/wsl/lib)
+  find_library(libdxcore dxcore HINTS /lib/wsl/lib)
+  list(APPEND dxlibs ${libd3d12} ${libdxcore})
+else()
+# Fallback to default: let CMake look for libs
+  list(APPEND dxlibs d3d12 dxcore)
+endif()
+
 project(DirectX-Headers-GoogleTest-Suite CXX)
 add_executable(Feature-Support-Test feature_support_test.cpp)
-target_link_libraries(Feature-Support-Test DirectX-Headers DirectX-Guids d3d12 dxcore gtest_main)
+target_link_libraries(Feature-Support-Test DirectX-Headers DirectX-Guids ${dxlibs} gtest_main)
