@@ -936,7 +936,7 @@ typedef enum D3D12_FEATURE
     D3D12_FEATURE_D3D12_OPTIONS9                        = 37,
     D3D12_FEATURE_D3D12_OPTIONS10                       = 39,
     D3D12_FEATURE_D3D12_OPTIONS11                       = 40,
-    D3D12_FEATURE_D3D12_OPTIONS12                       = 41,
+    D3D12_FEATURE_D3D12_OPTIONS12                       = 41
 } D3D12_FEATURE;
 
 typedef enum D3D12_SHADER_MIN_PRECISION_SUPPORT
@@ -1408,7 +1408,9 @@ typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS12
 {
     [annotation("_Out_")] D3D12_TRI_STATE MSPrimitivesPipelineStatisticIncludesCulledPrimitives;
     [annotation("_Out_")] BOOL EnhancedBarriersSupported;
+    [annotation("_Out_")] BOOL RelaxedFormatCastingSupported;
 } D3D12_FEATURE_DATA_D3D12_OPTIONS12;
+
 
 
 typedef struct D3D12_RESOURCE_ALLOCATION_INFO
