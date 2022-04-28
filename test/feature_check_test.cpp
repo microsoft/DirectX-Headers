@@ -658,6 +658,18 @@ int run_per_adapter(IUnknown* adapter)
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS12);
         VERIFY_FEATURE_CHECK(MSPrimitivesPipelineStatisticIncludesCulledPrimitives, D3D12_TRI_STATE_UNKNOWN);
         VERIFY_FEATURE_CHECK(EnhancedBarriersSupported, false);
+        VERIFY_FEATURE_CHECK(RelaxedFormatCastingSupported, false);
+    }
+
+    // 41: Options13
+    {
+        D3D12_FEATURE_DATA_D3D12_OPTIONS13 Data;
+        INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS13);
+        VERIFY_FEATURE_CHECK(UnrestrictedBufferTextureCopyPitchSupported, false);
+        VERIFY_FEATURE_CHECK(UnrestrictedVertexElementAlignmentSupported, false);
+        VERIFY_FEATURE_CHECK(InvertedViewportHeightFlipsYSupported, false);
+        VERIFY_FEATURE_CHECK(TextureCopyBetweenDimensionsSupported, false);
+        VERIFY_FEATURE_CHECK(AlphaBlendFactorSupported, false);
     }
 
     std::cout << "Test completed with no errors." << std::endl;
