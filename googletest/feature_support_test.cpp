@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 #include "gtest/gtest.h"
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <unknwn.h>
+#else
 #include <wsl/winadapter.h>
 #endif
 

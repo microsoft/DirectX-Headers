@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <unknwn.h>
+#else
 #include <wsl/winadapter.h>
 #endif
 

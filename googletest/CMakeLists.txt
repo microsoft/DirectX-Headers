@@ -13,13 +13,24 @@ FetchContent_MakeAvailable(googletest)
 list(APPEND dxlibs "")
 if(EXISTS "/dev/dxg" AND EXISTS "/lib/wsl/lib/")
   find_library(libd3d12 d3d12 HINTS /lib/wsl/lib)
-  find_library(libdxcore dxcore HINTS /lib/wsl/lib)
-  list(APPEND dxlibs ${libd3d12} ${libdxcore})
+  list(APPEND dxlibs ${libd3d12})
 else()
 # Fallback to default: let CMake look for libs
-  list(APPEND dxlibs d3d12 dxcore)
+  list(APPEND dxlibs d3d12)
 endif()
 
-project(DirectX-Headers-GoogleTest-Suite CXX)
+project(DirectX-Headers-GoogleTest-Suite
+  DESCRIPTION "DirectX-Header tests using GooleTest"
+  HOMEPAGE_URL "https://github.com/microsoft/DirectX-Headers/"
+  LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 add_executable(Feature-Support-Test feature_support_test.cpp)
 target_link_libraries(Feature-Support-Test DirectX-Headers DirectX-Guids ${dxlibs} gtest_main)
+
+if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
+    target_compile_options(Feature-Support-Test PRIVATE -Wno-unused-variable)
+endif()

@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <unknwn.h>
+#else
 #include <wsl/winadapter.h>
 #endif
 
@@ -399,7 +401,7 @@ int run_per_adapter(IUnknown* adapter)
 
         D3D12_FEATURE_DATA_SHADER_CACHE Data;
         INITIALIZE_FEATURE_SUPPORT_DATA(SHADER_CACHE);
-        VERIFY_RENAMED_FEATURE_CHECK(ShaderCacheSupportFlags, SupportFlags, D3D12_SHADER_CACHE_FLAG_NONE);
+        VERIFY_RENAMED_FEATURE_CHECK(ShaderCacheSupportFlags, SupportFlags, D3D12_SHADER_CACHE_SUPPORT_NONE);
     }
 
     // 20: Command Queue Prioirity
