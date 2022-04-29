@@ -4067,7 +4067,7 @@ public:
         UINT FirstArraySlice,
         UINT NumArraySlices,
         UINT FirstPlane = 0,
-        UINT NumPlanes = UINT_MAX) noexcept :
+        UINT NumPlanes = 1) noexcept :
         D3D12_BARRIER_SUBRESOURCE_RANGE
         {
             FirstMipLevel,
@@ -4330,6 +4330,15 @@ public: // Function declaration
     // D3D12_OPTIONS12
     D3D12_TRI_STATE MSPrimitivesPipelineStatisticIncludesCulledPrimitives() const noexcept;
     BOOL EnhancedBarriersSupported() const noexcept;
+    BOOL RelaxedFormatCastingSupported() const noexcept;
+
+    // D3D12_OPTIONS13
+    BOOL UnrestrictedBufferTextureCopyPitchSupported() const noexcept;
+    BOOL UnrestrictedVertexElementAlignmentSupported() const noexcept;
+    BOOL InvertedViewportHeightFlipsYSupported() const noexcept;
+    BOOL InvertedViewportDepthFlipsZSupported() const noexcept;
+    BOOL TextureCopyBetweenDimensionsSupported() const noexcept;
+    BOOL AlphaBlendFactorSupported() const noexcept;
 
 private: // Private structs and helpers declaration
     struct ProtectedResourceSessionTypesLocal : D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES
@@ -4387,6 +4396,7 @@ private: // Member data
     D3D12_FEATURE_DATA_D3D12_OPTIONS10 m_dOptions10;
     D3D12_FEATURE_DATA_D3D12_OPTIONS11 m_dOptions11;
     D3D12_FEATURE_DATA_D3D12_OPTIONS12 m_dOptions12;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS13 m_dOptions13;
 };
 
 // Implementations for CD3DX12FeatureSupport functions
@@ -4447,6 +4457,8 @@ inline CD3DX12FeatureSupport::CD3DX12FeatureSupport() noexcept
 , m_dOptions9{}
 , m_dOptions10{}
 , m_dOptions11{}
+, m_dOptions12{}
+, m_dOptions13{}
 {}
 
 inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
@@ -4589,8 +4601,19 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
 
     if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &m_dOptions12, sizeof(m_dOptions12))))
     {
-        m_dOptions12.MSPrimitivesPipelineStatisticIncludesCulledPrimitives = D3D12_TRI_STATE_UNKNOWN;
+        m_dOptions12.MSPrimitivesPipelineStatisticIncludesCulledPrimitives = D3D12_TRI_STATE::D3D12_TRI_STATE_UNKNOWN;
         m_dOptions12.EnhancedBarriersSupported = false;
+        m_dOptions12.RelaxedFormatCastingSupported = false;
+    }
+
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &m_dOptions13, sizeof(m_dOptions13))))
+    {
+        m_dOptions13.UnrestrictedBufferTextureCopyPitchSupported = false;
+        m_dOptions13.UnrestrictedVertexElementAlignmentSupported = false;
+        m_dOptions13.InvertedViewportHeightFlipsYSupported = false;
+        m_dOptions13.InvertedViewportDepthFlipsZSupported = false;
+        m_dOptions13.TextureCopyBetweenDimensionsSupported = false;
+        m_dOptions13.AlphaBlendFactorSupported = false;
     }
 
     // Initialize per-node feature support data structures
@@ -4902,6 +4925,15 @@ FEATURE_SUPPORT_GET(BOOL, m_dOptions11, AtomicInt64OnDescriptorHeapResourceSuppo
 // 41: Options12
 FEATURE_SUPPORT_GET(D3D12_TRI_STATE, m_dOptions12, MSPrimitivesPipelineStatisticIncludesCulledPrimitives);
 FEATURE_SUPPORT_GET(BOOL, m_dOptions12, EnhancedBarriersSupported);
+FEATURE_SUPPORT_GET(BOOL, m_dOptions12, RelaxedFormatCastingSupported);
+
+// 42: Options13
+FEATURE_SUPPORT_GET(BOOL, m_dOptions13, UnrestrictedBufferTextureCopyPitchSupported);
+FEATURE_SUPPORT_GET(BOOL, m_dOptions13, UnrestrictedVertexElementAlignmentSupported);
+FEATURE_SUPPORT_GET(BOOL, m_dOptions13, InvertedViewportHeightFlipsYSupported);
+FEATURE_SUPPORT_GET(BOOL, m_dOptions13, InvertedViewportDepthFlipsZSupported);
+FEATURE_SUPPORT_GET(BOOL, m_dOptions13, TextureCopyBetweenDimensionsSupported);
+FEATURE_SUPPORT_GET(BOOL, m_dOptions13, AlphaBlendFactorSupported);
 
 // Helper function to decide the highest shader model supported by the system
 // Stores the result in m_dShaderModel

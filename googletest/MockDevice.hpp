@@ -506,7 +506,7 @@ public: // IUnknown
             default:
                 return E_INVALIDARG;
             }
-            pRootSig->HighestVersion = std::min(pRootSig->HighestVersion, m_RootSignatureHighestVersion); 
+            pRootSig->HighestVersion = static_cast<D3D_ROOT_SIGNATURE_VERSION>(std::min<int>(pRootSig->HighestVersion, m_RootSignatureHighestVersion));
         } return S_OK;
         
 
@@ -703,7 +703,7 @@ public: // IUnknown
                 default:
                     return E_INVALIDARG;
                 }
-                pSM->HighestShaderModel = std::min(pSM->HighestShaderModel,m_HighestSupportedShaderModel);
+                pSM->HighestShaderModel = static_cast<D3D_SHADER_MODEL>(std::min<int>(pSM->HighestShaderModel,m_HighestSupportedShaderModel));
             } return S_OK;
         case D3D12_FEATURE_SHADER_CACHE:
             {
