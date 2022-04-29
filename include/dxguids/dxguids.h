@@ -30,7 +30,9 @@ constexpr inline bool ConstexprIsEqualGUID(REFGUID a, REFGUID b)
 #ifdef _WIN32
 // winadapter.h isn't included when building for Windows, so the base function template needs to be declared.
 template <typename T> GUID uuidof() = delete;
+#ifdef __MINGW32__
 #define WINADAPTER_IID(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+__CRT_UUID_DECL(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
 template <> constexpr GUID uuidof<InterfaceName>() \
 { \
     return { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }; \
@@ -41,8 +43,16 @@ static_assert(ConstexprIsEqualGUID(uuidof<InterfaceName>(), __uuidof(InterfaceNa
 template <> constexpr GUID uuidof<InterfaceName>() \
 { \
     return { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }; \
+} \
+static_assert(ConstexprIsEqualGUID(uuidof<InterfaceName>(), __uuidof(InterfaceName)), "GUID definition mismatch: "#InterfaceName);
+#endif /* __MINGW32__ */
+#else
+#define WINADAPTER_IID(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+template <> constexpr GUID uuidof<InterfaceName>() \
+{ \
+    return { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }; \
 }
-#endif
+#endif /* _WIN32 */
 
 // Direct3D
 WINADAPTER_IID(ID3D12Object, 0xc4fec28f, 0x7966, 0x4e95, 0x9f, 0x94, 0xf4, 0x31, 0xcb, 0x56, 0xc3, 0xb8);
