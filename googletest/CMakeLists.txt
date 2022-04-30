@@ -11,8 +11,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 list(APPEND dxlibs "")
-if(EXISTS "/dev/dxg" AND EXISTS "/lib/wsl/lib/")
-  find_library(libd3d12 d3d12 HINTS /lib/wsl/lib)
+if(EXISTS "/usr/lib/wsl/lib/")
+  find_library(libd3d12 d3d12 HINTS /usr/lib/wsl/lib)
   list(APPEND dxlibs ${libd3d12})
 else()
 # Fallback to default: let CMake look for libs
