@@ -466,8 +466,8 @@ typedef interface ID3D12GraphicsCommandList7 ID3D12GraphicsCommandList7;
 
 
 /* header files for imported files */
-#include "OAIdl.h"
-#include "OCIdl.h"
+#include "oaidl.h"
+#include "ocidl.h"
 #include "dxgicommon.h"
 #include "dxgiformat.h"
 #include "d3dcommon.h"
