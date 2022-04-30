@@ -125,9 +125,9 @@
     { "name": "arm64-Debug-WSL"  , "description": "WSL AArch64 (Debug) for Windows 11", "inherits": [ "base", "ARM64", "Debug" ] },
     { "name": "arm64-Release-WSL", "description": "WSL AArch64 (Release) for Windows 11", "inherits": [ "base", "ARM64", "Release" ] },
 
-    { "name": "x64-Debug-WSL-Win10"    , "description": "WSL x64 (Debug) for Windows 10", "inherits": [ "base", "x64", "Debug", "NoTests" ] },
-    { "name": "x64-Release-WSL-Win10"  , "description": "WSL x64 (Release) for Windows 10", "inherits": [ "base", "x64", "Release", "NoTests" ] },
-    { "name": "arm64-Debug-WSL-Win10"  , "description": "WSL AArch64 (Debug) for Windows 10", "inherits": [ "base", "ARM64", "Debug", "NoTests" ] },
-    { "name": "arm64-Release-WSL-Win10", "description": "WSL AArch64 (Release) for Windows 10", "inherits": [ "base", "ARM64", "Release", "NoTests" ] }
+    { "name": "x64-Debug-Linux"    , "description": "Linux x64 (Debug)", "inherits": [ "base", "x64", "Debug", "NoTests" ] },
+    { "name": "x64-Release-Linux"  , "description": "Linux x64 (Release)", "inherits": [ "base", "x64", "Release", "NoTests" ] },
+    { "name": "arm64-Debug-Linux"  , "description": "Linux AArch64 (Debug)", "inherits": [ "base", "ARM64", "Debug", "NoTests" ] },
+    { "name": "arm64-Release-Linux", "description": "Linux AArch64 (Release)", "inherits": [ "base", "ARM64", "Release", "NoTests" ] }
   ]
 }
