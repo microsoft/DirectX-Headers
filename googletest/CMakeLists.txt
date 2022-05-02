@@ -34,3 +34,11 @@ target_link_libraries(Feature-Support-Test DirectX-Headers DirectX-Guids ${dxlib
 if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
     target_compile_options(Feature-Support-Test PRIVATE -Wno-unused-variable)
 endif()
+
+if(WIN32)
+    target_compile_definitions(Feature-Support-Test PRIVATE _UNICODE UNICODE _WIN32_WINNT=0x0A00)
+
+    if(WINDOWS_STORE)
+      target_compile_definitions(Feature-Support-Test PRIVATE WINAPI_FAMILY=WINAPI_FAMILY_APP)
+    endif()
+endif()
