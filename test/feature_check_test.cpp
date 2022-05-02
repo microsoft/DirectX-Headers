@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#ifdef _WIN32
-#include <unknwn.h>
-#else
+#ifndef _WIN32
 #include <wsl/winadapter.h>
+#elif defined(__MINGW32__)
+#include <unknwn.h>
 #endif
 
 #include <iostream>
