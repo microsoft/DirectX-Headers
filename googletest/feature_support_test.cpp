@@ -4,6 +4,8 @@
 
 #ifndef _WIN32
 #include <wsl/winadapter.h>
+#elif defined(__MINGW32__)
+#include <unknwn.h>
 #endif
 
 #include <directx/d3d12.h>

@@ -3,6 +3,8 @@
 
 #ifndef _WIN32
 #include <wsl/winadapter.h>
+#elif defined(__MINGW32__)
+#include <unknwn.h>
 #endif
 
 #include <iostream>
@@ -399,7 +401,7 @@ int run_per_adapter(IUnknown* adapter)
 
         D3D12_FEATURE_DATA_SHADER_CACHE Data;
         INITIALIZE_FEATURE_SUPPORT_DATA(SHADER_CACHE);
-        VERIFY_RENAMED_FEATURE_CHECK(ShaderCacheSupportFlags, SupportFlags, D3D12_SHADER_CACHE_FLAG_NONE);
+        VERIFY_RENAMED_FEATURE_CHECK(ShaderCacheSupportFlags, SupportFlags, D3D12_SHADER_CACHE_SUPPORT_NONE);
     }
 
     // 20: Command Queue Prioirity

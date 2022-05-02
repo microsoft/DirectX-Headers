@@ -30,6 +30,8 @@ public: // Constructors and custom functions
 
     }
 
+    virtual ~MockDevice() = default;
+
     void SetNodeCount(UINT NewCount) 
     {
         m_NodeCount = NewCount;
