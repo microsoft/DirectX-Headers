@@ -268,10 +268,10 @@ typedef struct _LUID
 
 typedef struct _RECT
 {
-     int left;
-     int top;
-     int right;
-     int bottom;
+    int left;
+    int top;
+    int right;
+    int bottom;
 } RECT;
 
 typedef union _LARGE_INTEGER {
