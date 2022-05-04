@@ -74,7 +74,11 @@ typedef const wchar_t *LPCWSTR, *PCWSTR;
 #define DECLSPEC_UUID(x)
 #define DECLSPEC_NOVTABLE
 #define DECLSPEC_SELECTANY
+#ifdef __cplusplus
 #define EXTERN_C extern "C"
+#else
+#define EXTERN_C
+#endif
 #define APIENTRY
 #define OUT
 #define IN
@@ -262,13 +266,13 @@ typedef struct _LUID
     LONG HighPart;
 } LUID;
 
-struct RECT
+typedef struct _RECT
 {
-    int left;
-    int top;
-    int right;
-    int bottom;
-};
+     int left;
+     int top;
+     int right;
+     int bottom;
+} RECT;
 
 typedef union _LARGE_INTEGER {
   struct {
