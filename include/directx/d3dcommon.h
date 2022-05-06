@@ -68,8 +68,8 @@ typedef interface ID3DDestructionNotifier ID3DDestructionNotifier;
 
 
 /* header files for imported files */
-#include "OAIdl.h"
-#include "OCIdl.h"
+#include "oaidl.h"
+#include "ocidl.h"
 
 #ifdef __cplusplus
 extern "C"{

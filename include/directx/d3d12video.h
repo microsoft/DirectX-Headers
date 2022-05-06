@@ -242,8 +242,8 @@ typedef interface ID3D12VideoEncodeCommandList3 ID3D12VideoEncodeCommandList3;
 
 
 /* header files for imported files */
-#include "OAIdl.h"
-#include "OCIdl.h"
+#include "oaidl.h"
+#include "ocidl.h"
 #include "dxgicommon.h"
 #include "d3d12.h"
 
