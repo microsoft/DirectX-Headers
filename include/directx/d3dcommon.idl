@@ -389,12 +389,12 @@ interface ID3DDestructionNotifier
     : IUnknown
 {
     HRESULT RegisterDestructionCallback(
-        [annotation("_In_")] PFN_DESTRUCTION_CALLBACK callbackFn,
-        [annotation("_In_")] void* pData,
-        [annotation("_Out_")] UINT* pCallbackID
+        PFN_DESTRUCTION_CALLBACK callbackFn,
+        void* pData,
+        UINT* pCallbackID
         );
     HRESULT UnregisterDestructionCallback(
-        [annotation("_In_")] UINT callbackID
+        UINT callbackID
         );
 };
 

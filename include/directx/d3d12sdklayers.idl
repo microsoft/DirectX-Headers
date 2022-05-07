@@ -149,8 +149,8 @@ typedef struct D3D12_DEBUG_DEVICE_GPU_SLOWDOWN_PERFORMANCE_FACTOR
 interface ID3D12DebugDevice1
     : IUnknown
 {
-    HRESULT SetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_TYPE Type, [annotation("_In_reads_bytes_(DataSize)")] const void *pData, UINT DataSize);
-    HRESULT GetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_TYPE Type, [annotation("_Out_writes_bytes_(DataSize)")] void *pData, UINT DataSize);
+    HRESULT SetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_TYPE Type, const void *pData, UINT DataSize);
+    HRESULT GetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_TYPE Type, void *pData, UINT DataSize);
     HRESULT ReportLiveDeviceObjects( D3D12_RLDO_FLAGS Flags );
 }
 
@@ -167,8 +167,8 @@ interface ID3D12DebugDevice
 interface ID3D12DebugDevice2
     : ID3D12DebugDevice
 {
-    HRESULT SetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_TYPE Type, [annotation("_In_reads_bytes_(DataSize)")] const void *pData, UINT DataSize);
-    HRESULT GetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_TYPE Type, [annotation("_Out_writes_bytes_(DataSize)")] void *pData, UINT DataSize);
+    HRESULT SetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_TYPE Type, const void *pData, UINT DataSize);
+    HRESULT GetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_TYPE Type, void *pData, UINT DataSize);
 }
 
 cpp_quote("DEFINE_GUID(DXGI_DEBUG_D3D12, 0xcf59a98c, 0xa950, 0x4326, 0x91, 0xef, 0x9b, 0xba, 0xa1, 0x7b, 0xfd, 0x95);")
@@ -178,8 +178,8 @@ cpp_quote("DEFINE_GUID(DXGI_DEBUG_D3D12, 0xcf59a98c, 0xa950, 0x4326, 0x91, 0xef,
 interface ID3D12DebugCommandQueue
     : IUnknown
 {
-    BOOL AssertResourceState( [annotation("_In_")] ID3D12Resource* pResource, UINT Subresource, UINT State );
-//  TODO: Stale  BOOL AssertResourceStateThroughView( [annotation("_In_")] ID3D12View* pView, UINT State );
+    BOOL AssertResourceState( ID3D12Resource* pResource, UINT Subresource, UINT State );
+//  TODO: Stale  BOOL AssertResourceStateThroughView( ID3D12View* pView, UINT State );
 };
 
 typedef enum D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE
@@ -196,16 +196,16 @@ typedef struct D3D12_DEBUG_COMMAND_LIST_GPU_BASED_VALIDATION_SETTINGS
 interface ID3D12DebugCommandList1
     : IUnknown
 {
-    BOOL AssertResourceState( [annotation("_In_")] ID3D12Resource* pResource, UINT Subresource, UINT State );
-    HRESULT SetDebugParameter(D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE Type, [annotation("_In_reads_bytes_(DataSize)")] const void *pData, UINT DataSize);
-    HRESULT GetDebugParameter(D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE Type, [annotation("_Out_writes_bytes_(DataSize)")] void *pData, UINT DataSize);
+    BOOL AssertResourceState( ID3D12Resource* pResource, UINT Subresource, UINT State );
+    HRESULT SetDebugParameter(D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE Type, const void *pData, UINT DataSize);
+    HRESULT GetDebugParameter(D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE Type, void *pData, UINT DataSize);
 };
 
 [uuid(09e0bf36-54ac-484f-8847-4baeeab6053f), object, local, pointer_default(unique)]
 interface ID3D12DebugCommandList
     : IUnknown
 {
-    BOOL AssertResourceState([annotation("_In_")] ID3D12Resource* pResource, UINT Subresource, UINT State);
+    BOOL AssertResourceState(ID3D12Resource* pResource, UINT Subresource, UINT State);
     HRESULT SetFeatureMask(D3D12_DEBUG_FEATURE Mask);
     D3D12_DEBUG_FEATURE GetFeatureMask();
 };
@@ -214,18 +214,18 @@ interface ID3D12DebugCommandList
 interface ID3D12DebugCommandList2
     : ID3D12DebugCommandList
 {
-    HRESULT SetDebugParameter(D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE Type, [annotation("_In_reads_bytes_(DataSize)")] const void *pData, UINT DataSize);
-    HRESULT GetDebugParameter(D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE Type, [annotation("_Out_writes_bytes_(DataSize)")] void *pData, UINT DataSize);
+    HRESULT SetDebugParameter(D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE Type, const void *pData, UINT DataSize);
+    HRESULT GetDebugParameter(D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE Type, void *pData, UINT DataSize);
 };
 
 [uuid(0adf7d52-929c-4e61-addb-ffed30de66ef), object, local, pointer_default(unique)]
 interface ID3D12SharingContract
     : IUnknown
 {
-    void Present([annotation("_In_")] ID3D12Resource* pResource, UINT Subresource, [annotation("_In_")] HWND window);
-    void SharedFenceSignal([annotation("_In_")] ID3D12Fence* pFence, UINT64 FenceValue);
-    void BeginCapturableWork([annotation("_In_")] REFGUID guid);
-    void EndCapturableWork([annotation("_In_")] REFGUID guid);
+    void Present(ID3D12Resource* pResource, UINT Subresource, HWND window);
+    void SharedFenceSignal(ID3D12Fence* pFence, UINT64 FenceValue);
+    void BeginCapturableWork(REFGUID guid);
+    void EndCapturableWork(REFGUID guid);
 };
 
 
@@ -1385,18 +1385,18 @@ typedef struct D3D12_MESSAGE
     D3D12_MESSAGE_CATEGORY  Category;
     D3D12_MESSAGE_SEVERITY  Severity;
     D3D12_MESSAGE_ID        ID;
-    [annotation("_Field_size_(DescriptionByteLength)")] const char*             pDescription;
+    const char*             pDescription;
     SIZE_T                  DescriptionByteLength;
 } D3D12_MESSAGE;
 
 typedef struct D3D12_INFO_QUEUE_FILTER_DESC
 {
     UINT                    NumCategories;
-    [annotation("_Field_size_(NumCategories)")] D3D12_MESSAGE_CATEGORY* pCategoryList;
+    D3D12_MESSAGE_CATEGORY* pCategoryList;
     UINT                    NumSeverities;
-    [annotation("_Field_size_(NumSeverities)")] D3D12_MESSAGE_SEVERITY* pSeverityList;
+    D3D12_MESSAGE_SEVERITY* pSeverityList;
     UINT                    NumIDs;
-    [annotation("_Field_size_(NumIDs)")] D3D12_MESSAGE_ID*       pIDList;
+    D3D12_MESSAGE_ID*       pIDList;
 } D3D12_INFO_QUEUE_FILTER_DESC;
 
 // To use, memset to 0, then fill in what you need.
@@ -1430,7 +1430,7 @@ interface ID3D12InfoQueue
     // The default message count size is
     // D3D12_INFO_QUEUE_DEFAULT_MESSAGE_COUNT_LIMIT
     // Returns S_OK or E_INVALIDARG.
-    HRESULT SetMessageCountLimit([annotation("_In_")]  UINT64 MessageCountLimit);
+    HRESULT SetMessageCountLimit( UINT64 MessageCountLimit);
 
     // ClearStoredMessages
     void    ClearStoredMessages();
@@ -1465,9 +1465,9 @@ interface ID3D12InfoQueue
     //
     // Returns: S_OK, S_FALSE, E_INVALIDARG or E_OUTOFMEMORY.
     HRESULT GetMessage(
-        [annotation("_In_")]    UINT64  MessageIndex,
-        [annotation("_Out_writes_bytes_opt_(*pMessageByteLength)")] D3D12_MESSAGE* pMessage,
-        [annotation("_Inout_")] SIZE_T*  pMessageByteLength);
+           UINT64  MessageIndex,
+        D3D12_MESSAGE* pMessage,
+        SIZE_T*  pMessageByteLength);
 
     // GetNumMessagesAllowedByStorageFilter()
     // Returns how many messages sent to the queue passed
@@ -1508,7 +1508,7 @@ interface ID3D12InfoQueue
     // Adds to the existing entries at top of stack
     // Returns: S_OK, E_INVALIDARG or E_OUTOFMEMORY.
     HRESULT AddStorageFilterEntries(
-        [annotation("_In_")]   D3D12_INFO_QUEUE_FILTER* pFilter);
+          D3D12_INFO_QUEUE_FILTER* pFilter);
 
     // GetStorageFilter()
     // Gets all entries at top of stack.
@@ -1520,8 +1520,8 @@ interface ID3D12InfoQueue
     // data.  So the application needs to only allocate/free the memory for pFilter.
     // Returns S_OK, S_FALSE, E_INVALIDARG or E_OUTOFMEMORY
     HRESULT GetStorageFilter(
-        [annotation("_Out_writes_bytes_opt_(*pFilterByteLength)")] D3D12_INFO_QUEUE_FILTER* pFilter,
-        [annotation("_Inout_")] SIZE_T* pFilterByteLength);
+        D3D12_INFO_QUEUE_FILTER* pFilter,
+        SIZE_T* pFilterByteLength);
 
     // ClearStorageFilter()
     // Clears filter at the top of the stack (if there is one)
@@ -1547,7 +1547,7 @@ interface ID3D12InfoQueue
     // by AddStorageFilterEntries()
     // Returns S_OK, E_INVALIDARG or E_OUTOFMEMORY.
     HRESULT PushStorageFilter(
-        [annotation("_In_")] D3D12_INFO_QUEUE_FILTER* pFilter);
+        D3D12_INFO_QUEUE_FILTER* pFilter);
 
     // PopStorageFilter()
     // Pop the current storage filter off the stack (if there is one)
@@ -1563,7 +1563,7 @@ interface ID3D12InfoQueue
     // Adds to the existing entries at top of stack
     // Returns: S_OK, E_INVALIDARG or E_OUTOFMEMORY.
     HRESULT AddRetrievalFilterEntries(
-        [annotation("_In_")]   D3D12_INFO_QUEUE_FILTER* pFilter);
+          D3D12_INFO_QUEUE_FILTER* pFilter);
 
     // GetRetrievalFilter()
     // Gets all entries at top of stack.
@@ -1575,8 +1575,8 @@ interface ID3D12InfoQueue
     // data.  So the application needs to only allocate/free the memory for pFilter.
     // Returns S_OK, S_FALSE, E_INVALIDARG or E_OUTOFMEMORY
     HRESULT GetRetrievalFilter(
-        [annotation("_Out_writes_bytes_opt_(*pFilterByteLength)")] D3D12_INFO_QUEUE_FILTER* pFilter,
-        [annotation("_Inout_")] SIZE_T* pFilterByteLength);
+        D3D12_INFO_QUEUE_FILTER* pFilter,
+        SIZE_T* pFilterByteLength);
 
     // ClearRetrievalFilter()
     // Clears filter at the top of the stack (if there is one)
@@ -1602,7 +1602,7 @@ interface ID3D12InfoQueue
     // by AddRetrievalFilterEntries()
     // Returns S_OK, E_INVALIDARG or E_OUTOFMEMORY.
     HRESULT PushRetrievalFilter(
-        [annotation("_In_")] D3D12_INFO_QUEUE_FILTER* pFilter);
+        D3D12_INFO_QUEUE_FILTER* pFilter);
 
     // PopRetrievalFilter()
     // Pop the current storage filter off the stack (if there is one)
@@ -1622,10 +1622,10 @@ interface ID3D12InfoQueue
     //
     // Returns S_OK, E_INVALIDARG or E_OUTOFMEMORY
     HRESULT AddMessage(
-        [annotation("_In_")]    D3D12_MESSAGE_CATEGORY Category,
-        [annotation("_In_")]    D3D12_MESSAGE_SEVERITY Severity,
-        [annotation("_In_")]    D3D12_MESSAGE_ID       ID,
-        [annotation("_In_")]    LPCSTR                pDescription);
+           D3D12_MESSAGE_CATEGORY Category,
+           D3D12_MESSAGE_SEVERITY Severity,
+           D3D12_MESSAGE_ID       ID,
+           LPCSTR                pDescription);
 
     // AddApplicationMessage()
     // This is a convenience for applications that want
@@ -1640,32 +1640,32 @@ interface ID3D12InfoQueue
     //
     // Returns S_OK, E_INVALIDARG or E_OUTOFMEMORY
     HRESULT AddApplicationMessage(
-        [annotation("_In_")] D3D12_MESSAGE_SEVERITY Severity,
-        [annotation("_In_")] LPCSTR                pDescription);
+        D3D12_MESSAGE_SEVERITY Severity,
+        LPCSTR                pDescription);
 
     //=========================================================================
     //  Methods for breaking on errors that pass the storage filter.
     HRESULT SetBreakOnCategory(
-        [annotation("_In_")]    D3D12_MESSAGE_CATEGORY Category,
-        [annotation("_In_")]    BOOL bEnable);
+           D3D12_MESSAGE_CATEGORY Category,
+           BOOL bEnable);
     HRESULT SetBreakOnSeverity(
-        [annotation("_In_")]    D3D12_MESSAGE_SEVERITY Severity,
-        [annotation("_In_")]    BOOL bEnable);
+           D3D12_MESSAGE_SEVERITY Severity,
+           BOOL bEnable);
     HRESULT SetBreakOnID(
-        [annotation("_In_")]    D3D12_MESSAGE_ID ID,
-        [annotation("_In_")]    BOOL bEnable);
+           D3D12_MESSAGE_ID ID,
+           BOOL bEnable);
 
     BOOL GetBreakOnCategory(
-        [annotation("_In_")]    D3D12_MESSAGE_CATEGORY Category);
+           D3D12_MESSAGE_CATEGORY Category);
     BOOL GetBreakOnSeverity(
-        [annotation("_In_")]    D3D12_MESSAGE_SEVERITY Severity);
+           D3D12_MESSAGE_SEVERITY Severity);
     BOOL GetBreakOnID(
-        [annotation("_In_")]    D3D12_MESSAGE_ID ID);
+           D3D12_MESSAGE_ID ID);
 
     //=========================================================================
     //  Methods for globally muting debug spte from the InfoQueue
     void SetMuteDebugOutput(
-        [annotation("_In_")]    BOOL bMute);
+           BOOL bMute);
     BOOL GetMuteDebugOutput();
 };
 
@@ -1689,13 +1689,13 @@ interface ID3D12InfoQueue1
     : ID3D12InfoQueue
 {
     HRESULT RegisterMessageCallback(
-        [annotation("_In_")]    D3D12MessageFunc CallbackFunc, 
-        [annotation("_In_")]    D3D12_MESSAGE_CALLBACK_FLAGS CallbackFilterFlags,
-        [annotation("_In_")]    void* pContext, 
-        [annotation("_Inout_")] DWORD *pCallbackCookie);
+           D3D12MessageFunc CallbackFunc, 
+           D3D12_MESSAGE_CALLBACK_FLAGS CallbackFilterFlags,
+           void* pContext, 
+        DWORD *pCallbackCookie);
 
     HRESULT UnregisterMessageCallback(
-        [annotation("_In_")]    DWORD CallbackCookie);
+           DWORD CallbackCookie);
 };
 
 
