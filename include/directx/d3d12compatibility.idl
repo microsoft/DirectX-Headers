@@ -37,28 +37,28 @@ interface ID3D12CompatibilityDevice
     : IUnknown
 {
     HRESULT CreateSharedResource(
-        [annotation("_In_")] const D3D12_HEAP_PROPERTIES* pHeapProperties,
+        const D3D12_HEAP_PROPERTIES* pHeapProperties,
         D3D12_HEAP_FLAGS HeapFlags,
-        [annotation("_In_")] const D3D12_RESOURCE_DESC* pDesc,
+        const D3D12_RESOURCE_DESC* pDesc,
         D3D12_RESOURCE_STATES InitialResourceState,
-        [annotation("_In_opt_")] const D3D12_CLEAR_VALUE* pOptimizedClearValue,
-        [annotation("_In_opt_")] const D3D11_RESOURCE_FLAGS* pFlags11,
+        const D3D12_CLEAR_VALUE* pOptimizedClearValue,
+        const D3D11_RESOURCE_FLAGS* pFlags11,
         D3D12_COMPATIBILITY_SHARED_FLAGS CompatibilityFlags,
-        [annotation("_In_opt_")] ID3D12LifetimeTracker* pLifetimeTracker,
-        [annotation("_In_opt_")] ID3D12SwapChainAssistant* pOwningSwapchain,
+        ID3D12LifetimeTracker* pLifetimeTracker,
+        ID3D12SwapChainAssistant* pOwningSwapchain,
         REFIID riid,
         [out, iid_is(riid), annotation("_COM_Outptr_opt_")] void** ppResource);
 
     HRESULT CreateSharedHeap(
-        [annotation("_In_")] const D3D12_HEAP_DESC* pHeapDesc,
+        const D3D12_HEAP_DESC* pHeapDesc,
         D3D12_COMPATIBILITY_SHARED_FLAGS CompatibilityFlags,
         REFIID riid,
         [out, iid_is(riid), annotation("_COM_Outptr_opt_")] void** ppHeap);
 
     HRESULT ReflectSharedProperties(
-        [annotation("_In_")] ID3D12Object* pHeapOrResource,
+        ID3D12Object* pHeapOrResource,
         D3D12_REFLECT_SHARED_PROPERTY ReflectType,
-        [annotation("_Out_writes_bytes_(DataSize)")] void* pData,
+        void* pData,
         UINT DataSize);
 }
 

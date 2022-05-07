@@ -236,28 +236,28 @@ interface ID3D12VideoDevice
 {
     HRESULT CheckFeatureSupport(
         D3D12_FEATURE_VIDEO FeatureVideo,
-        [annotation("_Inout_updates_bytes_(FeatureSupportDataSize)")] void* pFeatureSupportData,
+        void* pFeatureSupportData,
         UINT FeatureSupportDataSize
         );
 
     HRESULT CreateVideoDecoder(
-        [annotation("_In_")] const D3D12_VIDEO_DECODER_DESC* pDesc,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoDecoder, 
+        const D3D12_VIDEO_DECODER_DESC* pDesc,
+        REFIID riid, // Expected: IID_ID3D12VideoDecoder, 
         [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppVideoDecoder
         );
 
     HRESULT CreateVideoDecoderHeap(
         [annotation("_In_")]const D3D12_VIDEO_DECODER_HEAP_DESC* pVideoDecoderHeapDesc,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoDecoderHeap, 
+        REFIID riid, // Expected: IID_ID3D12VideoDecoderHeap, 
         [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppVideoDecoderHeap
         );
 
     HRESULT CreateVideoProcessor(
         UINT NodeMask,
-        [annotation("_In_")] const D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC* pOutputStreamDesc,
+        const D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC* pOutputStreamDesc,
         UINT NumInputStreamDescs,
         [annotation("_In_reads_(NumInputStreamDescs)")]const D3D12_VIDEO_PROCESS_INPUT_STREAM_DESC *pInputStreamDescs,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoProcessor, 
+        REFIID riid, // Expected: IID_ID3D12VideoProcessor, 
         [out, iid_is(riid), annotation("_COM_Outptr_")] void **ppVideoProcessor
         );
 }
@@ -337,7 +337,7 @@ typedef struct D3D12_FEATURE_DATA_VIDEO_DECODE_PROFILES
 {
     UINT NodeIndex;                                                   // input
     UINT ProfileCount;                                                // input
-    [annotation("_Field_size_full_(ProfileCount)")] GUID *pProfiles;  // output. The list of supported profiles. The caller allocates storage for the profile list before calling CheckFeatureSupport.
+    GUID *pProfiles;  // output. The list of supported profiles. The caller allocates storage for the profile list before calling CheckFeatureSupport.
 } D3D12_FEATURE_DATA_VIDEO_DECODE_PROFILES;
 
 typedef struct D3D12_FEATURE_DATA_VIDEO_DECODE_FORMAT_COUNT
@@ -352,7 +352,7 @@ typedef struct D3D12_FEATURE_DATA_VIDEO_DECODE_FORMATS
     UINT NodeIndex;                                                              // input
     D3D12_VIDEO_DECODE_CONFIGURATION Configuration;                              // input
     UINT FormatCount;                                                            // input
-    [annotation("_Field_size_full_(FormatCount)")] DXGI_FORMAT *pOutputFormats;  // output. The list of supported video formats. The caller allocates storage for the format list before calling CheckFeatureSupport.
+    DXGI_FORMAT *pOutputFormats;  // output. The list of supported video formats. The caller allocates storage for the format list before calling CheckFeatureSupport.
 } D3D12_FEATURE_DATA_VIDEO_DECODE_FORMATS;
 
 typedef struct D3D12_FEATURE_DATA_VIDEO_ARCHITECTURE
@@ -465,15 +465,15 @@ typedef struct D3D12_VIDEO_DECODE_FRAME_ARGUMENT
 {
     D3D12_VIDEO_DECODE_ARGUMENT_TYPE Type;
     UINT Size;
-    [annotation("_Field_size_bytes_full_(Size)")] void *pData;
+    void *pData;
 } D3D12_VIDEO_DECODE_FRAME_ARGUMENT;
 
 typedef struct D3D12_VIDEO_DECODE_REFERENCE_FRAMES
 {
     UINT NumTexture2Ds;
-    [annotation("_Field_size_full_(NumTexture2Ds)")] ID3D12Resource** ppTexture2Ds;
-    [annotation("_Field_size_full_(NumTexture2Ds)")] UINT* pSubresources;
-    [annotation("_Field_size_full_opt_(NumTexture2Ds)")] ID3D12VideoDecoderHeap** ppHeaps; // If null, assume single decoder heap from input args.
+    ID3D12Resource** ppTexture2Ds;
+    UINT* pSubresources;
+    ID3D12VideoDecoderHeap** ppHeaps; // If null, assume single decoder heap from input args.
 } D3D12_VIDEO_DECODE_REFERENCE_FRAMES;
 
 typedef struct D3D12_VIDEO_DECODE_COMPRESSED_BITSTREAM
@@ -514,7 +514,7 @@ interface ID3D12VideoProcessor
 {
     UINT GetNodeMask();
     UINT GetNumInputStreamDescs();
-    HRESULT GetInputStreamDescs(UINT NumInputStreamDescs, [annotation("_Out_writes_(NumInputStreamDescs)")] D3D12_VIDEO_PROCESS_INPUT_STREAM_DESC *pInputStreamDescs);
+    HRESULT GetInputStreamDescs(UINT NumInputStreamDescs, D3D12_VIDEO_PROCESS_INPUT_STREAM_DESC *pInputStreamDescs);
     D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC GetOutputStreamDesc();
 }
 
@@ -682,70 +682,70 @@ interface ID3D12VideoDecodeCommandList
     HRESULT Close();
 
     HRESULT Reset(
-        [annotation("_In_")] ID3D12CommandAllocator* pAllocator
+        ID3D12CommandAllocator* pAllocator
         );
 
     void ClearState();
 
     void ResourceBarrier(
-        [annotation("_In_")] UINT NumBarriers,
-        [annotation("_In_reads_(NumBarriers)")] const D3D12_RESOURCE_BARRIER* pBarriers
+        UINT NumBarriers,
+        const D3D12_RESOURCE_BARRIER* pBarriers
         );
 
     void DiscardResource(
-        [annotation("_In_")] ID3D12Resource* pResource,
-        [annotation("_In_opt_")] const D3D12_DISCARD_REGION* pRegion
+        ID3D12Resource* pResource,
+        const D3D12_DISCARD_REGION* pRegion
         );
 
     void BeginQuery(
-        [annotation("_In_")] ID3D12QueryHeap* pQueryHeap,
-        [annotation("_In_")] D3D12_QUERY_TYPE Type,
-        [annotation("_In_")] UINT Index
+        ID3D12QueryHeap* pQueryHeap,
+        D3D12_QUERY_TYPE Type,
+        UINT Index
         );
 
     void EndQuery(
-        [annotation("_In_")] ID3D12QueryHeap* pQueryHeap,
-        [annotation("_In_")] D3D12_QUERY_TYPE Type,
-        [annotation("_In_")] UINT Index
+        ID3D12QueryHeap* pQueryHeap,
+        D3D12_QUERY_TYPE Type,
+        UINT Index
         );
 
     void ResolveQueryData(
-        [annotation("_In_")] ID3D12QueryHeap* pQueryHeap,
-        [annotation("_In_")] D3D12_QUERY_TYPE Type,
-        [annotation("_In_")] UINT StartIndex,
-        [annotation("_In_")] UINT NumQueries,
-        [annotation("_In_")] ID3D12Resource* pDestinationBuffer,
-        [annotation("_In_")] UINT64 AlignedDestinationBufferOffset
+        ID3D12QueryHeap* pQueryHeap,
+        D3D12_QUERY_TYPE Type,
+        UINT StartIndex,
+        UINT NumQueries,
+        ID3D12Resource* pDestinationBuffer,
+        UINT64 AlignedDestinationBufferOffset
         );
 
     void SetPredication(
-        [annotation("_In_opt_")] ID3D12Resource* pBuffer,
-        [annotation("_In_")] UINT64 AlignedBufferOffset,
-        [annotation("_In_")] D3D12_PREDICATION_OP Operation
+        ID3D12Resource* pBuffer,
+        UINT64 AlignedBufferOffset,
+        D3D12_PREDICATION_OP Operation
         );
 
     void SetMarker(
         UINT Metadata,
-        [annotation("_In_reads_bytes_opt_(Size)")] const void* pData,
+        const void* pData,
         UINT Size);
 
     void BeginEvent(
         UINT Metadata,
-        [annotation("_In_reads_bytes_opt_(Size)")] const void* pData,
+        const void* pData,
         UINT Size);
 
     void EndEvent();
 
     void DecodeFrame(
-        [annotation("_In_")] ID3D12VideoDecoder* pDecoder,
-        [annotation("_In_")] const D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS *pOutputArguments,
-        [annotation("_In_")] const D3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS *pInputArguments
+        ID3D12VideoDecoder* pDecoder,
+        const D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS *pOutputArguments,
+        const D3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS *pInputArguments
         );
 
     void WriteBufferImmediate(
         UINT Count,
-        [annotation("_In_reads_(Count)")] const D3D12_WRITEBUFFERIMMEDIATE_PARAMETER *pParams,
-        [annotation("_In_reads_opt_(Count)")] const D3D12_WRITEBUFFERIMMEDIATE_MODE *pModes
+        const D3D12_WRITEBUFFERIMMEDIATE_PARAMETER *pParams,
+        const D3D12_WRITEBUFFERIMMEDIATE_MODE *pModes
         );
 }
 
@@ -756,71 +756,71 @@ interface ID3D12VideoProcessCommandList
     HRESULT Close();
 
     HRESULT Reset(
-        [annotation("_In_")] ID3D12CommandAllocator* pAllocator
+        ID3D12CommandAllocator* pAllocator
         );
 
     void ClearState();
 
     void ResourceBarrier(
-        [annotation("_In_")] UINT NumBarriers,
-        [annotation("_In_reads_(NumBarriers)")] const D3D12_RESOURCE_BARRIER* pBarriers
+        UINT NumBarriers,
+        const D3D12_RESOURCE_BARRIER* pBarriers
         );
 
     void DiscardResource(
-        [annotation("_In_")] ID3D12Resource* pResource,
-        [annotation("_In_opt_")] const D3D12_DISCARD_REGION* pRegion
+        ID3D12Resource* pResource,
+        const D3D12_DISCARD_REGION* pRegion
         );
 
     void BeginQuery(
-        [annotation("_In_")] ID3D12QueryHeap* pQueryHeap,
-        [annotation("_In_")] D3D12_QUERY_TYPE Type,
-        [annotation("_In_")] UINT Index
+        ID3D12QueryHeap* pQueryHeap,
+        D3D12_QUERY_TYPE Type,
+        UINT Index
         );
 
     void EndQuery(
-        [annotation("_In_")] ID3D12QueryHeap* pQueryHeap,
-        [annotation("_In_")] D3D12_QUERY_TYPE Type,
-        [annotation("_In_")] UINT Index
+        ID3D12QueryHeap* pQueryHeap,
+        D3D12_QUERY_TYPE Type,
+        UINT Index
         );
 
     void ResolveQueryData(
-        [annotation("_In_")] ID3D12QueryHeap* pQueryHeap,
-        [annotation("_In_")] D3D12_QUERY_TYPE Type,
-        [annotation("_In_")] UINT StartIndex,
-        [annotation("_In_")] UINT NumQueries,
-        [annotation("_In_")] ID3D12Resource* pDestinationBuffer,
-        [annotation("_In_")] UINT64 AlignedDestinationBufferOffset
+        ID3D12QueryHeap* pQueryHeap,
+        D3D12_QUERY_TYPE Type,
+        UINT StartIndex,
+        UINT NumQueries,
+        ID3D12Resource* pDestinationBuffer,
+        UINT64 AlignedDestinationBufferOffset
         );
 
     void SetPredication(
-        [annotation("_In_opt_")] ID3D12Resource* pBuffer,
-        [annotation("_In_")] UINT64 AlignedBufferOffset,
-        [annotation("_In_")] D3D12_PREDICATION_OP Operation
+        ID3D12Resource* pBuffer,
+        UINT64 AlignedBufferOffset,
+        D3D12_PREDICATION_OP Operation
         );
 
     void SetMarker(
         UINT Metadata,
-        [annotation("_In_reads_bytes_opt_(Size)")] const void* pData,
+        const void* pData,
         UINT Size);
 
     void BeginEvent(
         UINT Metadata,
-        [annotation("_In_reads_bytes_opt_(Size)")] const void* pData,
+        const void* pData,
         UINT Size);
 
     void EndEvent();
 
     void ProcessFrames(
-        [annotation("_In_")] ID3D12VideoProcessor* pVideoProcessor,
-        [annotation("_In_")] const D3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS *pOutputArguments,
+        ID3D12VideoProcessor* pVideoProcessor,
+        const D3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS *pOutputArguments,
         UINT NumInputStreams,
-        [annotation("_In_reads_(NumInputStreams)")] const D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS *pInputArguments
+        const D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS *pInputArguments
         );
 
     void WriteBufferImmediate(
         UINT Count,
-        [annotation("_In_reads_(Count)")] const D3D12_WRITEBUFFERIMMEDIATE_PARAMETER *pParams,
-        [annotation("_In_reads_opt_(Count)")] const D3D12_WRITEBUFFERIMMEDIATE_MODE *pModes
+        const D3D12_WRITEBUFFERIMMEDIATE_PARAMETER *pParams,
+        const D3D12_WRITEBUFFERIMMEDIATE_MODE *pModes
         );
 }
 
@@ -854,9 +854,9 @@ interface ID3D12VideoDecodeCommandList1
     : ID3D12VideoDecodeCommandList
 {
     void DecodeFrame1(
-        [annotation("_In_")] ID3D12VideoDecoder* pDecoder,
-        [annotation("_In_")] const D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS1 *pOutputArguments,
-        [annotation("_In_")] const D3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS *pInputArguments
+        ID3D12VideoDecoder* pDecoder,
+        const D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS1 *pOutputArguments,
+        const D3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS *pInputArguments
         );
 }
 
@@ -875,10 +875,10 @@ typedef struct D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS1
 interface ID3D12VideoProcessCommandList1 : ID3D12VideoProcessCommandList
 {
     void ProcessFrames1(
-        [annotation("_In_")] ID3D12VideoProcessor* pVideoProcessor,
-        [annotation("_In_")] const D3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS *pOutputArguments,
+        ID3D12VideoProcessor* pVideoProcessor,
+        const D3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS *pOutputArguments,
         UINT NumInputStreams,
-        [annotation("_In_reads_(NumInputStreams)")] const D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS1 *pInputArguments
+        const D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS1 *pInputArguments
         );
 }
 
@@ -991,16 +991,16 @@ interface ID3D12VideoDevice1
     : ID3D12VideoDevice
 {
     HRESULT CreateVideoMotionEstimator(
-        [annotation("_In_")] const D3D12_VIDEO_MOTION_ESTIMATOR_DESC* pDesc,
-        [annotation("_In_opt_")] ID3D12ProtectedResourceSession *pProtectedResourceSession,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoMotionEstimator, 
+        const D3D12_VIDEO_MOTION_ESTIMATOR_DESC* pDesc,
+        ID3D12ProtectedResourceSession *pProtectedResourceSession,
+        REFIID riid, // Expected: IID_ID3D12VideoMotionEstimator, 
         [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppVideoMotionEstimator
         );
 
     HRESULT CreateVideoMotionVectorHeap(
-        [annotation("_In_")] const D3D12_VIDEO_MOTION_VECTOR_HEAP_DESC* pDesc,
-        [annotation("_In_opt_")] ID3D12ProtectedResourceSession *pProtectedResourceSession,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoMotionVectorHeap, 
+        const D3D12_VIDEO_MOTION_VECTOR_HEAP_DESC* pDesc,
+        ID3D12ProtectedResourceSession *pProtectedResourceSession,
+        REFIID riid, // Expected: IID_ID3D12VideoMotionVectorHeap, 
         [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppVideoMotionVectorHeap
         );
 }
@@ -1048,64 +1048,64 @@ interface ID3D12VideoEncodeCommandList
     HRESULT Close();
 
     HRESULT Reset(
-        [annotation("_In_")] ID3D12CommandAllocator* pAllocator
+        ID3D12CommandAllocator* pAllocator
         );
 
     void ClearState();
 
     void ResourceBarrier(
-        [annotation("_In_")] UINT NumBarriers,
-        [annotation("_In_reads_(NumBarriers)")] const D3D12_RESOURCE_BARRIER* pBarriers
+        UINT NumBarriers,
+        const D3D12_RESOURCE_BARRIER* pBarriers
         );
 
     void DiscardResource(
-        [annotation("_In_")] ID3D12Resource* pResource,
-        [annotation("_In_opt_")] const D3D12_DISCARD_REGION* pRegion
+        ID3D12Resource* pResource,
+        const D3D12_DISCARD_REGION* pRegion
         );
 
     void BeginQuery(
-        [annotation("_In_")] ID3D12QueryHeap* pQueryHeap,
-        [annotation("_In_")] D3D12_QUERY_TYPE Type,
-        [annotation("_In_")] UINT Index
+        ID3D12QueryHeap* pQueryHeap,
+        D3D12_QUERY_TYPE Type,
+        UINT Index
         );
 
     void EndQuery(
-        [annotation("_In_")] ID3D12QueryHeap* pQueryHeap,
-        [annotation("_In_")] D3D12_QUERY_TYPE Type,
-        [annotation("_In_")] UINT Index
+        ID3D12QueryHeap* pQueryHeap,
+        D3D12_QUERY_TYPE Type,
+        UINT Index
         );
 
     void ResolveQueryData(
-        [annotation("_In_")] ID3D12QueryHeap* pQueryHeap,
-        [annotation("_In_")] D3D12_QUERY_TYPE Type,
-        [annotation("_In_")] UINT StartIndex,
-        [annotation("_In_")] UINT NumQueries,
-        [annotation("_In_")] ID3D12Resource* pDestinationBuffer,
-        [annotation("_In_")] UINT64 AlignedDestinationBufferOffset
+        ID3D12QueryHeap* pQueryHeap,
+        D3D12_QUERY_TYPE Type,
+        UINT StartIndex,
+        UINT NumQueries,
+        ID3D12Resource* pDestinationBuffer,
+        UINT64 AlignedDestinationBufferOffset
         );
 
     void SetPredication(
-        [annotation("_In_opt_")] ID3D12Resource* pBuffer,
-        [annotation("_In_")] UINT64 AlignedBufferOffset,
-        [annotation("_In_")] D3D12_PREDICATION_OP Operation
+        ID3D12Resource* pBuffer,
+        UINT64 AlignedBufferOffset,
+        D3D12_PREDICATION_OP Operation
         );
 
     void SetMarker(
         UINT Metadata,
-        [annotation("_In_reads_bytes_opt_(Size)")] const void* pData,
+        const void* pData,
         UINT Size);
 
     void BeginEvent(
         UINT Metadata,
-        [annotation("_In_reads_bytes_opt_(Size)")] const void* pData,
+        const void* pData,
         UINT Size);
 
     void EndEvent();
 
     void EstimateMotion(
-        [annotation("_In_")] ID3D12VideoMotionEstimator* pMotionEstimator,
-        [annotation("_In_")] const D3D12_VIDEO_MOTION_ESTIMATOR_OUTPUT* pOutputArguments,
-        [annotation("_In_")] const D3D12_VIDEO_MOTION_ESTIMATOR_INPUT* pInputArguments
+        ID3D12VideoMotionEstimator* pMotionEstimator,
+        const D3D12_VIDEO_MOTION_ESTIMATOR_OUTPUT* pOutputArguments,
+        const D3D12_VIDEO_MOTION_ESTIMATOR_INPUT* pInputArguments
         );
     
     void ResolveMotionVectorHeap(
@@ -1115,8 +1115,8 @@ interface ID3D12VideoEncodeCommandList
 
     void WriteBufferImmediate(
         UINT Count,
-        [annotation("_In_reads_(Count)")] const D3D12_WRITEBUFFERIMMEDIATE_PARAMETER *pParams,
-        [annotation("_In_reads_opt_(Count)")] const D3D12_WRITEBUFFERIMMEDIATE_MODE *pModes
+        const D3D12_WRITEBUFFERIMMEDIATE_PARAMETER *pParams,
+        const D3D12_WRITEBUFFERIMMEDIATE_MODE *pModes
         );
 
     void SetProtectedResourceSession(
@@ -1227,7 +1227,7 @@ typedef struct D3D12_FEATURE_DATA_VIDEO_EXTENSION_COMMANDS
 {
     UINT NodeIndex;
     UINT CommandCount;
-    [annotation("_Field_size_full_(CommandCount)")] D3D12_VIDEO_EXTENSION_COMMAND_INFO* pCommandInfos;
+    D3D12_VIDEO_EXTENSION_COMMAND_INFO* pCommandInfos;
 } D3D12_FEATURE_DATA_VIDEO_EXTENSION_COMMANDS;
 
 typedef struct D3D12_FEATURE_DATA_VIDEO_EXTENSION_COMMAND_PARAMETER_COUNT
@@ -1250,16 +1250,16 @@ typedef struct D3D12_FEATURE_DATA_VIDEO_EXTENSION_COMMAND_PARAMETERS
     GUID CommandId;  // in
     D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE Stage;  // in
     UINT ParameterCount; // in
-    [annotation("_Field_size_full_(ParameterCount)")] D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_INFO* pParameterInfos; // out
+    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_INFO* pParameterInfos; // out
 } D3D12_FEATURE_DATA_VIDEO_EXTENSION_COMMAND_PARAMETERS;
 
 typedef struct D3D12_FEATURE_DATA_VIDEO_EXTENSION_COMMAND_SUPPORT
 {
     UINT NodeIndex;
     GUID CommandId;
-    [annotation("_Field_size_bytes_full_opt_(InputDataSizeInBytes)")] const void *pInputData;
+    const void *pInputData;
     SIZE_T InputDataSizeInBytes;
-    [annotation("_Field_size_bytes_full_opt_(OutputDataSizeInBytes)")] void *pOutputData;
+    void *pOutputData;
     SIZE_T OutputDataSizeInBytes;
 } D3D12_FEATURE_DATA_VIDEO_EXTENSION_COMMAND_SUPPORT;
 
@@ -1267,7 +1267,7 @@ typedef struct D3D12_FEATURE_DATA_VIDEO_EXTENSION_COMMAND_SIZE
 {
     UINT NodeIndex;
     GUID CommandId;
-    [annotation("_Field_size_bytes_full_(CreationParametersDataSizeInBytes)")] const void* pCreationParameters;
+    const void* pCreationParameters;
     SIZE_T CreationParametersSizeInBytes;
     UINT64 MemoryPoolL0Size;                                            // output
     UINT64 MemoryPoolL1Size;                                            // output
@@ -1322,42 +1322,42 @@ interface ID3D12VideoDevice2
     : ID3D12VideoDevice1
 {
     HRESULT CreateVideoDecoder1(
-        [annotation("_In_")] const D3D12_VIDEO_DECODER_DESC* pDesc,
-        [annotation("_In_opt_")] ID3D12ProtectedResourceSession *pProtectedResourceSession,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoDecoder1, 
+        const D3D12_VIDEO_DECODER_DESC* pDesc,
+        ID3D12ProtectedResourceSession *pProtectedResourceSession,
+        REFIID riid, // Expected: IID_ID3D12VideoDecoder1, 
         [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppVideoDecoder
         );
 
     HRESULT CreateVideoDecoderHeap1(
-        [annotation("_In_")] const D3D12_VIDEO_DECODER_HEAP_DESC* pVideoDecoderHeapDesc,
-        [annotation("_In_opt_")] ID3D12ProtectedResourceSession *pProtectedResourceSession,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoDecoderHeap1, 
+        const D3D12_VIDEO_DECODER_HEAP_DESC* pVideoDecoderHeapDesc,
+        ID3D12ProtectedResourceSession *pProtectedResourceSession,
+        REFIID riid, // Expected: IID_ID3D12VideoDecoderHeap1, 
         [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppVideoDecoderHeap
         );
 
     HRESULT CreateVideoProcessor1(
         UINT NodeMask,
-        [annotation("_In_")] const D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC* pOutputStreamDesc,
+        const D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC* pOutputStreamDesc,
         UINT NumInputStreamDescs,
         [annotation("_In_reads_(NumInputStreamDescs)")]const D3D12_VIDEO_PROCESS_INPUT_STREAM_DESC *pInputStreamDescs,
-        [annotation("_In_opt_")] ID3D12ProtectedResourceSession *pProtectedResourceSession,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoProcessor1, 
+        ID3D12ProtectedResourceSession *pProtectedResourceSession,
+        REFIID riid, // Expected: IID_ID3D12VideoProcessor1, 
         [out, iid_is(riid), annotation("_COM_Outptr_")] void **ppVideoProcessor
         );
 
     HRESULT CreateVideoExtensionCommand(
-        [annotation("_In_")] const D3D12_VIDEO_EXTENSION_COMMAND_DESC* pDesc,        
-        [annotation("_In_reads_bytes_(CreationParametersDataSizeInBytes)")] const void* pCreationParameters, 
+        const D3D12_VIDEO_EXTENSION_COMMAND_DESC* pDesc,        
+        const void* pCreationParameters, 
         SIZE_T CreationParametersDataSizeInBytes,
-        [annotation("_In_opt_")] ID3D12ProtectedResourceSession* pProtectedResourceSession,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoExtensionCommand, 
+        ID3D12ProtectedResourceSession* pProtectedResourceSession,
+        REFIID riid, // Expected: IID_ID3D12VideoExtensionCommand, 
         [annotation("_COM_Outptr_")] void** ppVideoExtensionCommand);
 
     HRESULT ExecuteExtensionCommand(
-        [annotation("_In_")] ID3D12VideoExtensionCommand* pExtensionCommand,
-        [annotation("_In_reads_bytes_(ExecutionParametersSizeInBytes)")] const void *pExecutionParameters, 
+        ID3D12VideoExtensionCommand* pExtensionCommand,
+        const void *pExecutionParameters, 
         SIZE_T ExecutionParametersSizeInBytes,
-        [annotation("_Out_writes_bytes_(OutputDataSizeInBytes)")] void *pOutputData,
+        void *pOutputData,
         SIZE_T OutputDataSizeInBytes
         );
 }
@@ -1371,13 +1371,13 @@ interface ID3D12VideoDecodeCommandList2
         );
 
     void InitializeExtensionCommand(
-        [annotation("_In_")] ID3D12VideoExtensionCommand* pExtensionCommand,
-        [annotation("_In_reads_bytes_(InitializationParametersSizeInBytes)")] const void *pInitializationParameters, 
+        ID3D12VideoExtensionCommand* pExtensionCommand,
+        const void *pInitializationParameters, 
         SIZE_T InitializationParametersSizeInBytes);
 
     void ExecuteExtensionCommand(
-        [annotation("_In_")] ID3D12VideoExtensionCommand* pExtensionCommand,
-        [annotation("_In_reads_bytes_(ExecutionParametersSizeInBytes)")] const void *pExecutionParameters, 
+        ID3D12VideoExtensionCommand* pExtensionCommand,
+        const void *pExecutionParameters, 
         SIZE_T ExecutionParametersSizeInBytes);
 }
 
@@ -1387,7 +1387,7 @@ interface ID3D12VideoDecodeCommandList3
 {
     void Barrier(
         UINT32 NumBarrierGroups,
-        [annotation("_In_reads_(NumBarrierGroups)")] const D3D12_BARRIER_GROUP *pBarrierGroups
+        const D3D12_BARRIER_GROUP *pBarrierGroups
         );
 }
 
@@ -1401,13 +1401,13 @@ interface ID3D12VideoProcessCommandList2
         );
 
     void InitializeExtensionCommand(
-        [annotation("_In_")] ID3D12VideoExtensionCommand* pExtensionCommand,
-        [annotation("_In_reads_bytes_(InitializationParametersSizeInBytes)")] const void *pInitializationParameters, 
+        ID3D12VideoExtensionCommand* pExtensionCommand,
+        const void *pInitializationParameters, 
         SIZE_T InitializationParametersSizeInBytes);
 
     void ExecuteExtensionCommand(
-        [annotation("_In_")] ID3D12VideoExtensionCommand* pExtensionCommand,
-        [annotation("_In_reads_bytes_(ExecutionParametersSizeInBytes)")] const void *pExecutionParameters, 
+        ID3D12VideoExtensionCommand* pExtensionCommand,
+        const void *pExecutionParameters, 
         SIZE_T ExecutionParametersSizeInBytes);
 }
 
@@ -1417,7 +1417,7 @@ interface ID3D12VideoProcessCommandList3
 {
     void Barrier(
         UINT32 NumBarrierGroups,
-        [annotation("_In_reads_(NumBarrierGroups)")] const D3D12_BARRIER_GROUP *pBarrierGroups
+        const D3D12_BARRIER_GROUP *pBarrierGroups
         );
 }
 
@@ -1426,13 +1426,13 @@ interface ID3D12VideoEncodeCommandList1
     : ID3D12VideoEncodeCommandList
 {
     void InitializeExtensionCommand(
-        [annotation("_In_")] ID3D12VideoExtensionCommand* pExtensionCommand,
-        [annotation("_In_reads_bytes_(InitializationParametersSizeInBytes)")] const void *pInitializationParameters, 
+        ID3D12VideoExtensionCommand* pExtensionCommand,
+        const void *pInitializationParameters, 
         SIZE_T InitializationParametersSizeInBytes);
 
     void ExecuteExtensionCommand(
-        [annotation("_In_")] ID3D12VideoExtensionCommand* pExtensionCommand,
-        [annotation("_In_reads_bytes_(ExecutionParametersSizeInBytes)")] const void *pExecutionParameters, 
+        ID3D12VideoExtensionCommand* pExtensionCommand,
+        const void *pExecutionParameters, 
         SIZE_T ExecutionParametersSizeInBytes);
 }
 
@@ -1685,7 +1685,7 @@ typedef struct D3D12_FEATURE_DATA_VIDEO_ENCODER_OUTPUT_RESOLUTION
     D3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_DESC MaxResolutionSupported; // output
     UINT ResolutionWidthMultipleRequirement;    // output
     UINT ResolutionHeightMultipleRequirement;   // output
-    [annotation("_Field_size_full_(ResolutionRatiosCount)")] D3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_RATIO_DESC* pResolutionRatios;
+    D3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_RATIO_DESC* pResolutionRatios;
 } D3D12_FEATURE_DATA_VIDEO_ENCODER_OUTPUT_RESOLUTION;
 
 typedef struct D3D12_FEATURE_DATA_VIDEO_ENCODER_INPUT_FORMAT
@@ -1753,7 +1753,7 @@ typedef struct D3D12_VIDEO_ENCODER_HEAP_DESC
     D3D12_VIDEO_ENCODER_PROFILE_DESC EncodeProfile;
     D3D12_VIDEO_ENCODER_LEVEL_SETTING EncodeLevel;
     UINT ResolutionsListCount;
-    [annotation("_Field_size_full_(ResolutionsListCount)")] const D3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_DESC* pResolutionList;
+    const D3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_DESC* pResolutionList;
 } D3D12_VIDEO_ENCODER_HEAP_DESC;
 
 typedef struct D3D12_FEATURE_DATA_VIDEO_ENCODER_HEAP_SIZE {
@@ -2053,7 +2053,7 @@ typedef struct D3D12_FEATURE_DATA_VIDEO_ENCODER_SUPPORT
     D3D12_VIDEO_ENCODER_LEVEL_SETTING SuggestedLevel; // assuming max resolution from input list
     
     // resolution dependent output
-    [annotation("_Field_size_full_(ResolutionsListCount)")] D3D12_FEATURE_DATA_VIDEO_ENCODER_RESOLUTION_SUPPORT_LIMITS* pResolutionDependentSupport;
+    D3D12_FEATURE_DATA_VIDEO_ENCODER_RESOLUTION_SUPPORT_LIMITS* pResolutionDependentSupport;
 } D3D12_FEATURE_DATA_VIDEO_ENCODER_SUPPORT;
 
 
@@ -2099,8 +2099,8 @@ interface ID3D12VideoEncoder
     UINT GetNodeMask(); 
     D3D12_VIDEO_ENCODER_FLAGS GetEncoderFlags(); 
     D3D12_VIDEO_ENCODER_CODEC GetCodec(); 
-    HRESULT GetCodecProfile([annotation("_Inout_")] D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile);
-    HRESULT GetCodecConfiguration([annotation("_Inout_")] D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION dstCodecConfig);
+    HRESULT GetCodecProfile(D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile);
+    HRESULT GetCodecConfiguration(D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION dstCodecConfig);
     DXGI_FORMAT GetInputFormat();
     D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE GetMaxMotionEstimationPrecision();
 }
@@ -2112,12 +2112,12 @@ interface ID3D12VideoEncoderHeap
     UINT GetNodeMask(); 
     D3D12_VIDEO_ENCODER_HEAP_FLAGS GetEncoderHeapFlags(); 
     D3D12_VIDEO_ENCODER_CODEC GetCodec(); 
-    HRESULT GetCodecProfile([annotation("_Inout_")] D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile); 
-    HRESULT GetCodecLevel([annotation("_Inout_")] D3D12_VIDEO_ENCODER_LEVEL_SETTING dstLevel); 
+    HRESULT GetCodecProfile(D3D12_VIDEO_ENCODER_PROFILE_DESC dstProfile); 
+    HRESULT GetCodecLevel(D3D12_VIDEO_ENCODER_LEVEL_SETTING dstLevel); 
     UINT GetResolutionListCount(); 
     HRESULT GetResolutionList(
         const UINT ResolutionsListCount,
-        [annotation("_Out_writes_(ResolutionsListCount)")] D3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_DESC* pResolutionList); 
+        D3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_DESC* pResolutionList); 
 }
 
 [uuid(4243ADB4-3A32-4666-973C-0CCC5625DC44), object, local, pointer_default(unique)]
@@ -2126,13 +2126,13 @@ interface ID3D12VideoDevice3
 {
 
     HRESULT CreateVideoEncoder(
-        [annotation("_In_")] const D3D12_VIDEO_ENCODER_DESC* pDesc,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoEncoder,
+        const D3D12_VIDEO_ENCODER_DESC* pDesc,
+        REFIID riid, // Expected: IID_ID3D12VideoEncoder,
         [annotation("_COM_Outptr_")] void** ppVideoEncoder);
 
     HRESULT CreateVideoEncoderHeap(
-        [annotation("_In_")] const D3D12_VIDEO_ENCODER_HEAP_DESC* pDesc,
-        [annotation("_In_")] REFIID riid, // Expected: IID_ID3D12VideoEncoderHeap,
+        const D3D12_VIDEO_ENCODER_HEAP_DESC* pDesc,
+        REFIID riid, // Expected: IID_ID3D12VideoEncoderHeap,
         [annotation("_COM_Outptr_")] void** ppVideoEncoderHeap);
 
 }
@@ -2194,20 +2194,20 @@ typedef struct D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_H264
     UINT FrameDecodingOrderNumber;
     UINT TemporalLayerIndex;
     UINT List0ReferenceFramesCount;
-    [annotation("_Field_size_full_(List0ReferenceFramesCount)")] UINT* pList0ReferenceFrames;
+    UINT* pList0ReferenceFrames;
     UINT List1ReferenceFramesCount;
-    [annotation("_Field_size_full_(List1ReferenceFramesCount)")] UINT* pList1ReferenceFrames;
+    UINT* pList1ReferenceFrames;
     UINT ReferenceFramesReconPictureDescriptorsCount;
-    [annotation("_Field_size_full_(ReferenceFramesReconPictureDescriptorsCount)")] D3D12_VIDEO_ENCODER_REFERENCE_PICTURE_DESCRIPTOR_H264* pReferenceFramesReconPictureDescriptors;
+    D3D12_VIDEO_ENCODER_REFERENCE_PICTURE_DESCRIPTOR_H264* pReferenceFramesReconPictureDescriptors;
     UCHAR adaptive_ref_pic_marking_mode_flag;
     UINT RefPicMarkingOperationsCommandsCount;
-    [annotation("_Field_size_full_(RefPicMarkingOperationsCommandsCount)")] D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_H264_REFERENCE_PICTURE_MARKING_OPERATION* pRefPicMarkingOperationsCommands;
+    D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_H264_REFERENCE_PICTURE_MARKING_OPERATION* pRefPicMarkingOperationsCommands;
     UINT List0RefPicModificationsCount;
-    [annotation("_Field_size_full_(List0RefPicModificationsCount)")] D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_H264_REFERENCE_PICTURE_LIST_MODIFICATION_OPERATION* pList0RefPicModifications;
+    D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_H264_REFERENCE_PICTURE_LIST_MODIFICATION_OPERATION* pList0RefPicModifications;
     UINT List1RefPicModificationsCount;
-    [annotation("_Field_size_full_(List1RefPicModificationsCount)")] D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_H264_REFERENCE_PICTURE_LIST_MODIFICATION_OPERATION* pList1RefPicModifications;
+    D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_H264_REFERENCE_PICTURE_LIST_MODIFICATION_OPERATION* pList1RefPicModifications;
     UINT QPMapValuesCount;
-    [annotation("_Field_size_full_(QPMapValuesCount)")] INT8 *pRateControlQPMap;
+    INT8 *pRateControlQPMap;
 } D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_H264;
 
 typedef enum D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC
@@ -2242,17 +2242,17 @@ typedef struct D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_HEVC
     UINT PictureOrderCountNumber;
     UINT TemporalLayerIndex;    
     UINT List0ReferenceFramesCount;
-    [annotation("_Field_size_full_(List0ReferenceFramesCount)")] UINT* pList0ReferenceFrames;
+    UINT* pList0ReferenceFrames;
     UINT List1ReferenceFramesCount;
-    [annotation("_Field_size_full_(List1ReferenceFramesCount)")] UINT* pList1ReferenceFrames;
+    UINT* pList1ReferenceFrames;
     UINT ReferenceFramesReconPictureDescriptorsCount;
-    [annotation("_Field_size_full_(ReferenceFramesReconPictureDescriptorsCount)")] D3D12_VIDEO_ENCODER_REFERENCE_PICTURE_DESCRIPTOR_HEVC* pReferenceFramesReconPictureDescriptors;
+    D3D12_VIDEO_ENCODER_REFERENCE_PICTURE_DESCRIPTOR_HEVC* pReferenceFramesReconPictureDescriptors;
     UINT List0RefPicModificationsCount;
-    [annotation("_Field_size_full_(List0RefPicModificationsCount)")] UINT* pList0RefPicModifications;
+    UINT* pList0RefPicModifications;
     UINT List1RefPicModificationsCount;
-    [annotation("_Field_size_full_(List1RefPicModificationsCount)")] UINT* pList1RefPicModifications;    
+    UINT* pList1RefPicModifications;    
     UINT QPMapValuesCount;
-    [annotation("_Field_size_full_(QPMapValuesCount)")] INT8 *pRateControlQPMap;
+    INT8 *pRateControlQPMap;
 } D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_HEVC;
 
 typedef struct D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA
@@ -2268,8 +2268,8 @@ typedef struct D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA
 typedef struct D3D12_VIDEO_ENCODE_REFERENCE_FRAMES
 {
     UINT NumTexture2Ds;
-    [annotation("_Field_size_full_(NumTexture2Ds)")] ID3D12Resource** ppTexture2Ds;
-    [annotation("_Field_size_full_(NumTexture2Ds)")] UINT* pSubresources;
+    ID3D12Resource** ppTexture2Ds;
+    UINT* pSubresources;
 } D3D12_VIDEO_ENCODE_REFERENCE_FRAMES;
 
 typedef enum D3D12_VIDEO_ENCODER_PICTURE_CONTROL_FLAGS
@@ -2432,14 +2432,14 @@ interface ID3D12VideoEncodeCommandList2
     : ID3D12VideoEncodeCommandList1
 {
     void EncodeFrame(
-        [annotation("_In_")] ID3D12VideoEncoder* pEncoder,
-        [annotation("_In_")] ID3D12VideoEncoderHeap *pHeap,
-        [annotation("_In_")] const D3D12_VIDEO_ENCODER_ENCODEFRAME_INPUT_ARGUMENTS *pInputArguments,
-        [annotation("_In_")] const D3D12_VIDEO_ENCODER_ENCODEFRAME_OUTPUT_ARGUMENTS *pOutputArguments);
+        ID3D12VideoEncoder* pEncoder,
+        ID3D12VideoEncoderHeap *pHeap,
+        const D3D12_VIDEO_ENCODER_ENCODEFRAME_INPUT_ARGUMENTS *pInputArguments,
+        const D3D12_VIDEO_ENCODER_ENCODEFRAME_OUTPUT_ARGUMENTS *pOutputArguments);
 
     void ResolveEncoderOutputMetadata(
-        [annotation("_In_")] const D3D12_VIDEO_ENCODER_RESOLVE_METADATA_INPUT_ARGUMENTS* pInputArguments,
-        [annotation("_In_")] const D3D12_VIDEO_ENCODER_RESOLVE_METADATA_OUTPUT_ARGUMENTS* pOutputArguments);
+        const D3D12_VIDEO_ENCODER_RESOLVE_METADATA_INPUT_ARGUMENTS* pInputArguments,
+        const D3D12_VIDEO_ENCODER_RESOLVE_METADATA_OUTPUT_ARGUMENTS* pOutputArguments);
 }
 
 
@@ -2450,7 +2450,7 @@ interface ID3D12VideoEncodeCommandList3
 
     void Barrier(
         UINT32 NumBarrierGroups,
-        [annotation("_In_reads_(NumBarrierGroups)")] const D3D12_BARRIER_GROUP *pBarrierGroups
+        const D3D12_BARRIER_GROUP *pBarrierGroups
         );
 }
 
