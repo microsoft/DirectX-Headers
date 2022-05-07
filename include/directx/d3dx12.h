@@ -3293,9 +3293,9 @@ inline bool operator==( const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC &a, const D3D
 //
 //================================================================================================
 #include <list>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 #ifndef D3DX12_USE_ATL
 #include <wrl/client.h>
 #define D3DX12_COM_PTR Microsoft::WRL::ComPtr
@@ -4051,6 +4051,13 @@ private:
     D3D12_NODE_MASK m_Desc;
 };
 
+#endif // !D3DX12_NO_STATE_OBJECT_HELPERS
+
+
+//================================================================================================
+// D3DX12 Enhanced Barrier Helpers
+//================================================================================================
+
 class CD3DX12_BARRIER_SUBRESOURCE_RANGE : public D3D12_BARRIER_SUBRESOURCE_RANGE
 {
 public:
@@ -4173,11 +4180,12 @@ public:
 };
 
 
-#endif // #ifndef D3DX12_NO_STATE_OBJECT_HELPERS
-
 #ifndef D3DX12_NO_CHECK_FEATURE_SUPPORT_CLASS
 
-//------------------------------------------------------------------------------------------------
+//================================================================================================
+// D3DX12 Check Feature Support
+//================================================================================================
+
 #include <vector>
 
 class CD3DX12FeatureSupport
@@ -5082,7 +5090,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT No
 
 // end CD3DX12FeatureSupport
 
-#endif // #ifndef D3DX12_NO_CHECK_FEATURE_SUPPORT_CLASS
+#endif // !D3DX12_NO_CHECK_FEATURE_SUPPORT_CLASS
 
 #undef D3DX12_COM_PTR
 #undef D3DX12_COM_PTR_GET
