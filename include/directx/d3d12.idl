@@ -769,6 +769,35 @@ typedef struct D3D12_RASTERIZER_DESC
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+[ uuid( c4fec28f-7966-4e95-9f94-f431cb56c3b8 ), object, local, pointer_default( unique ) ]
+interface ID3D12Object
+    : IUnknown
+{
+    HRESULT GetPrivateData(
+        [annotation("_In_")] REFGUID guid,
+        [annotation("_Inout_")] UINT* pDataSize,
+        [annotation("_Out_writes_bytes_opt_( *pDataSize )")] void* pData );
+    HRESULT SetPrivateData(
+        [annotation("_In_")] REFGUID guid,
+        [annotation("_In_")] UINT DataSize,
+        [annotation("_In_reads_bytes_opt_( DataSize )")] const void* pData );
+    HRESULT SetPrivateDataInterface(
+        [annotation("_In_")] REFGUID guid,
+        [annotation("_In_opt_")] const IUnknown* pData );
+    HRESULT SetName(
+        [annotation("_In_z_")] LPCWSTR Name );
+}
+
+[ uuid( 905db94b-a00c-4140-9df5-2b64ca9ea357 ), object, local, pointer_default( unique ) ]
+interface ID3D12DeviceChild
+    : ID3D12Object
+{
+    HRESULT GetDevice( 
+        [in] REFIID riid,
+        [out, iid_is(riid), annotation("_COM_Outptr_opt_")] void** ppvDevice
+        );
+}
+
 [ uuid( c54a6b66-72df-4ee8-8be5-a946a1429214 ), object, local, pointer_default( unique ) ]
 interface ID3D12RootSignature
     : ID3D12DeviceChild
@@ -2880,35 +2909,6 @@ typedef struct D3D12_COMMAND_SIGNATURE_DESC
 } D3D12_COMMAND_SIGNATURE_DESC;
 
 interface ID3D12Device;
-
-[ uuid( c4fec28f-7966-4e95-9f94-f431cb56c3b8 ), object, local, pointer_default( unique ) ]
-interface ID3D12Object
-    : IUnknown
-{
-    HRESULT GetPrivateData(
-        [annotation("_In_")] REFGUID guid,
-        [annotation("_Inout_")] UINT* pDataSize,
-        [annotation("_Out_writes_bytes_opt_( *pDataSize )")] void* pData );
-    HRESULT SetPrivateData(
-        [annotation("_In_")] REFGUID guid,
-        [annotation("_In_")] UINT DataSize,
-        [annotation("_In_reads_bytes_opt_( DataSize )")] const void* pData );
-    HRESULT SetPrivateDataInterface(
-        [annotation("_In_")] REFGUID guid,
-        [annotation("_In_opt_")] const IUnknown* pData );
-    HRESULT SetName(
-        [annotation("_In_z_")] LPCWSTR Name );
-}
-
-[ uuid( 905db94b-a00c-4140-9df5-2b64ca9ea357 ), object, local, pointer_default( unique ) ]
-interface ID3D12DeviceChild
-    : ID3D12Object
-{
-    HRESULT GetDevice( 
-        [in] REFIID riid,
-        [out, iid_is(riid), annotation("_COM_Outptr_opt_")] void** ppvDevice
-        );
-}
 
 [ uuid( 63ee58fb-1268-4835-86da-f008ce62f0d6 ), object, local, pointer_default( unique ) ]
 interface ID3D12Pageable
@@ -5659,6 +5659,7 @@ interface ID3D12GraphicsCommandList7 : ID3D12GraphicsCommandList6
 cpp_quote("#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_GAMES) */")
 #pragma endregion
 
+cpp_quote( "#if !defined(__MINGW32__)")
 cpp_quote( "DEFINE_GUID(IID_ID3D12Object,0xc4fec28f,0x7966,0x4e95,0x9f,0x94,0xf4,0x31,0xcb,0x56,0xc3,0xb8);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceChild,0x905db94b,0xa00c,0x4140,0x9d,0xf5,0x2b,0x64,0xca,0x9e,0xa3,0x57);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12RootSignature,0xc54a6b66,0x72df,0x4ee8,0x8b,0xe5,0xa9,0x46,0xa1,0x42,0x92,0x14);" )
@@ -5718,3 +5719,4 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12SDKConfiguration,0xe9eb5314,0x33aa,0x42b2,0xa7
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList5,0x55050859,0x4024,0x474c,0x87,0xf5,0x64,0x72,0xea,0xee,0x44,0xea);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList6,0xc3827890,0xe548,0x4cfa,0x96,0xcf,0x56,0x89,0xa9,0x37,0x0f,0x80);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList7,0xdd171223,0x8b61,0x4769,0x90,0xe3,0x16,0x0c,0xcd,0xe4,0xe2,0xc1);" )
+cpp_quote( "#endif /* defined(__MINGW32__) */")
