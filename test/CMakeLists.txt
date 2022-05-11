@@ -31,7 +31,7 @@ foreach(t IN LISTS TEST_EXES)
   target_link_libraries(${t} DirectX-Headers DirectX-Guids ${dxlibs})
 endforeach()
 
-if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
+if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang|IntelLLVM" )
     target_compile_options(DirectX-Headers-Check-Feature-Support-Test PRIVATE -Wno-unused-variable)
 endif()
 
