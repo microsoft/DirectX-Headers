@@ -32,7 +32,7 @@ public: // Constructors and custom functions
 
     virtual ~MockDevice() = default;
 
-    void SetNodeCount(UINT NewCount) 
+    void SetNodeCount(UINT NewCount)
     {
         m_NodeCount = NewCount;
         m_TileBasedRenderer.resize(NewCount);
@@ -46,7 +46,7 @@ public: // Constructors and custom functions
     }
 
 public: // ID3D12Device
-    UINT STDMETHODCALLTYPE GetNodeCount() override 
+    UINT STDMETHODCALLTYPE GetNodeCount() override
     {
         return m_NodeCount;
     }
@@ -55,7 +55,7 @@ public: // ID3D12Device
             _In_  const D3D12_COMMAND_QUEUE_DESC *pDesc,
             REFIID riid,
             _COM_Outptr_  void **ppCommandQueue
-    ) override 
+    ) override
     {
         return S_OK;
     }
@@ -78,7 +78,7 @@ public: // ID3D12Device
         return S_OK;
     }
 
-    HRESULT STDMETHODCALLTYPE CreateComputePipelineState( 
+    HRESULT STDMETHODCALLTYPE CreateComputePipelineState(
         _In_  const D3D12_COMPUTE_PIPELINE_STATE_DESC *pDesc,
         REFIID riid,
         _COM_Outptr_  void **ppPipelineState
@@ -87,118 +87,118 @@ public: // ID3D12Device
         return S_OK;
     }
 
-    HRESULT STDMETHODCALLTYPE CreateCommandList( 
+    HRESULT STDMETHODCALLTYPE CreateCommandList(
         _In_  UINT nodeMask,
         _In_  D3D12_COMMAND_LIST_TYPE type,
         _In_  ID3D12CommandAllocator *pCommandAllocator,
         _In_opt_  ID3D12PipelineState *pInitialState,
         REFIID riid,
         _COM_Outptr_  void **ppCommandList
-    ) override 
+    ) override
     {
         return S_OK;
     }
 
-    virtual HRESULT STDMETHODCALLTYPE CreateDescriptorHeap( 
+    virtual HRESULT STDMETHODCALLTYPE CreateDescriptorHeap(
         _In_  const D3D12_DESCRIPTOR_HEAP_DESC *pDescriptorHeapDesc,
         REFIID riid,
         _COM_Outptr_  void **ppvHeap
-    ) override 
+    ) override
     {
         return S_OK;
     }
 
-    virtual UINT STDMETHODCALLTYPE GetDescriptorHandleIncrementSize( 
+    virtual UINT STDMETHODCALLTYPE GetDescriptorHandleIncrementSize(
         _In_  D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapType
-    ) override 
+    ) override
     {
         return 0;
     }
-        
-    virtual HRESULT STDMETHODCALLTYPE CreateRootSignature( 
+
+    virtual HRESULT STDMETHODCALLTYPE CreateRootSignature(
         _In_  UINT nodeMask,
         _In_reads_(blobLengthInBytes)  const void *pBlobWithRootSignature,
         _In_  SIZE_T blobLengthInBytes,
         REFIID riid,
         _COM_Outptr_  void **ppvRootSignature
-    ) override 
+    ) override
     {
         return S_OK;
     }
-    
-    virtual void STDMETHODCALLTYPE CreateConstantBufferView( 
+
+    virtual void STDMETHODCALLTYPE CreateConstantBufferView(
         _In_opt_  const D3D12_CONSTANT_BUFFER_VIEW_DESC *pDesc,
         _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor
-    ) override 
+    ) override
     {
         return;
     }
-    
-    virtual void STDMETHODCALLTYPE CreateShaderResourceView( 
+
+    virtual void STDMETHODCALLTYPE CreateShaderResourceView(
         _In_opt_  ID3D12Resource *pResource,
         _In_opt_  const D3D12_SHADER_RESOURCE_VIEW_DESC *pDesc,
         _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor
-    ) override 
+    ) override
     {
         return;
     }
-    
-    virtual void STDMETHODCALLTYPE CreateUnorderedAccessView( 
+
+    virtual void STDMETHODCALLTYPE CreateUnorderedAccessView(
         _In_opt_  ID3D12Resource *pResource,
         _In_opt_  ID3D12Resource *pCounterResource,
         _In_opt_  const D3D12_UNORDERED_ACCESS_VIEW_DESC *pDesc,
         _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor
-    ) override 
+    ) override
     {
         return;
     }
-    
-    virtual void STDMETHODCALLTYPE CreateRenderTargetView( 
+
+    virtual void STDMETHODCALLTYPE CreateRenderTargetView(
         _In_opt_  ID3D12Resource *pResource,
         _In_opt_  const D3D12_RENDER_TARGET_VIEW_DESC *pDesc,
         _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor
-    ) override 
+    ) override
     {
         return;
     }
-    
-    virtual void STDMETHODCALLTYPE CreateDepthStencilView( 
+
+    virtual void STDMETHODCALLTYPE CreateDepthStencilView(
         _In_opt_  ID3D12Resource *pResource,
         _In_opt_  const D3D12_DEPTH_STENCIL_VIEW_DESC *pDesc,
-        _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) override 
+        _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) override
     {
         return;
     }
-    
-    virtual void STDMETHODCALLTYPE CreateSampler( 
+
+    virtual void STDMETHODCALLTYPE CreateSampler(
         _In_  const D3D12_SAMPLER_DESC *pDesc,
-        _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) override 
+        _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) override
     {
         return;
     }
-    
-    virtual void STDMETHODCALLTYPE CopyDescriptors( 
+
+    virtual void STDMETHODCALLTYPE CopyDescriptors(
         _In_  UINT NumDestDescriptorRanges,
         _In_reads_(NumDestDescriptorRanges)  const D3D12_CPU_DESCRIPTOR_HANDLE *pDestDescriptorRangeStarts,
         _In_reads_opt_(NumDestDescriptorRanges)  const UINT *pDestDescriptorRangeSizes,
         _In_  UINT NumSrcDescriptorRanges,
         _In_reads_(NumSrcDescriptorRanges)  const D3D12_CPU_DESCRIPTOR_HANDLE *pSrcDescriptorRangeStarts,
         _In_reads_opt_(NumSrcDescriptorRanges)  const UINT *pSrcDescriptorRangeSizes,
-        _In_  D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapsType) override 
+        _In_  D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapsType) override
     {
         return;
     }
-    
-    virtual void STDMETHODCALLTYPE CopyDescriptorsSimple( 
+
+    virtual void STDMETHODCALLTYPE CopyDescriptorsSimple(
         _In_  UINT NumDescriptors,
         _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptorRangeStart,
         _In_  D3D12_CPU_DESCRIPTOR_HANDLE SrcDescriptorRangeStart,
-        _In_  D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapsType) override 
+        _In_  D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapsType) override
     {
         return;
     }
-    
-    virtual D3D12_RESOURCE_ALLOCATION_INFO STDMETHODCALLTYPE GetResourceAllocationInfo( 
+
+    virtual D3D12_RESOURCE_ALLOCATION_INFO STDMETHODCALLTYPE GetResourceAllocationInfo(
         _In_  UINT visibleMask,
         _In_  UINT numResourceDescs,
         _In_reads_(numResourceDescs)  const D3D12_RESOURCE_DESC *pResourceDescs) override
@@ -206,113 +206,113 @@ public: // ID3D12Device
         D3D12_RESOURCE_ALLOCATION_INFO mockInfo = {};
         return mockInfo;
     }
-    
-    virtual D3D12_HEAP_PROPERTIES STDMETHODCALLTYPE GetCustomHeapProperties( 
+
+    virtual D3D12_HEAP_PROPERTIES STDMETHODCALLTYPE GetCustomHeapProperties(
         _In_  UINT nodeMask,
-        D3D12_HEAP_TYPE heapType) override 
+        D3D12_HEAP_TYPE heapType) override
     {
         D3D12_HEAP_PROPERTIES mockProps = {};
         return mockProps;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE CreateCommittedResource( 
+
+    virtual HRESULT STDMETHODCALLTYPE CreateCommittedResource(
         _In_  const D3D12_HEAP_PROPERTIES *pHeapProperties,
         D3D12_HEAP_FLAGS HeapFlags,
         _In_  const D3D12_RESOURCE_DESC *pDesc,
         D3D12_RESOURCE_STATES InitialResourceState,
         _In_opt_  const D3D12_CLEAR_VALUE *pOptimizedClearValue,
         REFIID riidResource,
-        _COM_Outptr_opt_  void **ppvResource) override 
+        _COM_Outptr_opt_  void **ppvResource) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE CreateHeap( 
+
+    virtual HRESULT STDMETHODCALLTYPE CreateHeap(
         _In_  const D3D12_HEAP_DESC *pDesc,
         REFIID riid,
-        _COM_Outptr_opt_  void **ppvHeap) override 
+        _COM_Outptr_opt_  void **ppvHeap) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE CreatePlacedResource( 
+
+    virtual HRESULT STDMETHODCALLTYPE CreatePlacedResource(
         _In_  ID3D12Heap *pHeap,
         UINT64 HeapOffset,
         _In_  const D3D12_RESOURCE_DESC *pDesc,
         D3D12_RESOURCE_STATES InitialState,
         _In_opt_  const D3D12_CLEAR_VALUE *pOptimizedClearValue,
         REFIID riid,
-        _COM_Outptr_opt_  void **ppvResource) override 
+        _COM_Outptr_opt_  void **ppvResource) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE CreateReservedResource( 
+
+    virtual HRESULT STDMETHODCALLTYPE CreateReservedResource(
         _In_  const D3D12_RESOURCE_DESC *pDesc,
         D3D12_RESOURCE_STATES InitialState,
         _In_opt_  const D3D12_CLEAR_VALUE *pOptimizedClearValue,
         REFIID riid,
-        _COM_Outptr_opt_  void **ppvResource) override 
+        _COM_Outptr_opt_  void **ppvResource) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE CreateSharedHandle( 
+
+    virtual HRESULT STDMETHODCALLTYPE CreateSharedHandle(
         _In_  ID3D12DeviceChild *pObject,
         _In_opt_  const SECURITY_ATTRIBUTES *pAttributes,
         DWORD Access,
         _In_opt_  LPCWSTR Name,
-        _Out_  HANDLE *pHandle) override 
+        _Out_  HANDLE *pHandle) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE OpenSharedHandle( 
+
+    virtual HRESULT STDMETHODCALLTYPE OpenSharedHandle(
         _In_  HANDLE NTHandle,
         REFIID riid,
-        _COM_Outptr_opt_  void **ppvObj) override 
+        _COM_Outptr_opt_  void **ppvObj) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE OpenSharedHandleByName( 
+
+    virtual HRESULT STDMETHODCALLTYPE OpenSharedHandleByName(
         _In_  LPCWSTR Name,
         DWORD Access,
-        /* [annotation][out] */ 
-        _Out_  HANDLE *pNTHandle) override 
+        /* [annotation][out] */
+        _Out_  HANDLE *pNTHandle) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE MakeResident( 
+
+    virtual HRESULT STDMETHODCALLTYPE MakeResident(
         UINT NumObjects,
         _In_reads_(NumObjects)  ID3D12Pageable *const *ppObjects) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE Evict( 
+
+    virtual HRESULT STDMETHODCALLTYPE Evict(
         UINT NumObjects,
-        _In_reads_(NumObjects)  ID3D12Pageable *const *ppObjects) override 
+        _In_reads_(NumObjects)  ID3D12Pageable *const *ppObjects) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE CreateFence( 
+
+    virtual HRESULT STDMETHODCALLTYPE CreateFence(
         UINT64 InitialValue,
         D3D12_FENCE_FLAGS Flags,
         REFIID riid,
-        _COM_Outptr_  void **ppFence) override 
+        _COM_Outptr_  void **ppFence) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE GetDeviceRemovedReason( void) override 
+
+    virtual HRESULT STDMETHODCALLTYPE GetDeviceRemovedReason( void) override
     {
         return S_OK;
     }
-    
-    virtual void STDMETHODCALLTYPE GetCopyableFootprints( 
+
+    virtual void STDMETHODCALLTYPE GetCopyableFootprints(
         _In_  const D3D12_RESOURCE_DESC *pResourceDesc,
         _In_range_(0,D3D12_REQ_SUBRESOURCES)  UINT FirstSubresource,
         _In_range_(0,D3D12_REQ_SUBRESOURCES-FirstSubresource)  UINT NumSubresources,
@@ -320,26 +320,26 @@ public: // ID3D12Device
         _Out_writes_opt_(NumSubresources)  D3D12_PLACED_SUBRESOURCE_FOOTPRINT *pLayouts,
         _Out_writes_opt_(NumSubresources)  UINT *pNumRows,
         _Out_writes_opt_(NumSubresources)  UINT64 *pRowSizeInBytes,
-        _Out_opt_  UINT64 *pTotalBytes) override 
+        _Out_opt_  UINT64 *pTotalBytes) override
     {
         return;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE CreateQueryHeap( 
+
+    virtual HRESULT STDMETHODCALLTYPE CreateQueryHeap(
         _In_  const D3D12_QUERY_HEAP_DESC *pDesc,
         REFIID riid,
-        _COM_Outptr_opt_  void **ppvHeap) override 
-    {
-        return S_OK;    
-    }
-    
-    virtual HRESULT STDMETHODCALLTYPE SetStablePowerState( 
-        BOOL Enable) override 
+        _COM_Outptr_opt_  void **ppvHeap) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE CreateCommandSignature( 
+
+    virtual HRESULT STDMETHODCALLTYPE SetStablePowerState(
+        BOOL Enable) override
+    {
+        return S_OK;
+    }
+
+    virtual HRESULT STDMETHODCALLTYPE CreateCommandSignature(
         _In_  const D3D12_COMMAND_SIGNATURE_DESC *pDesc,
         _In_opt_  ID3D12RootSignature *pRootSignature,
         REFIID riid,
@@ -347,51 +347,51 @@ public: // ID3D12Device
     {
         return S_OK;
     }
-    
-    virtual void STDMETHODCALLTYPE GetResourceTiling( 
+
+    virtual void STDMETHODCALLTYPE GetResourceTiling(
         _In_  ID3D12Resource *pTiledResource,
         _Out_opt_  UINT *pNumTilesForEntireResource,
         _Out_opt_  D3D12_PACKED_MIP_INFO *pPackedMipDesc,
         _Out_opt_  D3D12_TILE_SHAPE *pStandardTileShapeForNonPackedMips,
         _Inout_opt_  UINT *pNumSubresourceTilings,
         _In_  UINT FirstSubresourceTilingToGet,
-        _Out_writes_(*pNumSubresourceTilings)  D3D12_SUBRESOURCE_TILING *pSubresourceTilingsForNonPackedMips) override 
+        _Out_writes_(*pNumSubresourceTilings)  D3D12_SUBRESOURCE_TILING *pSubresourceTilingsForNonPackedMips) override
     {
         return;
     }
-    
-    virtual LUID STDMETHODCALLTYPE GetAdapterLuid( void) override 
+
+    virtual LUID STDMETHODCALLTYPE GetAdapterLuid( void) override
     {
         LUID mockLuid = {};
         return mockLuid;
     }
 
 public: // ID3D12Object
-    virtual HRESULT STDMETHODCALLTYPE GetPrivateData( 
+    virtual HRESULT STDMETHODCALLTYPE GetPrivateData(
         _In_  REFGUID guid,
         _Inout_  UINT *pDataSize,
         _Out_writes_bytes_opt_( *pDataSize )  void *pData) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE SetPrivateData( 
+
+    virtual HRESULT STDMETHODCALLTYPE SetPrivateData(
         _In_  REFGUID guid,
         _In_  UINT DataSize,
         _In_reads_bytes_opt_( DataSize )  const void *pData) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE SetPrivateDataInterface( 
+
+    virtual HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(
         _In_  REFGUID guid,
-        _In_opt_  const IUnknown *pData) override 
+        _In_opt_  const IUnknown *pData) override
     {
         return S_OK;
     }
-    
-    virtual HRESULT STDMETHODCALLTYPE SetName( 
-        _In_z_  LPCWSTR Name) override 
+
+    virtual HRESULT STDMETHODCALLTYPE SetName(
+        _In_z_  LPCWSTR Name) override
     {
         return S_OK;
     }
@@ -405,24 +405,24 @@ public: // IUnknown
         return S_OK;
     }
 
-    virtual ULONG STDMETHODCALLTYPE AddRef() override 
+    virtual ULONG STDMETHODCALLTYPE AddRef() override
     {
         // Casual implementation. No actual actions
         return 0;
     }
 
-    virtual ULONG STDMETHODCALLTYPE Release() override 
+    virtual ULONG STDMETHODCALLTYPE Release() override
     {
         return 0;
     }
 
 
     // Major function we need to work with
-    virtual HRESULT STDMETHODCALLTYPE CheckFeatureSupport( 
+    virtual HRESULT STDMETHODCALLTYPE CheckFeatureSupport(
         D3D12_FEATURE Feature,
         _Inout_updates_bytes_(FeatureSupportDataSize)  void *pFeatureSupportData,
         UINT FeatureSupportDataSize
-    ) override 
+    ) override
     {
         switch( Feature )
         {
@@ -452,10 +452,10 @@ public: // IUnknown
                 pD3D12Options->VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation = m_VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation;
                 pD3D12Options->ResourceHeapTier                    = m_ResourceHeapTier;
             } return S_OK;
-        
+
         case D3D12_FEATURE_D3D12_OPTIONS1:
         {
-            if (!m_Options1Available) 
+            if (!m_Options1Available)
             {
                 return E_INVALIDARG;
             }
@@ -471,11 +471,11 @@ public: // IUnknown
             pD3D12Options1->ExpandedComputeResourceStates = m_ExpandedComputeResourceStates;
             pD3D12Options1->Int64ShaderOps = m_Int64ShaderOpsSupported;
         } return S_OK;
-        
-        
+
+
         case D3D12_FEATURE_D3D12_OPTIONS2:
         {
-            if (!m_Options2Available) 
+            if (!m_Options2Available)
             {
                 return E_INVALIDARG;
             }
@@ -510,7 +510,7 @@ public: // IUnknown
             }
             pRootSig->HighestVersion = static_cast<D3D_ROOT_SIGNATURE_VERSION>(std::min<int>(pRootSig->HighestVersion, m_RootSignatureHighestVersion));
         } return S_OK;
-        
+
 
         case D3D12_FEATURE_ARCHITECTURE:
             {
@@ -523,11 +523,11 @@ public: // IUnknown
 
                 // Testing only
                 // If Architecture1 is available, use data from architecture1
-                if (m_Architecture1Available) 
+                if (m_Architecture1Available)
                 {
                     D3D12_FEATURE_DATA_ARCHITECTURE1 CurFData;
                     CurFData.NodeIndex = pFData->NodeIndex;
-                    
+
                     HRESULT hr;
                     if (FAILED( hr = CheckFeatureSupport( D3D12_FEATURE_ARCHITECTURE1, &CurFData, sizeof( CurFData ) ) ))
                     {
@@ -537,12 +537,12 @@ public: // IUnknown
                     pFData->TileBasedRenderer = CurFData.TileBasedRenderer;
                     pFData->UMA = CurFData.UMA;
                     pFData->CacheCoherentUMA = CurFData.CacheCoherentUMA;
-                } 
+                }
                 else // Otherwise, load the data directly
                 {
                     // The original procedure will generate and return an E_INVALIDARG error if the NodeIndex is out of scope
                     // Mocking the behavior here by returning the rror
-                    if (!(pFData->NodeIndex < m_NodeCount)) 
+                    if (!(pFData->NodeIndex < m_NodeCount))
                     {
                         return E_INVALIDARG;
                     }
@@ -568,7 +568,7 @@ public: // IUnknown
 
                 // The original procedure will generate and return an E_INVALIDARG error if the NodeIndex is out of scope
                 // Mocking the behavior here by returning the rror
-                if (!(pFData->NodeIndex < m_NodeCount)) 
+                if (!(pFData->NodeIndex < m_NodeCount))
                 {
                     return E_INVALIDARG;
                 }
@@ -610,7 +610,7 @@ public: // IUnknown
 
         case D3D12_FEATURE_FORMAT_SUPPORT:
             {
-                D3D12_FEATURE_DATA_FORMAT_SUPPORT* pFData = 
+                D3D12_FEATURE_DATA_FORMAT_SUPPORT* pFData =
                     static_cast< D3D12_FEATURE_DATA_FORMAT_SUPPORT* >( pFeatureSupportData );
                 if (FeatureSupportDataSize != sizeof( *pFData ))
                 {
@@ -620,7 +620,7 @@ public: // IUnknown
                 pFData->Support1 = m_FormatSupport1;
                 pFData->Support2 = m_FormatSupport2;
                 // Based on the original implementation, if there's no support for the format, return an E_FAIL
-                if (m_FormatSupport1 == D3D12_FORMAT_SUPPORT1_NONE && m_FormatSupport2 == D3D12_FORMAT_SUPPORT2_NONE) 
+                if (m_FormatSupport1 == D3D12_FORMAT_SUPPORT1_NONE && m_FormatSupport2 == D3D12_FORMAT_SUPPORT2_NONE)
                 {
                     return E_FAIL;
                 }
@@ -641,18 +641,18 @@ public: // IUnknown
 
                 // The original check implementation may return E_FAIL
                 // Valid results are non-negative values including 0, smaller than D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT
-                if (!m_MultisampleQualityLevelsSucceed) 
+                if (!m_MultisampleQualityLevelsSucceed)
                 {
                     // NumQualityLevels will be set to 0 should the check fails
                     pFData->NumQualityLevels = 0;
                     return E_FAIL;
                 }
-                
+
                 pFData->NumQualityLevels = m_NumQualityLevels;
             } return S_OK;
         case D3D12_FEATURE_FORMAT_INFO:
             {
-                D3D12_FEATURE_DATA_FORMAT_INFO* pFData = 
+                D3D12_FEATURE_DATA_FORMAT_INFO* pFData =
                     static_cast< D3D12_FEATURE_DATA_FORMAT_INFO* > ( pFeatureSupportData );
                 if (FeatureSupportDataSize != sizeof( *pFData ))
                 {
@@ -660,9 +660,9 @@ public: // IUnknown
                 }
 
                 m_FormatReceived = pFData->Format;
-                
+
                 // If the format is not supported, an E_INVALIDARG will be returned
-                if (!m_DXGIFormatSupported) 
+                if (!m_DXGIFormatSupported)
                 {
                     return E_INVALIDARG;
                 }
@@ -709,7 +709,7 @@ public: // IUnknown
             } return S_OK;
         case D3D12_FEATURE_SHADER_CACHE:
             {
-                if (!m_ShaderCacheAvailable) 
+                if (!m_ShaderCacheAvailable)
                 {
                     return E_INVALIDARG;
                 }
@@ -753,10 +753,10 @@ public: // IUnknown
                 }
 
             } return S_OK;
-        
+
         case D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_SUPPORT:
             {
-                if (!m_ProtectedResourceSessionAvailable) 
+                if (!m_ProtectedResourceSessionAvailable)
                 {
                     return E_INVALIDARG;
                 }
@@ -773,10 +773,10 @@ public: // IUnknown
                     : D3D12_PROTECTED_RESOURCE_SESSION_SUPPORT_FLAG_NONE;
 
             } return S_OK;
-        
+
         case D3D12_FEATURE_D3D12_OPTIONS3:
         {
-            if (!m_Options3Available) 
+            if (!m_Options3Available)
             {
                 return E_INVALIDARG;
             }
@@ -835,7 +835,7 @@ public: // IUnknown
                 }
 
                 const UINT NodeIndex = pSerialization->NodeIndex;
-                if (NodeIndex >= m_NodeCount) 
+                if (NodeIndex >= m_NodeCount)
                 {
                     return E_INVALIDARG;
                 }
@@ -874,7 +874,7 @@ public: // IUnknown
             } return S_OK;
         case D3D12_FEATURE_DISPLAYABLE:
             {
-                if (!m_DisplayableAvailable) 
+                if (!m_DisplayableAvailable)
                 {
                     return E_INVALIDARG;
                 }
@@ -887,10 +887,10 @@ public: // IUnknown
                 pD3D12Displayable->DisplayableTexture = m_DisplayableTexture;
                 pD3D12Displayable->SharedResourceCompatibilityTier = m_SharedResourceCompatibilityTier;
             } return S_OK;
-        
+
         case D3D12_FEATURE_D3D12_OPTIONS6:
         {
-            if (!m_Options6Available) 
+            if (!m_Options6Available)
             {
                 return E_INVALIDARG;
             }
@@ -914,14 +914,14 @@ public: // IUnknown
                 {
                     return E_INVALIDARG;
                 }
-                
+
                 // Only checks inputs and outputs
                 auto* pQueryData = static_cast<D3D12_FEATURE_DATA_QUERY_META_COMMAND*>(pFeatureSupportData);
                 m_CommandID = pQueryData->CommandId;
                 m_pQueryInputData = pQueryData->pQueryInputData;
                 m_NodeMask = pQueryData->NodeMask;
                 m_QueryInputDataSizeInBytes = pQueryData->QueryInputDataSizeInBytes;
-                
+
                 pQueryData->QueryOutputDataSizeInBytes = m_QueryOutputDataSizeInBytes;
                 pQueryData->pQueryOutputData = m_pQueryOutputData;
             }
@@ -986,7 +986,7 @@ public: // IUnknown
                 }
 
             } return S_OK;
-        
+
         case D3D12_FEATURE_D3D12_OPTIONS8:
         {
             if (!m_Options8Available)
@@ -1075,7 +1075,7 @@ public: // For simplicity, allow tests to set the internal state values for this
     UINT m_NodeCount; // Simulated number of computing nodes
 
     // 0: Options
-    bool m_D3D12OptionsAvailable = true; 
+    bool m_D3D12OptionsAvailable = true;
     BOOL m_DoublePrecisionFloatShaderOps = false;
     BOOL m_OutputMergerLogicOp = false;
     D3D12_SHADER_MIN_PRECISION_SUPPORT m_ShaderMinPrecisionSupport10Bit = D3D12_SHADER_MIN_PRECISION_SUPPORT_NONE;
