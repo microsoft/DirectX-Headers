@@ -679,6 +679,16 @@ int run_per_adapter(IUnknown* adapter)
     return 0;
 }
 
+#ifdef __MINGW32__
+STDAPI
+DXCoreCreateAdapterFactory(
+    REFIID riid,
+    _COM_Outptr_ void** ppvFactory
+) {
+    return 0;
+}
+#endif
+
 int main()
 {
     ComPtr<IDXCoreAdapterFactory> adapter_factory;

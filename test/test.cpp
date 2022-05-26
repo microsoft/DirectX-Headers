@@ -13,6 +13,16 @@
 #include <directx/d3dx12.h>
 #include "dxguids/dxguids.h"
 
+#ifdef __MINGW32__
+STDAPI
+DXCoreCreateAdapterFactory(
+    REFIID riid,
+    _COM_Outptr_ void** ppvFactory
+) {
+    return 0;
+}
+#endif
+
 int main()
 {
     IDXCoreAdapter *adapter = nullptr;

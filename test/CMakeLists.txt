@@ -9,7 +9,11 @@ if(EXISTS "/usr/lib/wsl/lib/")
   list(APPEND dxlibs ${libd3d12} ${libdxcore})
 else()
 # Fallback to default: let CMake look for libs
-  list(APPEND dxlibs d3d12 dxcore)
+  list(APPEND dxlibs d3d12)
+  if (MSVC)
+    # MINGW doesn't have dxcore yet
+    list(APPEND dxlibs dxcore)
+  endif()
 endif()
 
 project(DirectX-Headers-Test
