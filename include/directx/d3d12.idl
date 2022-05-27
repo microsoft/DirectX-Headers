@@ -769,6 +769,35 @@ typedef struct D3D12_RASTERIZER_DESC
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+[ uuid( c4fec28f-7966-4e95-9f94-f431cb56c3b8 ), object, local, pointer_default( unique ) ]
+interface ID3D12Object
+    : IUnknown
+{
+    HRESULT GetPrivateData(
+        [annotation("_In_")] REFGUID guid,
+        [annotation("_Inout_")] UINT* pDataSize,
+        [annotation("_Out_writes_bytes_opt_( *pDataSize )")] void* pData );
+    HRESULT SetPrivateData(
+        [annotation("_In_")] REFGUID guid,
+        [annotation("_In_")] UINT DataSize,
+        [annotation("_In_reads_bytes_opt_( DataSize )")] const void* pData );
+    HRESULT SetPrivateDataInterface(
+        [annotation("_In_")] REFGUID guid,
+        [annotation("_In_opt_")] const IUnknown* pData );
+    HRESULT SetName(
+        [annotation("_In_z_")] LPCWSTR Name );
+}
+
+[ uuid( 905db94b-a00c-4140-9df5-2b64ca9ea357 ), object, local, pointer_default( unique ) ]
+interface ID3D12DeviceChild
+    : ID3D12Object
+{
+    HRESULT GetDevice( 
+        [in] REFIID riid,
+        [out, iid_is(riid), annotation("_COM_Outptr_opt_")] void** ppvDevice
+        );
+}
+
 [ uuid( c54a6b66-72df-4ee8-8be5-a946a1429214 ), object, local, pointer_default( unique ) ]
 interface ID3D12RootSignature
     : ID3D12DeviceChild
@@ -2880,35 +2909,6 @@ typedef struct D3D12_COMMAND_SIGNATURE_DESC
 } D3D12_COMMAND_SIGNATURE_DESC;
 
 interface ID3D12Device;
-
-[ uuid( c4fec28f-7966-4e95-9f94-f431cb56c3b8 ), object, local, pointer_default( unique ) ]
-interface ID3D12Object
-    : IUnknown
-{
-    HRESULT GetPrivateData(
-        [annotation("_In_")] REFGUID guid,
-        [annotation("_Inout_")] UINT* pDataSize,
-        [annotation("_Out_writes_bytes_opt_( *pDataSize )")] void* pData );
-    HRESULT SetPrivateData(
-        [annotation("_In_")] REFGUID guid,
-        [annotation("_In_")] UINT DataSize,
-        [annotation("_In_reads_bytes_opt_( DataSize )")] const void* pData );
-    HRESULT SetPrivateDataInterface(
-        [annotation("_In_")] REFGUID guid,
-        [annotation("_In_opt_")] const IUnknown* pData );
-    HRESULT SetName(
-        [annotation("_In_z_")] LPCWSTR Name );
-}
-
-[ uuid( 905db94b-a00c-4140-9df5-2b64ca9ea357 ), object, local, pointer_default( unique ) ]
-interface ID3D12DeviceChild
-    : ID3D12Object
-{
-    HRESULT GetDevice( 
-        [in] REFIID riid,
-        [out, iid_is(riid), annotation("_COM_Outptr_opt_")] void** ppvDevice
-        );
-}
 
 [ uuid( 63ee58fb-1268-4835-86da-f008ce62f0d6 ), object, local, pointer_default( unique ) ]
 interface ID3D12Pageable
