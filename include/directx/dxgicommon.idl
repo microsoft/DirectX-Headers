@@ -3,6 +3,8 @@
 //    Licensed under the MIT license
 //
 
+import "oaidl.idl";
+import "ocidl.idl";
 
 typedef struct DXGI_RATIONAL
 {
