@@ -197,7 +197,18 @@ public: // ID3D12Device
     {
         return;
     }
-
+#ifndef _MSC_VER
+    virtual D3D12_RESOURCE_ALLOCATION_INFO* STDMETHODCALLTYPE GetResourceAllocationInfo(
+        D3D12_RESOURCE_ALLOCATION_INFO *__ret,
+        UINT visibleMask,
+        UINT numResourceDescs,
+        const D3D12_RESOURCE_DESC *pResourceDescs) override
+    {
+        D3D12_RESOURCE_ALLOCATION_INFO mockInfo = {};
+        *__ret = mockInfo;
+        return __ret;
+    }
+#else
     virtual D3D12_RESOURCE_ALLOCATION_INFO STDMETHODCALLTYPE GetResourceAllocationInfo(
         _In_  UINT visibleMask,
         _In_  UINT numResourceDescs,
@@ -206,7 +217,19 @@ public: // ID3D12Device
         D3D12_RESOURCE_ALLOCATION_INFO mockInfo = {};
         return mockInfo;
     }
+#endif
 
+#ifndef _MSC_VER
+    virtual D3D12_HEAP_PROPERTIES* STDMETHODCALLTYPE GetCustomHeapProperties(
+        D3D12_HEAP_PROPERTIES *__ret,
+        UINT nodeMask,
+        D3D12_HEAP_TYPE heapType) override
+    {
+        D3D12_HEAP_PROPERTIES mockProps = {};
+        *__ret  = mockProps;
+        return __ret;
+    }
+#else
     virtual D3D12_HEAP_PROPERTIES STDMETHODCALLTYPE GetCustomHeapProperties(
         _In_  UINT nodeMask,
         D3D12_HEAP_TYPE heapType) override
@@ -214,6 +237,7 @@ public: // ID3D12Device
         D3D12_HEAP_PROPERTIES mockProps = {};
         return mockProps;
     }
+#endif
 
     virtual HRESULT STDMETHODCALLTYPE CreateCommittedResource(
         _In_  const D3D12_HEAP_PROPERTIES *pHeapProperties,
@@ -360,11 +384,21 @@ public: // ID3D12Device
         return;
     }
 
+#ifndef _MSC_VER
+    virtual LUID* STDMETHODCALLTYPE GetAdapterLuid(
+        LUID *__ret)
+    {
+        LUID mockLuid = {};
+        *__ret = mockLuid;
+        return __ret;
+    }
+#else
     virtual LUID STDMETHODCALLTYPE GetAdapterLuid( void) override
     {
         LUID mockLuid = {};
         return mockLuid;
     }
+#endif
 
 public: // ID3D12Object
     virtual HRESULT STDMETHODCALLTYPE GetPrivateData(
