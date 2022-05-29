@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#ifndef _WIN32
 #include <wsl/winadapter.h>
-#elif defined(__MINGW32__)
-#include <unknwn.h>
-#endif
 
 #include <iostream>
 #include <directx/d3d12.h>

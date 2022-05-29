@@ -77,7 +77,7 @@ extern "C++"
             STDMETHODCALLTYPE
             QueryInterface(_COM_Outptr_ Q * *pp)
         {
-            return QueryInterface(uuidof<Q>(), (void **)pp);
+            return QueryInterface(__uuidof(Q), (void **)pp);
         }
         END_INTERFACE
     };

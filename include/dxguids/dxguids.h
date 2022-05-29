@@ -22,23 +22,24 @@ constexpr inline bool ConstexprIsEqualGUID(REFGUID a, REFGUID b)
         a.Data4[7] == b.Data4[7];
 }
 
+template <typename T> GUID uuidof() = delete;
+template <typename T> GUID uuidof(T*) { return uuidof<T>(); }
+template <typename T> GUID uuidof(T**) { return uuidof<T>(); }
+template <typename T> GUID uuidof(T&) { return uuidof<T>(); }
+
 // Each COM interface (e.g. ID3D12Device) has a unique interface ID (IID) associated with it. With MSVC, the IID is defined 
 // along with the interface declaration using compiler intrinsics (__declspec(uuid(...)); the IID can then be retrieved 
 // using __uuidof. These intrinsics are not supported with all toolchains, so these helpers redefine IID values that can be 
 // used with the various adapter COM helpers (ComPtr, IID_PPV_ARGS, etc.) for Linux. IIDs are stable and cannot change, but as 
 // a precaution we statically assert the values are as expected when compiling for Windows.
-#ifdef _WIN32
-// winadapter.h isn't included when building for Windows, so the base function template needs to be declared.
-template <typename T> GUID uuidof() = delete;
 #if defined(_MSC_VER)
 #define _DXGUIDS_SUPPORT_STATIC_ASSERT_IID
-#elif defined(__MINGW32__)
+#elif defined(__CRT_UUID_DECL)
 /* match _mingw.h */
 #if __cpp_constexpr >= 200704l && __cpp_inline_variables >= 201606L
 #define _DXGUIDS_SUPPORT_STATIC_ASSERT_IID
 #endif /* __cpp_constexpr >= 200704l && __cpp_inline_variables >= 201606L */
 #endif /* _MSC_VER */
-#endif /* _WIN32 */
 
 #ifdef _DXGUIDS_SUPPORT_STATIC_ASSERT_IID
 #define _WINADAPTER_ASSERT_IID(InterfaceName) \
@@ -47,7 +48,7 @@ static_assert(ConstexprIsEqualGUID(uuidof<InterfaceName>(), __uuidof(InterfaceNa
 #define _WINADAPTER_ASSERT_IID(InterfaceName)
 #endif
 
-#if defined(_WIN32) && defined(__MINGW32__)
+#ifdef __CRT_UUID_DECL
 #define WINADAPTER_IID(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
 template <> constexpr GUID uuidof<InterfaceName>() \
 { \

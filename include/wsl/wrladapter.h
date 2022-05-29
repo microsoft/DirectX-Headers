@@ -320,7 +320,7 @@ namespace WRL
             (std::is_same<T, IUnknown>::value)
             && !std::is_same<U*, T*>::value, void *>::type * = 0) const throw()
         {
-            return ptr_->QueryInterface(uuidof<U>(), ptr);
+            return ptr_->QueryInterface(__uuidof(U), ptr);
         }
 
         HRESULT CopyTo(_Outptr_result_maybenull_ InterfaceType** ptr) const throw()
@@ -338,21 +338,21 @@ namespace WRL
         template<typename U>
         HRESULT CopyTo(_Outptr_result_nullonfailure_ U** ptr) const throw()
         {
-            return ptr_->QueryInterface(uuidof<U>(), reinterpret_cast<void**>(ptr));
+            return ptr_->QueryInterface(__uuidof(U), reinterpret_cast<void**>(ptr));
         }
 
         // query for U interface
         template<typename U>
         HRESULT As(_Inout_ Details::ComPtrRef<ComPtr<U>> p) const throw()
         {
-            return ptr_->QueryInterface(uuidof<U>(), p);
+            return ptr_->QueryInterface(__uuidof(U), p);
         }
 
         // query for U interface
         template<typename U>
         HRESULT As(_Out_ ComPtr<U>* p) const throw()
         {
-            return ptr_->QueryInterface(uuidof<U>(), reinterpret_cast<void**>(p->ReleaseAndGetAddressOf()));
+            return ptr_->QueryInterface(__uuidof(U), reinterpret_cast<void**>(p->ReleaseAndGetAddressOf()));
         }
 
         // query for riid interface and return as IUnknown
@@ -385,7 +385,7 @@ namespace WRL
                 *ppvObject = nullptr;
                 bool isRefDelegated = false;
                 // Prefer InlineIsEqualGUID over other forms since it's better perf on 4-byte aligned data, which is almost always the case.
-                if (InlineIsEqualGUID(riid, uuidof<IUnknown>()))
+                if (InlineIsEqualGUID(riid, __uuidof(IUnknown)))
                 {
                     *ppvObject = implements->CastToUnknown();
                     static_cast<IUnknown*>(*ppvObject)->AddRef();
@@ -439,7 +439,7 @@ namespace WRL
                 static bool CanCastTo(_In_ T* ptr, REFIID riid, _Outptr_ void **ppv) noexcept
             {
                 // Prefer InlineIsEqualGUID over other forms since it's better perf on 4-byte aligned data, which is almost always the case.
-                if (InlineIsEqualGUID(riid, uuidof<Base>()))
+                if (InlineIsEqualGUID(riid, __uuidof(Base)))
                 {
                     *ppv = static_cast<Base*>(ptr);
                     return true;
@@ -553,7 +553,7 @@ namespace WRL
             HRESULT CanCastTo(REFIID riid, _Outptr_ void **ppv, bool *pRefDelegated = nullptr) noexcept
             {
                 // Prefer InlineIsEqualGUID over other forms since it's better perf on 4-byte aligned data, which is almost always the case.
-                if (InlineIsEqualGUID(riid, uuidof<I0>()))
+                if (InlineIsEqualGUID(riid, __uuidof(I0)))
                 {
                     *ppv = reinterpret_cast<I0*>(reinterpret_cast<void*>(this));
                     return S_OK;
