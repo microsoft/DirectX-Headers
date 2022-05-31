@@ -30,29 +30,39 @@ constexpr inline bool ConstexprIsEqualGUID(REFGUID a, REFGUID b)
 #ifdef _WIN32
 // winadapter.h isn't included when building for Windows, so the base function template needs to be declared.
 template <typename T> GUID uuidof() = delete;
-#ifdef __MINGW32__
-#define WINADAPTER_IID(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-__CRT_UUID_DECL(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-template <> constexpr GUID uuidof<InterfaceName>() \
-{ \
-    return { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }; \
-} \
-static_assert(ConstexprIsEqualGUID(uuidof<InterfaceName>(), __uuidof(InterfaceName)), "GUID definition mismatch: "#InterfaceName);
-#else
-#define WINADAPTER_IID(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-template <> constexpr GUID uuidof<InterfaceName>() \
-{ \
-    return { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }; \
-} \
-static_assert(ConstexprIsEqualGUID(uuidof<InterfaceName>(), __uuidof(InterfaceName)), "GUID definition mismatch: "#InterfaceName);
-#endif /* __MINGW32__ */
-#else
-#define WINADAPTER_IID(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-template <> constexpr GUID uuidof<InterfaceName>() \
-{ \
-    return { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }; \
-}
+#if defined(_MSC_VER)
+#define _DXGUIDS_SUPPORT_STATIC_ASSERT_IID
+#elif defined(__MINGW32__)
+/* match _mingw.h */
+#if __cpp_constexpr >= 200704l && __cpp_inline_variables >= 201606L
+#define _DXGUIDS_SUPPORT_STATIC_ASSERT_IID
+#endif /* __cpp_constexpr >= 200704l && __cpp_inline_variables >= 201606L */
+#endif /* _MSC_VER */
 #endif /* _WIN32 */
+
+#ifdef _DXGUIDS_SUPPORT_STATIC_ASSERT_IID
+#define _WINADAPTER_ASSERT_IID(InterfaceName) \
+static_assert(ConstexprIsEqualGUID(uuidof<InterfaceName>(), __uuidof(InterfaceName)), "GUID definition mismatch: "#InterfaceName);
+#else
+#define _WINADAPTER_ASSERT_IID(InterfaceName)
+#endif
+
+#if defined(_WIN32) && defined(__MINGW32__)
+#define WINADAPTER_IID(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+template <> constexpr GUID uuidof<InterfaceName>() \
+{ \
+    return { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }; \
+} \
+__CRT_UUID_DECL(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+_WINADAPTER_ASSERT_IID(InterfaceName)
+#else
+#define WINADAPTER_IID(InterfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+template <> constexpr GUID uuidof<InterfaceName>() \
+{ \
+    return { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }; \
+} \
+_WINADAPTER_ASSERT_IID(InterfaceName)
+#endif /* defined(_WIN32) && defined(__MINGW32__) */
 
 // Direct3D
 #ifdef __d3d12_h__
