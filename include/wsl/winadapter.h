@@ -20,7 +20,7 @@ typedef uint8_t UINT8;
 typedef int8_t INT8;
 typedef uint16_t UINT16;
 typedef int16_t INT16;
-typedef uint32_t UINT32, UINT, ULONG, DWORD, BOOL;
+typedef uint32_t UINT32, UINT, ULONG, DWORD, BOOL, WINBOOL;
 typedef int32_t INT32, INT, LONG;
 typedef uint64_t UINT64, ULONG_PTR;
 typedef int64_t INT64, LONG_PTR;
@@ -63,21 +63,17 @@ typedef const wchar_t *LPCWSTR, *PCWSTR;
 #define ULONG_MAX UINT_MAX
 
 // Misc defines
-#define interface struct
 #define MIDL_INTERFACE(x) interface
 #define __analysis_assume(x)
 #define TRUE 1u
 #define FALSE 0u
-#define DECLARE_INTERFACE(iface)                interface iface
-#define PURE = 0
-#define THIS_
 #define DECLSPEC_UUID(x)
 #define DECLSPEC_NOVTABLE
 #define DECLSPEC_SELECTANY
 #ifdef __cplusplus
 #define EXTERN_C extern "C"
 #else
-#define EXTERN_C
+#define EXTERN_C extern
 #endif
 #define APIENTRY
 #define OUT
@@ -110,23 +106,21 @@ typedef struct _GUID {
 } GUID;
 
 #ifdef __cplusplus
-#ifdef INITGUID
-#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) extern "C" const GUID name = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
-#else
-#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) extern "C" const GUID name
-#endif
-
 template <typename T> GUID uuidof() = delete;
 template <typename T> GUID uuidof(T*) { return uuidof<T>(); }
 template <typename T> GUID uuidof(T**) { return uuidof<T>(); }
 template <typename T> GUID uuidof(T&) { return uuidof<T>(); }
 #define __uuidof(x) uuidof(x)
-#else
-#ifdef INITGUID
-#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) const GUID name = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
-#else
-#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) extern const GUID name
 #endif
+
+#ifdef INITGUID
+#ifdef __cplusplus
+#define DEFINE_GUID(name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) EXTERN_C const GUID DECLSPEC_SELECTANY name = { l, w1, w2, { b1, b2, b3, b4, b5, b6, b7, b8 } }
+#else
+#define DEFINE_GUID(name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) const GUID DECLSPEC_SELECTANY name = { l, w1, w2, { b1, b2, b3, b4, b5, b6, b7, b8 } }
+#endif
+#else
+#define DEFINE_GUID(name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) EXTERN_C const GUID name
 #endif
 
 typedef GUID IID;
@@ -228,12 +222,49 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define __stdcall
 #define STDMETHODCALLTYPE
 #define STDAPICALLTYPE
-#define STDAPI extern "C" HRESULT STDAPICALLTYPE
+#define STDAPI EXTERN_C HRESULT STDAPICALLTYPE
 #define WINAPI
-#define STDMETHOD(name) virtual HRESULT name
-#define STDMETHOD_(type,name) virtual type name
-#define IFACEMETHOD(method) /*__override*/ STDMETHOD(method)
-#define IFACEMETHOD_(type, method) /*__override*/ STDMETHOD_(type, method)
+
+#define interface struct
+#if defined (__cplusplus) && !defined (CINTERFACE)
+#define STDMETHOD(method) virtual HRESULT STDMETHODCALLTYPE method
+#define STDMETHOD_(type, method) virtual type STDMETHODCALLTYPE method
+#define PURE = 0
+#define THIS_
+#define THIS void
+#define DECLARE_INTERFACE(iface) interface DECLSPEC_NOVTABLE iface
+#define DECLARE_INTERFACE_(iface, baseiface) interface DECLSPEC_NOVTABLE iface : public baseiface
+
+interface IUnknown;
+extern "C++"
+{
+    template<typename T> void** IID_PPV_ARGS_Helper(T** pp)
+    {
+        static_cast<IUnknown*>(*pp);
+        return reinterpret_cast<void**>(pp);
+    }
+}
+#define IID_PPV_ARGS(ppType) __uuidof (**(ppType)), IID_PPV_ARGS_Helper (ppType)
+#else
+#define STDMETHOD(method) HRESULT (STDMETHODCALLTYPE *method)
+#define STDMETHOD_(type, method) type (STDMETHODCALLTYPE *method)
+#define PURE
+#define THIS_ INTERFACE *This,
+#define THIS INTERFACE *This
+#ifdef CONST_VTABLE
+#define DECLARE_INTERFACE(iface) typedef interface iface { const struct iface##Vtbl *lpVtbl; } iface; typedef const struct iface##Vtbl iface##Vtbl; const struct iface##Vtbl
+#else
+#define DECLARE_INTERFACE(iface) typedef interface iface { struct iface##Vtbl *lpVtbl; } iface; typedef struct iface##Vtbl iface##Vtbl; struct iface##Vtbl
+#endif
+#define DECLARE_INTERFACE_(iface, baseiface) DECLARE_INTERFACE (iface)
+#endif
+
+#define IFACEMETHOD(method) /*override*/ STDMETHOD (method)
+#define IFACEMETHOD_(type, method) /*override*/ STDMETHOD_(type, method)
+#ifndef BEGIN_INTERFACE
+#define BEGIN_INTERFACE
+#define END_INTERFACE
+#endif
 
 // Error codes
 typedef LONG HRESULT;
@@ -298,7 +329,12 @@ typedef ULARGE_INTEGER *PULARGE_INTEGER;
   };                                                                           \
   typedef struct name##__ *name
 
-struct SECURITY_ATTRIBUTES;
+typedef struct _SECURITY_ATTRIBUTES {
+    DWORD nLength;
+    LPVOID lpSecurityDescriptor;
+    WINBOOL bInheritHandle;
+} SECURITY_ATTRIBUTES;
+
 struct STATSTG;
 
 #ifdef __cplusplus
@@ -352,43 +388,14 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { return ENUMTYPE(~((_ENUM_FLA
 inline constexpr ENUMTYPE operator ^ (ENUMTYPE a, ENUMTYPE b) { return ENUMTYPE(((_ENUM_FLAG_SIZED_INTEGER<ENUMTYPE>::type)a) ^ ((_ENUM_FLAG_SIZED_INTEGER<ENUMTYPE>::type)b)); } \
 inline ENUMTYPE &operator ^= (ENUMTYPE &a, ENUMTYPE b) { return (ENUMTYPE &)(((_ENUM_FLAG_SIZED_INTEGER<ENUMTYPE>::type &)a) ^= ((_ENUM_FLAG_SIZED_INTEGER<ENUMTYPE>::type)b)); } \
 }
+#else
+#define DEFINE_ENUM_FLAG_OPERATORS(ENUMTYPE) /* */
 #endif
 
 // D3DX12 uses these
 #include <stdlib.h>
 #define HeapAlloc(heap, flags, size) malloc(size)
 #define HeapFree(heap, flags, ptr) free(ptr)
-
-#ifdef __cplusplus
-// IUnknown
-
-interface DECLSPEC_UUID("00000000-0000-0000-C000-000000000046") DECLSPEC_NOVTABLE IUnknown
-{
-   virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) = 0;
-   virtual ULONG STDMETHODCALLTYPE AddRef() = 0;
-   virtual ULONG STDMETHODCALLTYPE Release() = 0;
-
-   template <class Q> HRESULT STDMETHODCALLTYPE QueryInterface(Q** pp) {
-       return QueryInterface(uuidof<Q>(), (void **)pp);
-   }
-};
-
-template <> constexpr GUID uuidof<IUnknown>()
-{
-    return { 0x00000000, 0x0000, 0x0000, { 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 } };
-}
-
-extern "C++"
-{
-    template<typename T> void** IID_PPV_ARGS_Helper(T** pp)
-    {
-        static_cast<IUnknown*>(*pp);
-        return reinterpret_cast<void**>(pp);
-    }
-}
-
-#define IID_PPV_ARGS(ppType) __uuidof(**(ppType)), IID_PPV_ARGS_Helper(ppType)
-#endif
 
 #if defined(lint)
 // Note: lint -e530 says don't complain about uninitialized variables for
@@ -402,4 +409,13 @@ extern "C++"
     /*lint -restore */
 #else
 #define UNREFERENCED_PARAMETER(P) (P)
+#endif
+
+#include <unknwn.h>
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+template <> constexpr GUID uuidof<IUnknown>()
+{
+    return { 0x00000000, 0x0000, 0x0000, { 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 } };
+}
 #endif

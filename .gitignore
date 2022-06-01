@@ -20,3 +20,4 @@
 .vs
 /out
 /CMakeUserPresets.json
+/build*
