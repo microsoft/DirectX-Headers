@@ -23,11 +23,16 @@ DXCoreCreateAdapterFactory(
 }
 #endif
 
+int check_uuid_linkage() {
+   auto uuid_i_unknown = IID_IUnknown;
+   return sizeof(uuid_i_unknown);
+}
+
 int main()
 {
     IDXCoreAdapter *adapter = nullptr;
     ID3D12Device *device = nullptr;
-
+    check_uuid_linkage();
     {
         IDXCoreAdapterFactory *factory = nullptr;
         if (FAILED(DXCoreCreateAdapterFactory(&factory)))
