@@ -22,6 +22,7 @@ DXCoreCreateAdapterFactory(
     _COM_Outptr_ void** ppvFactory
 );
 
+#ifdef __cplusplus
 template <class T>
 HRESULT
 DXCoreCreateAdapterFactory(
@@ -30,6 +31,7 @@ DXCoreCreateAdapterFactory(
 {
     return DXCoreCreateAdapterFactory(IID_PPV_ARGS(ppvFactory));
 }
+#endif
 
 #endif // (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 

@@ -1,8 +1,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-project('DirectX-Headers', 'cpp', version : '1.602.0',
-        default_options : ['cpp_std=c++14'])
+project('DirectX-Headers', ['c', 'cpp'], version : '1.602.0',
+        default_options : ['c_std=c99', 'cpp_std=c++14'])
 
 inc_dirs = [include_directories('include', is_system : true)]
 install_inc_subdirs = ['']
@@ -12,7 +12,7 @@ if host_machine.system() != 'windows'
     install_inc_subdirs += ['', 'wsl/stubs', 'directx']
 endif
 
-guids_lib = static_library('DirectX-Guids', 'src/dxguids.cpp', include_directories : inc_dirs, install : true)
+guids_lib = static_library('DirectX-Guids', 'src/dxguids.c', include_directories : inc_dirs, install : true)
 
 dep_dxheaders = declare_dependency(
     link_with : guids_lib,

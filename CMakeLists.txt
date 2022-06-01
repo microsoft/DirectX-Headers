@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 cmake_minimum_required(VERSION 3.10.2)
 project(DirectX-Headers
-    LANGUAGES CXX
+    LANGUAGES C CXX
     VERSION 1.602.0
 )
 
@@ -48,7 +48,7 @@ endif()
 
 add_library(Microsoft::DirectX-Headers ALIAS DirectX-Headers)
 
-add_library(DirectX-Guids STATIC src/dxguids.cpp)
+add_library(DirectX-Guids STATIC src/dxguids.c)
 target_link_libraries(DirectX-Guids PRIVATE DirectX-Headers)
 
 add_library(Microsoft::DirectX-Guids ALIAS DirectX-Guids)
