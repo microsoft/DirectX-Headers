@@ -208,6 +208,7 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define _In_count_(x)
 #define _In_opt_count_(x)
 #define _Use_decl_annotations_
+#define _Null_terminated_
 
 // Calling conventions
 #define __cdecl
