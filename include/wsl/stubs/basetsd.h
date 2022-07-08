@@ -233,7 +233,7 @@ extern "C++"
 {
     template<typename T> void** IID_PPV_ARGS_Helper(T** pp)
     {
-        static_cast<IUnknown*>(*pp);
+        (void)static_cast<IUnknown*>(*pp);
         return reinterpret_cast<void**>(pp);
     }
 }
