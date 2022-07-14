@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-project('DirectX-Headers', 'cpp', version : '1.602.0',
+project('DirectX-Headers', 'cpp', version : '1.606.3',
         default_options : ['cpp_std=c++14'])
 
 inc_dirs = [include_directories('include', is_system : true)]
