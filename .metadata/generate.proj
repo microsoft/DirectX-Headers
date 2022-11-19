@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.Windows.WinmdGenerator/0.39.18-preview">
+    <PropertyGroup Label="Globals">
+        <OutputWinmd>../.windows/winmd/Windows.Win32.Graphics.Direct3D12.winmd</OutputWinmd>
+        <WinmdVersion>1.608.0</WinmdVersion>
+        <IdlDir>../include/directx</IdlDir>
+    </PropertyGroup>
+    <ItemGroup>
+        <Idls Include="$(IdlDir)/dxgicommon.idl;$(IdlDir)/dxgiformat.idl;$(IdlDir)/d3dcommon.idl;$(IdlDir)/d3d12.idl" />
+        <ManualCs Include="manual\*.cs"/>
+
+        <Partition Include="dxgicommon.cpp">
+            <TraverseFiles>$(CompiledHeadersDir)/dxgiformat.h;$(CompiledHeadersDir)/dxgicommon.h</TraverseFiles>
+            <ExcludeFromCrossarch>true</ExcludeFromCrossarch>
+            <Namespace>Windows.Win32.Graphics.Dxgi.Common</Namespace>
+        </Partition>
+
+        <Partition Include="d3dcommon.cpp">
+            <TraverseFiles>$(CompiledHeadersDir)/d3dcommon.h</TraverseFiles>
+            <ExcludeFromCrossarch>true</ExcludeFromCrossarch>
+            <Namespace>Windows.Win32.Graphics.Direct3D</Namespace>
+        </Partition>
+
+        <Partition Include="d3d12.cpp">
+            <TraverseFiles>$(CompiledHeadersDir)/d3d12.h</TraverseFiles>
+            <ExcludeFromCrossarch>true</ExcludeFromCrossarch>
+            <Namespace>Windows.Win32.Graphics.Direct3D12</Namespace>
+        </Partition>
+    </ItemGroup>
+</Project>

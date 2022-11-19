@@ -1,0 +1,16 @@
+--with-librarypath
+D3D12SerializeVersionedRootSignature=d3d12.dll
+D3D12SerializeRootSignature=d3d12.dll
+D3D12PIXReportCounter=d3d12.dll
+D3D12PIXNotifyWakeFromFenceSignal=d3d12.dll
+D3D12PIXGetThreadInfo=d3d12.dll
+D3D12PIXEventsReplaceBlock=d3d12.dll
+D3D12GetInterface=d3d12.dll
+D3D12GetDebugInterface=d3d12.dll
+D3D12EnableExperimentalFeatures=d3d12.dll
+D3D12CreateVersionedRootSignatureDeserializer=d3d12.dll
+D3D12CreateRootSignatureDeserializer=d3d12.dll
+D3D12CreateDevice=d3d12.dll
+D3D12CoreRegisterLayers=d3d12.dll
+D3D12CoreGetLayeredDeviceSize=d3d12.dll
+D3D12CoreCreateLayeredDevice=d3d12.dll

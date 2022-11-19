@@ -21,3 +21,5 @@
 /out
 /CMakeUserPresets.json
 /build*
+/.metadata/obj
+/.metadata/bin
