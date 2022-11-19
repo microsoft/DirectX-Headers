@@ -293,7 +293,7 @@ const UINT D3D12_OS_RESERVED_REGISTER_SPACE_VALUES_END = 0xffffffff;
 const UINT D3D12_OS_RESERVED_REGISTER_SPACE_VALUES_START = 0xfffffff8;
 const UINT D3D12_PACKED_TILE = 0xffffffff;
 const UINT D3D12_PIXEL_ADDRESS_RANGE_BIT_COUNT = 15;
-const UINT D3D12_PREVIEW_SDK_VERSION = 706;
+const UINT D3D12_PREVIEW_SDK_VERSION = 707;
 const UINT D3D12_PRE_SCISSOR_PIXEL_ADDRESS_RANGE_BIT_COUNT = 16;
 const UINT D3D12_PS_CS_UAV_REGISTER_COMPONENTS = 1;
 const UINT D3D12_PS_CS_UAV_REGISTER_COUNT = 8;
@@ -361,7 +361,7 @@ const UINT D3D12_REQ_TEXTURECUBE_DIMENSION = 16384;
 const UINT D3D12_RESINFO_INSTRUCTION_MISSING_COMPONENT_RETVAL = 0;
 const UINT D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES = 0xffffffff;
 const UINT D3D12_RS_SET_SHADING_RATE_COMBINER_COUNT = 2;
-const UINT D3D12_SDK_VERSION = 606;
+const UINT D3D12_SDK_VERSION = 608;
 const UINT D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES = 32;
 const UINT D3D12_SHADER_MAJOR_VERSION = 5;
 const UINT D3D12_SHADER_MAX_INSTANCES = 65535;
@@ -788,6 +788,21 @@ typedef struct D3D12_RASTERIZER_DESC
     D3D12_CONSERVATIVE_RASTERIZATION_MODE ConservativeRaster;
 } D3D12_RASTERIZER_DESC;
 
+typedef struct D3D12_RASTERIZER_DESC1
+{
+    D3D12_FILL_MODE FillMode;
+    D3D12_CULL_MODE CullMode;
+    BOOL FrontCounterClockwise;
+    FLOAT DepthBias;
+    FLOAT DepthBiasClamp;
+    FLOAT SlopeScaledDepthBias;
+    BOOL DepthClipEnable;
+    BOOL MultisampleEnable;
+    BOOL AntialiasedLineEnable;
+    UINT ForcedSampleCount;
+    D3D12_CONSERVATIVE_RASTERIZATION_MODE ConservativeRaster;
+} D3D12_RASTERIZER_DESC1;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Pipeline State v1
@@ -838,6 +853,8 @@ typedef enum D3D12_PIPELINE_STATE_FLAGS
 {
     D3D12_PIPELINE_STATE_FLAG_NONE = 0x0,
     D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG = 0x1,
+    D3D12_PIPELINE_STATE_FLAG_DYNAMIC_DEPTH_BIAS = 0x4,
+    D3D12_PIPELINE_STATE_FLAG_DYNAMIC_INDEX_BUFFER_STRIP_CUT = 0x8,
 
 } D3D12_PIPELINE_STATE_FLAGS;
 cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_PIPELINE_STATE_FLAGS );" )
@@ -922,6 +939,7 @@ typedef enum D3D12_PIPELINE_STATE_SUBOBJECT_TYPE
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_AS = 24, // D3D12_SHADER_BYTECODE
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MS = 25, // D3D12_SHADER_BYTECODE
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL2 = 26, // D3D12_DEPTH_STENCIL_DESC2
+    D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER1 = 27, // D3D12_RASTERIZER_DESC1
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MAX_VALID,
 } D3D12_PIPELINE_STATE_SUBOBJECT_TYPE;
 
@@ -968,6 +986,7 @@ typedef enum D3D12_FEATURE
     D3D12_FEATURE_D3D12_OPTIONS13                       = 42,
     D3D12_FEATURE_D3D12_OPTIONS14                       = 43,
     D3D12_FEATURE_D3D12_OPTIONS15                       = 44,
+    D3D12_FEATURE_D3D12_OPTIONS16                       = 45
 } D3D12_FEATURE;
 
 typedef enum D3D12_SHADER_MIN_PRECISION_SUPPORT
@@ -1469,6 +1488,12 @@ typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS15
     [annotation("_Out_")] BOOL DynamicIndexBufferStripCutSupported;
 } D3D12_FEATURE_DATA_D3D12_OPTIONS15;
 
+// D3D12_FEATURE_D3D12_OPTIONS16
+typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS16
+{
+    [annotation("_Out_")] BOOL DynamicDepthBiasSupported;
+    [annotation("_Out_")] BOOL Reserved;                //
+} D3D12_FEATURE_DATA_D3D12_OPTIONS16;
 
 
 typedef struct D3D12_RESOURCE_ALLOCATION_INFO
@@ -5269,7 +5294,7 @@ typedef enum D3D12_BARRIER_SYNC
     D3D12_BARRIER_SYNC_NONE                                                     = 0x0,
     D3D12_BARRIER_SYNC_ALL                                                      = 0x1,
     D3D12_BARRIER_SYNC_DRAW                                                     = 0x2,
-    D3D12_BARRIER_SYNC_INPUT_ASSEMBLER                                          = 0x4,
+    D3D12_BARRIER_SYNC_INDEX_INPUT                                              = 0x4,
     D3D12_BARRIER_SYNC_VERTEX_SHADING                                           = 0x8,
     D3D12_BARRIER_SYNC_PIXEL_SHADING                                            = 0x10,
     D3D12_BARRIER_SYNC_DEPTH_STENCIL                                            = 0x20,
@@ -5854,6 +5879,20 @@ interface ID3D12GraphicsCommandList8 : ID3D12GraphicsCommandList7
     );
 };
 
+[uuid(34ed2808-ffe6-4c2b-b11a-cabd2b0c59e1), object, local, pointer_default(unique)]
+interface ID3D12GraphicsCommandList9 : ID3D12GraphicsCommandList8
+{
+    void RSSetDepthBias(
+        [annotation("_In_")] FLOAT DepthBias,
+        [annotation("_In_")] FLOAT DepthBiasClamp,
+        [annotation("_In_")] FLOAT SlopeScaledDepthBias
+    );
+
+    void IASetIndexBufferStripCutValue(
+        [annotation("_In_")] D3D12_INDEX_BUFFER_STRIP_CUT_VALUE IBStripCutValue
+    );
+};
+
 
 //----------------------------------------------------------------------------------------------------------
 // Old types which are still supported by the runtime for app-compat
@@ -5926,3 +5965,4 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList5,0x55050859,0x4024,0x474c,
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList6,0xc3827890,0xe548,0x4cfa,0x96,0xcf,0x56,0x89,0xa9,0x37,0x0f,0x80);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList7,0xdd171223,0x8b61,0x4769,0x90,0xe3,0x16,0x0c,0xcd,0xe4,0xe2,0xc1);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList8,0xee936ef9,0x599d,0x4d28,0x93,0x8e,0x23,0xc4,0xad,0x05,0xce,0x51);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList9,0x34ed2808,0xffe6,0x4c2b,0xb1,0x1a,0xca,0xbd,0x2b,0x0c,0x59,0xe1);" )
