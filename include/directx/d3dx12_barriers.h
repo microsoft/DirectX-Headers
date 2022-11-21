@@ -58,6 +58,8 @@ struct CD3DX12_RESOURCE_BARRIER : public D3D12_RESOURCE_BARRIER
     }
 };
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
+
 //================================================================================================
 // D3DX12 Enhanced Barrier Helpers
 //================================================================================================
@@ -183,6 +185,7 @@ public:
     }
 };
 
+#endif // D3D12_SDK_VERSION >= 608
 
 #endif // defined( __cplusplus )
 

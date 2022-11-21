@@ -61,10 +61,14 @@ typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< D3D12_SHADER_BYTECODE,         
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< CD3DX12_BLEND_DESC,                 D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_BLEND,          CD3DX12_DEFAULT>   CD3DX12_PIPELINE_STATE_STREAM_BLEND_DESC;
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< CD3DX12_DEPTH_STENCIL_DESC,         D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL,  CD3DX12_DEFAULT>   CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL;
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< CD3DX12_DEPTH_STENCIL_DESC1,        D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL1, CD3DX12_DEFAULT>   CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL1;
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< CD3DX12_DEPTH_STENCIL_DESC2,        D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL2, CD3DX12_DEFAULT>   CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL2;
+#endif
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< DXGI_FORMAT,                        D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL_FORMAT>              CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT;
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< CD3DX12_RASTERIZER_DESC,            D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER,     CD3DX12_DEFAULT>   CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER;
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< CD3DX12_RASTERIZER_DESC1,           D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER1,    CD3DX12_DEFAULT>   CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER1;
+#endif
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< D3D12_RT_FORMAT_ARRAY,              D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RENDER_TARGET_FORMATS>             CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS;
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< DXGI_SAMPLE_DESC,                   D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_DESC,    DefaultSampleDesc> CD3DX12_PIPELINE_STATE_STREAM_SAMPLE_DESC;
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< UINT,                               D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_MASK,    DefaultSampleMask> CD3DX12_PIPELINE_STATE_STREAM_SAMPLE_MASK;
@@ -95,10 +99,14 @@ struct ID3DX12PipelineParserCallbacks
     virtual void BlendStateCb(const D3D12_BLEND_DESC&) {}
     virtual void DepthStencilStateCb(const D3D12_DEPTH_STENCIL_DESC&) {}
     virtual void DepthStencilState1Cb(const D3D12_DEPTH_STENCIL_DESC1&) {}
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
     virtual void DepthStencilState2Cb(const D3D12_DEPTH_STENCIL_DESC2&) {}
+#endif
     virtual void DSVFormatCb(DXGI_FORMAT) {}
     virtual void RasterizerStateCb(const D3D12_RASTERIZER_DESC&) {}
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
     virtual void RasterizerState2Cb(const D3D12_RASTERIZER_DESC1&) {}
+#endif
     virtual void RTVFormatsCb(const D3D12_RT_FORMAT_ARRAY&) {}
     virtual void SampleDescCb(const DXGI_SAMPLE_DESC&) {}
     virtual void SampleMaskCb(UINT) {}
@@ -133,7 +141,7 @@ struct D3DX12_MESH_SHADER_PIPELINE_STATE_DESC
     D3D12_PIPELINE_STATE_FLAGS    Flags;
 };
 
-
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
 // Use CD3DX12_PIPELINE_STATE_STREAM4 for D3D12_RASTERIZER_DESC1 when CheckFeatureSupport returns true for Options16::DynamicDepthBiasSupported is true
 // Use CD3DX12_PIPELINE_STATE_STREAM3 for D3D12_DEPTH_STENCIL_DESC2 when CheckFeatureSupport returns true for Options14::IndependentFrontAndBackStencilSupported is true
 // Use CD3DX12_PIPELINE_STATE_STREAM2 for OS Build 19041+ (where there is a new mesh shader pipeline).
@@ -217,7 +225,7 @@ struct CD3DX12_PIPELINE_STATE_STREAM4
     CD3DX12_PIPELINE_STATE_STREAM_SAMPLE_MASK SampleMask;
     CD3DX12_PIPELINE_STATE_STREAM_CACHED_PSO CachedPSO;
     CD3DX12_PIPELINE_STATE_STREAM_VIEW_INSTANCING ViewInstancingDesc;
-    
+
     D3D12_GRAPHICS_PIPELINE_STATE_DESC GraphicsDescV0() const noexcept
     {
         D3D12_GRAPHICS_PIPELINE_STATE_DESC D;
@@ -255,8 +263,9 @@ struct CD3DX12_PIPELINE_STATE_STREAM4
         return D;
     }
 };
+#endif // D3D12_SDK_VERSION >= 608
 
-
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
 // Use CD3DX12_PIPELINE_STATE_STREAM3 for D3D12_DEPTH_STENCIL_DESC2 when CheckFeatureSupport returns true for Options14::IndependentFrontAndBackStencilSupported is true
 // Use CD3DX12_PIPELINE_STATE_STREAM2 for OS Build 19041+ (where there is a new mesh shader pipeline).
 // Use CD3DX12_PIPELINE_STATE_STREAM1 for OS Build 16299+ (where there is a new view instancing subobject).
@@ -339,7 +348,7 @@ struct CD3DX12_PIPELINE_STATE_STREAM3
     CD3DX12_PIPELINE_STATE_STREAM_SAMPLE_MASK SampleMask;
     CD3DX12_PIPELINE_STATE_STREAM_CACHED_PSO CachedPSO;
     CD3DX12_PIPELINE_STATE_STREAM_VIEW_INSTANCING ViewInstancingDesc;
-    
+
     D3D12_GRAPHICS_PIPELINE_STATE_DESC GraphicsDescV0() const noexcept
     {
         D3D12_GRAPHICS_PIPELINE_STATE_DESC D;
@@ -377,7 +386,7 @@ struct CD3DX12_PIPELINE_STATE_STREAM3
         return D;
     }
 };
-
+#endif // D3D12_SDK_VERSION >= 606
 
 // CD3DX12_PIPELINE_STATE_STREAM2 Works on OS Build 19041+ (where there is a new mesh shader pipeline).
 // Use CD3DX12_PIPELINE_STATE_STREAM1 for OS Build 16299+ (where there is a new view instancing subobject).
@@ -823,6 +832,7 @@ private:
     bool SeenDSS;
 };
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
 struct CD3DX12_PIPELINE_STATE_STREAM3_PARSE_HELPER : public ID3DX12PipelineParserCallbacks
 {
     CD3DX12_PIPELINE_STATE_STREAM3 PipelineStream;
@@ -887,7 +897,9 @@ struct CD3DX12_PIPELINE_STATE_STREAM3_PARSE_HELPER : public ID3DX12PipelineParse
 private:
     bool SeenDSS;
 };
+#endif // D3D12_SDK_VERSION >= 606
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
 struct CD3DX12_PIPELINE_STATE_STREAM4_PARSE_HELPER : public ID3DX12PipelineParserCallbacks
 {
     CD3DX12_PIPELINE_STATE_STREAM4 PipelineStream;
@@ -953,6 +965,7 @@ struct CD3DX12_PIPELINE_STATE_STREAM4_PARSE_HELPER : public ID3DX12PipelineParse
 private:
     bool SeenDSS;
 };
+#endif // D3D12_SDK_VERSION >= 608
 
 struct CD3DX12_PIPELINE_STATE_STREAM_PARSE_HELPER : public ID3DX12PipelineParserCallbacks
 {
@@ -1018,10 +1031,14 @@ inline D3D12_PIPELINE_STATE_SUBOBJECT_TYPE D3DX12GetBaseSubobjectType(D3D12_PIPE
     {
     case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL1:
         return D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL;
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
     case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL2:
         return D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL;
+#endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
     case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER1:
         return D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER;
+#endif
     default:
         return SubobjectType;
     }
@@ -1110,10 +1127,12 @@ inline HRESULT D3DX12ParsePipelineStream(const D3D12_PIPELINE_STATE_STREAM_DESC&
             pCallbacks->RasterizerStateCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::RasterizerState)*>(pStream));
             SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::RasterizerState);
             break;
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER1:
             pCallbacks->RasterizerState2Cb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM4::RasterizerState)*>(pStream));
             SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM4::RasterizerState);
             break;
+#endif
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL:
             pCallbacks->DepthStencilStateCb(*reinterpret_cast<CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL*>(pStream));
             SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL);
@@ -1122,10 +1141,12 @@ inline HRESULT D3DX12ParsePipelineStream(const D3D12_PIPELINE_STATE_STREAM_DESC&
             pCallbacks->DepthStencilState1Cb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::DepthStencilState)*>(pStream));
             SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::DepthStencilState);
             break;
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL2:
             pCallbacks->DepthStencilState2Cb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM3::DepthStencilState)*>(pStream));
             SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM3::DepthStencilState);
             break;
+#endif
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_INPUT_LAYOUT:
             pCallbacks->InputLayoutCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::InputLayout)*>(pStream));
             SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::InputLayout);

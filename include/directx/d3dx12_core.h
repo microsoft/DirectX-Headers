@@ -335,6 +335,7 @@ struct CD3DX12_DEPTH_STENCIL_DESC1 : public D3D12_DEPTH_STENCIL_DESC1
 };
 
 //------------------------------------------------------------------------------------------------
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
 struct CD3DX12_DEPTH_STENCIL_DESC2 : public D3D12_DEPTH_STENCIL_DESC2
 {
     CD3DX12_DEPTH_STENCIL_DESC2() = default;
@@ -458,6 +459,7 @@ struct CD3DX12_DEPTH_STENCIL_DESC2 : public D3D12_DEPTH_STENCIL_DESC2
         return D;
     }
 };
+#endif // D3D12_SDK_VERSION >= 606
 
 //------------------------------------------------------------------------------------------------
 struct CD3DX12_BLEND_DESC : public D3D12_BLEND_DESC
@@ -533,6 +535,7 @@ struct CD3DX12_RASTERIZER_DESC : public D3D12_RASTERIZER_DESC
 
 
 //------------------------------------------------------------------------------------------------
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
 struct CD3DX12_RASTERIZER_DESC1 : public D3D12_RASTERIZER_DESC1
 {
     CD3DX12_RASTERIZER_DESC1() = default;
@@ -546,7 +549,7 @@ struct CD3DX12_RASTERIZER_DESC1 : public D3D12_RASTERIZER_DESC1
         FillMode = o.FillMode;
         CullMode = o.CullMode;
         FrontCounterClockwise = o.FrontCounterClockwise;
-        DepthBias = (FLOAT)o.DepthBias;
+        DepthBias = static_cast<FLOAT>(o.DepthBias);
         DepthBiasClamp = o.DepthBiasClamp;
         SlopeScaledDepthBias = o.SlopeScaledDepthBias;
         DepthClipEnable = o.DepthClipEnable;
@@ -603,7 +606,7 @@ struct CD3DX12_RASTERIZER_DESC1 : public D3D12_RASTERIZER_DESC1
         o.FillMode = FillMode;
         o.CullMode = CullMode;
         o.FrontCounterClockwise = FrontCounterClockwise;
-        o.DepthBias = (INT)DepthBias;
+        o.DepthBias = static_cast<INT>(DepthBias);
         o.DepthBiasClamp = DepthBiasClamp;
         o.SlopeScaledDepthBias = SlopeScaledDepthBias;
         o.DepthClipEnable = DepthClipEnable;
@@ -615,6 +618,7 @@ struct CD3DX12_RASTERIZER_DESC1 : public D3D12_RASTERIZER_DESC1
         return o;
     }
 };
+#endif // D3D12_SDK_VERSION >= 608
 
 //------------------------------------------------------------------------------------------------
 struct CD3DX12_RESOURCE_ALLOCATION_INFO : public D3D12_RESOURCE_ALLOCATION_INFO
@@ -664,8 +668,8 @@ struct CD3DX12_HEAP_PROPERTIES : public D3D12_HEAP_PROPERTIES
     }
     bool IsCPUAccessible() const noexcept
     {
-        return Type == D3D12_HEAP_TYPE_UPLOAD || Type == D3D12_HEAP_TYPE_READBACK || 
-            (Type == D3D12_HEAP_TYPE_CUSTOM &&
+        return Type == D3D12_HEAP_TYPE_UPLOAD || Type == D3D12_HEAP_TYPE_READBACK
+            || (Type == D3D12_HEAP_TYPE_CUSTOM &&
                 (CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_WRITE_COMBINE || CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_WRITE_BACK));
     }
 };
@@ -1353,7 +1357,7 @@ inline const CD3DX12_RESOURCE_DESC1* D3DX12ConditionallyExpandAPIDesc(
             };
             auto Max = [](UINT64 const & a, UINT64 const & b)
             {
-                return (a < b) ? b : a; 
+                return (a < b) ? b : a;
             };
 
             LclDesc.MipLevels = MaxMipLevels(
