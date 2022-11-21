@@ -12,10 +12,15 @@ if host_machine.system() != 'windows'
     install_inc_subdirs += ['', 'wsl/stubs', 'directx']
 endif
 
+format_properties_lib = static_library(
+    'd3dx12-format-properties',
+    'src/d3dx12_property_format_table.cpp',
+     include_directories : [inc_dirs, 'include/directx'],
+     install : true)
 guids_lib = static_library('DirectX-Guids', 'src/dxguids.cpp', include_directories : inc_dirs, install : true)
 
 dep_dxheaders = declare_dependency(
-    link_with : guids_lib,
+    link_with : [format_properties_lib, guids_lib],
     include_directories : inc_dirs)
 
 if meson.version().version_compare('>=0.54.0')
@@ -29,7 +34,7 @@ endif
 pkg = import('pkgconfig')
 pkg.generate(name : 'DirectX-Headers',
              description : 'Headers for using D3D12',
-             libraries : [guids_lib],
+             libraries : [format_properties_lib, guids_lib],
              version : meson.project_version(),
              subdirs : install_inc_subdirs)
 install_subdir('include', install_dir : '')
