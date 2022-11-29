@@ -6,7 +6,7 @@
         <IdlDir>../include/directx</IdlDir>
     </PropertyGroup>
     <ItemGroup>
-        <Idls Include="$(IdlDir)/dxgicommon.idl;$(IdlDir)/dxgiformat.idl;$(IdlDir)/d3dcommon.idl;$(IdlDir)/d3d12.idl" />
+        <Idls Include="$(IdlDir)/dxgicommon.idl;$(IdlDir)/dxgiformat.idl;$(IdlDir)/d3dcommon.idl;$(IdlDir)/d3d12.idl;$(IdlDir)/d3d12compatibility.idl" />
         <ManualCs Include="manual\*.cs"/>
 
         <Partition Include="dxgicommon.cpp">
@@ -22,7 +22,7 @@
         </Partition>
 
         <Partition Include="d3d12.cpp">
-            <TraverseFiles>$(CompiledHeadersDir)/d3d12.h</TraverseFiles>
+            <TraverseFiles>$(CompiledHeadersDir)/d3d12.h;$(IdlDir)/d3d12sdklayers.h;$(CompiledHeadersDir)/d3d12compatibility.h;$(IdlDir)/d3d12shader.h</TraverseFiles>
             <ExcludeFromCrossarch>true</ExcludeFromCrossarch>
             <Namespace>Windows.Win32.Graphics.Direct3D12</Namespace>
         </Partition>
