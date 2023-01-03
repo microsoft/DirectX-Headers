@@ -247,7 +247,6 @@ private: // Member data
     D3D12_FEATURE_DATA_D3D12_OPTIONS13 m_dOptions13;
     D3D12_FEATURE_DATA_D3D12_OPTIONS14 m_dOptions14;
     D3D12_FEATURE_DATA_D3D12_OPTIONS15 m_dOptions15;
-    D3D12_FEATURE_DATA_D3D12_OPTIONS16 m_dOptions16;
 };
 
 // Implementations for CD3DX12FeatureSupport functions
@@ -312,7 +311,6 @@ inline CD3DX12FeatureSupport::CD3DX12FeatureSupport() noexcept
 , m_dOptions13{}
 , m_dOptions14{}
 , m_dOptions15{}
-, m_dOptions16{}
 {}
 
 inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
