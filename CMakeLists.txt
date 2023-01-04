@@ -41,7 +41,7 @@ target_include_directories(DirectX-Headers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 
 # For non-Windows targets, also add the WSL stubs to the include path
 if (NOT WIN32)
-    target_include_directories(DirectX-Headers SYSTEM INTERFACE
+    target_include_directories(DirectX-Headers SYSTEM PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/wsl/stubs>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/wsl/stubs>"
     )
