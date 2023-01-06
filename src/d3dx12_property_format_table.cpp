@@ -1007,7 +1007,7 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
 
             // This data will be returned straight from the API to satisfy Map. So, strides/ alignment must be API-correct.
             dst.pData = reinterpret_cast<void*>(totalByteSize);
-            assert(s != 0 || dst.pData == NULL);
+            assert(s != 0 || dst.pData == nullptr);
 
             dst.RowPitch = rowPitch; 
             dst.SlicePitch = depthPitch;
@@ -1212,7 +1212,7 @@ const D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FORMAT_DETAIL* D3D12_PROPERTY_LAYOUT_F
     const UINT Index = GetDetailTableIndex(Format);
     if( -1 == Index )
     {
-        return NULL;
+        return nullptr;
     }
   
   return &s_FormatDetail[ Index ];
