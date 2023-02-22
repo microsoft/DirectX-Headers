@@ -5432,9 +5432,7 @@ typedef enum D3D12_BARRIER_SYNC
     D3D12_BARRIER_SYNC_VIDEO_ENCODE                                             = 0x400000,
     D3D12_BARRIER_SYNC_BUILD_RAYTRACING_ACCELERATION_STRUCTURE                  = 0x800000,
     D3D12_BARRIER_SYNC_COPY_RAYTRACING_ACCELERATION_STRUCTURE                   = 0x1000000,
-    // error CS0031: Constant value '-2147483648' cannot be converted to a 'uint' 
-    // D3D12_BARRIER_SYNC_SPLIT = unchecked((int)(0x80000000)),
-    // D3D12_BARRIER_SYNC_SPLIT                                                    = 0x80000000,
+    D3D12_BARRIER_SYNC_SPLIT                                                    = 0x80000000,
 } D3D12_BARRIER_SYNC;
 cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_BARRIER_SYNC );" )
 
@@ -5465,7 +5463,7 @@ typedef enum D3D12_BARRIER_ACCESS
     D3D12_BARRIER_ACCESS_VIDEO_PROCESS_WRITE                        = 0x100000,
     D3D12_BARRIER_ACCESS_VIDEO_ENCODE_READ                          = 0x200000,
     D3D12_BARRIER_ACCESS_VIDEO_ENCODE_WRITE                         = 0x400000,
-    // D3D12_BARRIER_ACCESS_NO_ACCESS                                  = 0x80000000,
+    D3D12_BARRIER_ACCESS_NO_ACCESS                                  = 0x80000000,
 } D3D12_BARRIER_ACCESS;
 cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_BARRIER_ACCESS );" )
 
