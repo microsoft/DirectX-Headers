@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.Windows.WinmdGenerator/0.43.29-preview">
     <PropertyGroup Label="Globals">
-        <OutputWinmd>../.windows/winmd/Windows.Win32.Graphics.Direct3D12.winmd</OutputWinmd>
+        <OutputWinmd>../.windows/winmd/Microsoft.DirectX.winmd</OutputWinmd>
         <WinmdVersion>1.608.0</WinmdVersion>
         <IdlDir>../include/directx</IdlDir>
     </PropertyGroup>
@@ -12,19 +12,28 @@
         <Partition Include="dxgicommon.cpp">
             <TraverseFiles>$(CompiledHeadersDir)/dxgiformat.h;$(CompiledHeadersDir)/dxgicommon.h</TraverseFiles>
             <ExcludeFromCrossarch>true</ExcludeFromCrossarch>
-            <Namespace>Windows.Win32.Graphics.Dxgi.Common</Namespace>
+            <Namespace>Microsoft.DirectX.Dxgi.Common</Namespace>
         </Partition>
 
         <Partition Include="d3dcommon.cpp">
             <TraverseFiles>$(CompiledHeadersDir)/d3dcommon.h</TraverseFiles>
             <ExcludeFromCrossarch>true</ExcludeFromCrossarch>
-            <Namespace>Windows.Win32.Graphics.Direct3D</Namespace>
+            <Namespace>Microsoft.DirectX.Direct3D</Namespace>
         </Partition>
 
         <Partition Include="d3d12.cpp">
             <TraverseFiles>$(CompiledHeadersDir)/d3d12.h;$(IdlDir)/d3d12sdklayers.h;$(CompiledHeadersDir)/d3d12compatibility.h;$(IdlDir)/d3d12shader.h</TraverseFiles>
             <ExcludeFromCrossarch>true</ExcludeFromCrossarch>
-            <Namespace>Windows.Win32.Graphics.Direct3D12</Namespace>
+            <Namespace>Microsoft.DirectX.Direct3D12</Namespace>
         </Partition>
     </ItemGroup>
+    <Target Name="CopyWin32Metadata" AfterTargets="Build">
+        <Copy
+            SourceFiles="$(PkgMicrosoft_Windows_SDK_Win32Metadata)\Windows.Win32.winmd"
+            DestinationFiles="..\.windows\winmd\Windows.Win32.winmd" />
+
+        <Copy
+            SourceFiles="$(PkgMicrosoft_Windows_SDK_Win32Metadata)\Windows.Win32.Interop.dll"
+            DestinationFiles="..\.windows\winmd\Windows.Win32.Interop.winmd" />
+    </Target>
 </Project>
