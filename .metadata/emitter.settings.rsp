@@ -1,6 +1,2 @@
 --memberRemap
 ^ID[2|3]D\w+$=[Agile]
---with-type
-D3D12_BARRIER_SYNC=uint
---with-type
-D3D12_BARRIER_ACCESS=uint
