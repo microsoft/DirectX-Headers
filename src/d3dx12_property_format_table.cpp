@@ -14,10 +14,10 @@
 #ifndef NOMINMAX
     #define NOMINMAX
 #endif
-#include "d3dx12_property_format_table.h"
-#ifndef WIN32
+#ifndef _WIN32
     #include <wsl/winadapter.h>
 #endif
+#include "d3dx12_property_format_table.h"
 #include <assert.h>
 #include <algorithm>
 #include "D3D12TokenizedProgramFormat.hpp"
