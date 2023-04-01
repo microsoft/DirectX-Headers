@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.Windows.WinmdGenerator/0.45.21-preview">
+<Project Sdk="Microsoft.Windows.WinmdGenerator/0.48.19-preview">
     <PropertyGroup Label="Globals">
         <OutputWinmd>../.windows/winmd/Microsoft.DirectX.winmd</OutputWinmd>
         <WinmdVersion>1.608.0</WinmdVersion>
