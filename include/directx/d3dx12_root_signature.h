@@ -1084,9 +1084,36 @@ inline HRESULT D3DX12SerializeVersionedRootSignature(
                         }
                     }
 
+                    D3D12_STATIC_SAMPLER_DESC* pStaticSamplers = nullptr;
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 609)
+                    if (desc_1_1.NumStaticSamplers > 0 && pRootSignatureDesc->Version == D3D_ROOT_SIGNATURE_VERSION_1_2)
+                    {
+                        const SIZE_T SamplersSize = sizeof(D3D12_STATIC_SAMPLER_DESC) * desc_1_1.NumStaticSamplers;
+                        pStaticSamplers = static_cast<D3D12_STATIC_SAMPLER_DESC*>(HeapAlloc(GetProcessHeap(), 0, SamplersSize));
+
+                        if (pStaticSamplers == nullptr)
+                        {
+                            hr = E_OUTOFMEMORY;
+                        }
+                        else
+                        {
+                            const D3D12_ROOT_SIGNATURE_DESC2& desc_1_2 = pRootSignatureDesc->Desc_1_2;
+                            for (UINT n = 0; n < desc_1_1.NumStaticSamplers; ++n)
+                            {
+                                if ((desc_1_2.pStaticSamplers[n].Flags & ~D3D12_SAMPLER_FLAG_UINT_BORDER_COLOR) != 0)
+                                {
+                                    hr = E_INVALIDARG;
+                                    break;
+                                }
+                                memcpy(pStaticSamplers + n, desc_1_2.pStaticSamplers + n, sizeof(D3D12_STATIC_SAMPLER_DESC));
+                            }
+                        }
+                    }
+#endif
+
                     if (SUCCEEDED(hr))
                     {
-                        const CD3DX12_ROOT_SIGNATURE_DESC desc_1_0(desc_1_1.NumParameters, pParameters_1_0, desc_1_1.NumStaticSamplers, desc_1_1.pStaticSamplers, desc_1_1.Flags);
+                        const CD3DX12_ROOT_SIGNATURE_DESC desc_1_0(desc_1_1.NumParameters, pParameters_1_0, desc_1_1.NumStaticSamplers, pStaticSamplers == nullptr ? desc_1_1.pStaticSamplers : pStaticSamplers, desc_1_1.Flags);
                         hr = D3D12SerializeRootSignature(&desc_1_0, D3D_ROOT_SIGNATURE_VERSION_1, ppBlob, ppErrorBlob);
                     }
 
@@ -1102,6 +1129,12 @@ inline HRESULT D3DX12SerializeVersionedRootSignature(
                         }
                         HeapFree(GetProcessHeap(), 0, pParameters);
                     }
+
+                    if (pStaticSamplers)
+                    {
+                        HeapFree(GetProcessHeap(), 0, pStaticSamplers);
+                    }
+
                     return hr;
                 }
             }
