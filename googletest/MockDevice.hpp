@@ -198,6 +198,7 @@ public: // ID3D12Device
         return;
     }
 
+#if defined(_MSC_VER) || !defined(_WIN32)
     virtual D3D12_RESOURCE_ALLOCATION_INFO STDMETHODCALLTYPE GetResourceAllocationInfo(
         _In_  UINT visibleMask,
         _In_  UINT numResourceDescs,
@@ -206,7 +207,22 @@ public: // ID3D12Device
         D3D12_RESOURCE_ALLOCATION_INFO mockInfo = {};
         return mockInfo;
     }
+#else
+    virtual D3D12_RESOURCE_ALLOCATION_INFO *STDMETHODCALLTYPE GetResourceAllocationInfo(
+        D3D12_RESOURCE_ALLOCATION_INFO * RetVal,
+        _In_  UINT visibleMask,
+        _In_  UINT numResourceDescs,
+        _In_reads_(numResourceDescs)  const D3D12_RESOURCE_DESC *pResourceDescs) override
+    {
+        if (RetVal)
+        {
+            *RetVal = {};
+        }
+        return RetVal;
+    }
+#endif
 
+#if defined(_MSC_VER) || !defined(_WIN32)
     virtual D3D12_HEAP_PROPERTIES STDMETHODCALLTYPE GetCustomHeapProperties(
         _In_  UINT nodeMask,
         D3D12_HEAP_TYPE heapType) override
@@ -214,6 +230,19 @@ public: // ID3D12Device
         D3D12_HEAP_PROPERTIES mockProps = {};
         return mockProps;
     }
+#else
+    virtual D3D12_HEAP_PROPERTIES *STDMETHODCALLTYPE GetCustomHeapProperties(
+        D3D12_HEAP_PROPERTIES * RetVal,
+        _In_  UINT nodeMask,
+        D3D12_HEAP_TYPE heapType) override
+    {
+        if (RetVal)
+        {
+            *RetVal = {};
+        }
+        return RetVal;
+    }
+#endif
 
     virtual HRESULT STDMETHODCALLTYPE CreateCommittedResource(
         _In_  const D3D12_HEAP_PROPERTIES *pHeapProperties,
@@ -360,11 +389,23 @@ public: // ID3D12Device
         return;
     }
 
+#if defined(_MSC_VER) || !defined(_WIN32)
     virtual LUID STDMETHODCALLTYPE GetAdapterLuid( void) override
     {
         LUID mockLuid = {};
         return mockLuid;
     }
+#else
+    virtual LUID *STDMETHODCALLTYPE GetAdapterLuid(
+        LUID * RetVal) override
+    {
+        if (RetVal)
+        {
+            *RetVal = {};
+        }
+        return RetVal;
+    }
+#endif
 
 public: // ID3D12Object
     virtual HRESULT STDMETHODCALLTYPE GetPrivateData(
