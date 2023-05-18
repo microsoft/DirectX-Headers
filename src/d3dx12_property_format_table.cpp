@@ -20,10 +20,10 @@
 #ifndef _WIN32
     #include <wsl/winadapter.h>
 #endif
-#include "d3dx12_property_format_table.h"
+#include <d3dx12_property_format_table.h>
 #include <assert.h>
 #include <algorithm>
-#include "D3D12TokenizedProgramFormat.hpp"
+#include <D3D12TokenizedProgramFormat.hpp>
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
 #ifndef ASSUME
   #define ASSUME(x) assert(x)

@@ -31,7 +31,7 @@ int main()
     check_uuid_linkage();
     {
         IDXCoreAdapterFactory *factory = nullptr;
-        if (FAILED(DXCoreCreateAdapterFactory(&factory)))
+        if (FAILED(DXCoreCreateAdapterFactory(IID_PPV_ARGS(&factory))))
             return -1;
 
         IDXCoreAdapterList *list = nullptr;
