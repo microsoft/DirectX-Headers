@@ -1,0 +1,5 @@
+.{
+    .name = "DirectX-Headers",
+    .version = "1.610.0",
+    .dependencies = .{},
+}
