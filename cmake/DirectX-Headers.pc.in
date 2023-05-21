@@ -1,11 +1,10 @@
-prefix="@CMAKE_INSTALL_PREFIX@"
-exec_prefix="${prefix}"
-libdir="${prefix}/lib"
-includedir="${prefix}/include"
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@DIRECTX_LIBDIR_FOR_PKG_CONFIG@
+includedir=@DIRECTX_INCLUDEDIR_FOR_PKG_CONFIG@
 
 Name: @PROJECT_NAME@
-Description: @DXHEADERS_DESCRIPTION@
-URL: @DXHEADERS_URL@
+Description: Headers for using D3D12
+URL: https://github.com/microsoft/DirectX-Header
 Version: @PROJECT_VERSION@
 Cflags: -I${includedir}
-Libs: -l@DIRECTX_HEADERS_L@ -l@DIRECTX_GUIDS_L@
+Libs: -lDirectX-Headers -lDirectX-Guids

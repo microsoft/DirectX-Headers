@@ -10,10 +10,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-#pkg-config values
-set(DXHEADERS_URL "https://github.com/microsoft/DirectX-Headers")
-set(DXHEADERS_DESCRIPTION "Headers for using D3D12")
-
 # It's useful to know if you are a top level project or not, if your project is
 # being consumed via add_subdirectory
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -93,13 +89,14 @@ if (DXHEADERS_INSTALL)
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/directx-headers/cmake)
     
     # Create pkg-config file 
-    set(DIRECTX_HEADERS_L DirectX-Headers)
-    set(DIRECTX_GUIDS_L DirectX-Guids)
-         
+    include(cmake/JoinPaths.cmake)
+    # from: https://github.com/jtojnar/cmake-snips#concatenating-paths-when-building-pkg-config-files
+    join_paths(DIRECTX_INCLUDEDIR_FOR_PKG_CONFIG "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
+    join_paths(DIRECTX_LIBDIR_FOR_PKG_CONFIG "\${prefix}"     "${CMAKE_INSTALL_LIBDIR}")        
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DirectX-Headers.pc.in"
         "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc" @ONLY)
-        
+
     # Install the pkg-config file
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc"
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
