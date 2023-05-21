@@ -10,6 +10,10 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+#pkg-config values
+set(DXHEADERS_URL "https://github.com/microsoft/DirectX-Headers")
+set(DXHEADERS_DESCRIPTION "Headers for using D3D12")
+
 # It's useful to know if you are a top level project or not, if your project is
 # being consumed via add_subdirectory
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -45,6 +49,11 @@ if (NOT WIN32)
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/wsl/stubs>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/wsl/stubs>"
     )
+elseif((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+    # MinGW has RPC headers which define old versions, and complain if D3D
+    # headers are included before the RPC headers, since D3D headers were
+    # generated with new MIDL and "require" new RPC headers.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__REQUIRED_RPCNDR_H_VERSION__=475")
 endif()
 
 add_library(Microsoft::DirectX-Headers ALIAS DirectX-Headers)
@@ -82,6 +91,19 @@ if (DXHEADERS_INSTALL)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/directx-headers-config.cmake"
                 "${CMAKE_CURRENT_BINARY_DIR}/directx-headers-config-version.cmake"
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/directx-headers/cmake)
+    
+    # Create pkg-config file 
+    set(DIRECTX_HEADERS_L DirectX-Headers)
+    set(DIRECTX_GUIDS_L DirectX-Guids)
+         
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DirectX-Headers.pc.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc" @ONLY)
+        
+    # Install the pkg-config file
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc"
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    
 endif()
 
 if (DXHEADERS_BUILD_TEST)

@@ -1,0 +1,11 @@
+prefix="@CMAKE_INSTALL_PREFIX@"
+exec_prefix="${prefix}"
+libdir="${prefix}/lib"
+includedir="${prefix}/include"
+
+Name: @PROJECT_NAME@
+Description: @DXHEADERS_DESCRIPTION@
+URL: @DXHEADERS_URL@
+Version: @PROJECT_VERSION@
+Cflags: -I${includedir}
+Libs: -l@DIRECTX_HEADERS_L@ -l@DIRECTX_GUIDS_L@
