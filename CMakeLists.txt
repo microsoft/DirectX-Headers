@@ -45,6 +45,11 @@ if (NOT WIN32)
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/wsl/stubs>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/wsl/stubs>"
     )
+elseif((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+    # MinGW has RPC headers which define old versions, and complain if D3D
+    # headers are included before the RPC headers, since D3D headers were
+    # generated with new MIDL and "require" new RPC headers.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__REQUIRED_RPCNDR_H_VERSION__=475")
 endif()
 
 add_library(Microsoft::DirectX-Headers ALIAS DirectX-Headers)
@@ -82,6 +87,20 @@ if (DXHEADERS_INSTALL)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/directx-headers-config.cmake"
                 "${CMAKE_CURRENT_BINARY_DIR}/directx-headers-config-version.cmake"
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/directx-headers/cmake)
+    
+    # Create pkg-config file 
+    include(cmake/JoinPaths.cmake)
+    # from: https://github.com/jtojnar/cmake-snips#concatenating-paths-when-building-pkg-config-files
+    join_paths(DIRECTX_INCLUDEDIR_FOR_PKG_CONFIG "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
+    join_paths(DIRECTX_LIBDIR_FOR_PKG_CONFIG "\${prefix}"     "${CMAKE_INSTALL_LIBDIR}")        
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DirectX-Headers.pc.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc" @ONLY)
+
+    # Install the pkg-config file
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc"
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    
 endif()
 
 if (DXHEADERS_BUILD_TEST)
