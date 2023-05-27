@@ -9,6 +9,7 @@ project(DirectX-Headers
 set(CMAKE_CXX_STANDARD 14) 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+enable_testing()
 
 # It's useful to know if you are a top level project or not, if your project is
 # being consumed via add_subdirectory
@@ -103,10 +104,14 @@ if (DXHEADERS_INSTALL)
     
 endif()
 
-if (DXHEADERS_BUILD_TEST)
-    add_subdirectory(test) 
-endif()
+if (BUILD_TESTING)
+    if (DXHEADERS_BUILD_TEST)
+       add_subdirectory(test) 
+    endif()
 
-if (DXHEADERS_BUILD_GOOGLE_TEST)
-    add_subdirectory(googletest)
+    if (DXHEADERS_BUILD_GOOGLE_TEST)
+       # We do not want to install GoogleTest when packaging DirectX-Headers.
+       set(INSTALL_GTEST OFF)
+       add_subdirectory(googletest)
+    endif()
 endif()
