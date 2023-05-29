@@ -30,6 +30,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(Feature-Support-Test feature_support_test.cpp)
 target_link_libraries(Feature-Support-Test DirectX-Headers DirectX-Guids ${dxlibs} gtest_main)
+add_test(Feature-Support-Test Feature-Support-Test)
 
 if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
     target_compile_options(Feature-Support-Test PRIVATE -Wno-unused-variable)

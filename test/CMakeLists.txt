@@ -28,8 +28,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(TEST_EXES DirectX-Headers-Test DirectX-Headers-Check-Feature-Support-Test)
 
 add_executable(DirectX-Headers-Test test.cpp)
-
+add_test(NAME DirectX-Headers-Test COMMAND DirectX-Headers-Test)
 add_executable(DirectX-Headers-Check-Feature-Support-Test feature_check_test.cpp)
+add_test(NAME DirectX-Headers-Check-Feature-Support-Test COMMAND DirectX-Headers-Check-Feature-Support-Test)
 
 foreach(t IN LISTS TEST_EXES)
   target_link_libraries(${t} DirectX-Headers DirectX-Guids ${dxlibs})
