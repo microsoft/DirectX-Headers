@@ -42,6 +42,7 @@ endif
 pkg = import('pkgconfig')
 pkg.generate(name : 'DirectX-Headers',
              description : 'Headers for using D3D12',
+             url: 'https://github.com/microsoft/DirectX-Headers',
              libraries : [format_properties_lib, guids_lib],
              version : meson.project_version(),
              subdirs : install_inc_subdirs)
