@@ -40,6 +40,13 @@ target_include_directories(DirectX-Headers SYSTEM PUBLIC
 )
 target_include_directories(DirectX-Headers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/directx)
 
+add_library(Microsoft::DirectX-Headers ALIAS DirectX-Headers)
+
+add_library(DirectX-Guids STATIC src/dxguids.cpp)
+target_link_libraries(DirectX-Guids PRIVATE DirectX-Headers)
+
+add_library(Microsoft::DirectX-Guids ALIAS DirectX-Guids)
+
 # For non-Windows targets, also add the WSL stubs to the include path
 if (NOT WIN32)
     target_include_directories(DirectX-Headers SYSTEM PUBLIC
@@ -50,15 +57,9 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL
     # MinGW has RPC headers which define old versions, and complain if D3D
     # headers are included before the RPC headers, since D3D headers were
     # generated with new MIDL and "require" new RPC headers.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__REQUIRED_RPCNDR_H_VERSION__=475")
+   target_compile_options(DirectX-Headers PRIVATE "-D__REQUIRED_RPCNDR_H_VERSION__=475")
+   target_compile_options(DirectX-Guids PRIVATE "-D__REQUIRED_RPCNDR_H_VERSION__=475")
 endif()
-
-add_library(Microsoft::DirectX-Headers ALIAS DirectX-Headers)
-
-add_library(DirectX-Guids STATIC src/dxguids.cpp)
-target_link_libraries(DirectX-Guids PRIVATE DirectX-Headers)
-
-add_library(Microsoft::DirectX-Guids ALIAS DirectX-Guids)
 
 if (DXHEADERS_INSTALL)
     # Install the targets
@@ -101,7 +102,7 @@ if (DXHEADERS_INSTALL)
     # Install the pkg-config file
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc"
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-    
+
 endif()
 
 if (BUILD_TESTING)
