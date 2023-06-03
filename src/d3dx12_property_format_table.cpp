@@ -921,7 +921,7 @@ LPCSTR D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetName(DXGI_FORMAT Format, bool bHid
 bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::IsSRGBFormat(DXGI_FORMAT Format)
 {
     const UINT Index = GetDetailTableIndex(Format);
-    if( -1 == Index )
+    if( -1 == (int) Index )
     {
         return false;
     }
@@ -1280,6 +1280,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CanBeCastEvenFullyTyped(DXGI_FORMAT For
     {
     case D3D_FEATURE_LEVEL_1_0_CORE:
         return false;
+    default: ;
     }
     switch( Format )
     {
@@ -1291,6 +1292,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CanBeCastEvenFullyTyped(DXGI_FORMAT For
     case DXGI_FORMAT_R10G10B10A2_UNORM:
     case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
         return fl >= D3D_FEATURE_LEVEL_10_0;
+    default: ;
     }
     return false;
 }
@@ -1300,7 +1302,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CanBeCastEvenFullyTyped(DXGI_FORMAT For
 const D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FORMAT_DETAIL* D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetFormatDetail( DXGI_FORMAT  Format )
 {
     const UINT Index = GetDetailTableIndex(Format);
-    if( -1 == Index )
+    if( -1 == (int) Index )
     {
         return nullptr;
     }
@@ -1432,6 +1434,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::DepthOnlyFormat(DXGI_FORMAT Format)
     case DXGI_FORMAT_D32_FLOAT:
     case DXGI_FORMAT_D16_UNORM:
         return true;
+    default: ;
     }
     return false;
 }
@@ -1444,6 +1447,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SupportsSamplerFeedback(DXGI_FORMAT For
     case DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE:
     case DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE:
         return true;
+    default: ;
     }
     return false;
 }
@@ -1549,6 +1553,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FamilySupportsStencil(DXGI_FORMAT Forma
     case DXGI_FORMAT_R32G8X24_TYPELESS:
     case DXGI_FORMAT_R24G8_TYPELESS:
         return true;
+    default: ;
     }
     return false;
 }
@@ -1558,7 +1563,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FamilySupportsStencil(DXGI_FORMAT Forma
 UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetDetailTableIndexThrow(DXGI_FORMAT  Format)
 {
     UINT Index = GetDetailTableIndex( Format );
-    if( -1 == Index )
+    if( -1 == (int) Index )
     {
         throw E_FAIL;
     }
@@ -1570,7 +1575,7 @@ UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetDetailTableIndexThrow(DXGI_FORMAT  F
 UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetDetailTableIndexNoThrow(DXGI_FORMAT  Format)
 {
     UINT Index = GetDetailTableIndex( Format );
-    assert( -1 != Index ); // Needs to be validated externally.
+    assert( -1 != (int) Index ); // Needs to be validated externally.
     return Index;
 }
 
@@ -1817,6 +1822,8 @@ void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetTileShape(
             }
             break;
         }
+
+    default: ;
     }
 }
 
@@ -1991,6 +1998,7 @@ void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::Get4KTileShape(
             }
         }
         break;
+    default: ;
     }
 }
 
@@ -2013,6 +2021,7 @@ UINT8 D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSliceFromViewFormat(
             return 0;
         case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
             return 1;
+        default: ;
         }
         break;
     case DXGI_FORMAT_R32G8X24_TYPELESS:
@@ -2022,6 +2031,7 @@ UINT8 D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSliceFromViewFormat(
             return 0;
         case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
             return 1;
+        default: ;
         }
         break;
     case DXGI_FORMAT_NV12:
@@ -2035,6 +2045,7 @@ UINT8 D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSliceFromViewFormat(
         case DXGI_FORMAT_R8G8_UNORM:
         case DXGI_FORMAT_R8G8_UINT:
             return 1;
+        default: ;
         }
         break;
     case DXGI_FORMAT_P016:
@@ -2048,8 +2059,10 @@ UINT8 D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSliceFromViewFormat(
         case DXGI_FORMAT_R16G16_UINT:
         case DXGI_FORMAT_R32_UINT:
             return 1;
+        default: ;
         }
         break;
+    default: ;
     }
 
     return 0;
