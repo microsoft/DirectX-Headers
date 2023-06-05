@@ -1032,7 +1032,7 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
     UINT subWidth = width;
     UINT subHeight = height;
     UINT subDepth = depth;
-    for (UINT s = 0, iM = 0, iA = 0; s < subresources; ++s)
+    for (UINT s = 0, iM = 0; s < subresources; ++s)
     {
         UINT blockWidth;
         if (FAILED(DivideAndRoundUp(subWidth, formatDetail.WidthAlignment, /*_Out_*/ blockWidth)))
@@ -1114,7 +1114,6 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
         // Iterate over mip levels and array elements
         if (++iM >= mipLevels)
         {
-            ++iA;
             iM = 0;
 
             subWidth = width;
