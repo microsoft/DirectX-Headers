@@ -3,6 +3,7 @@
 
 gtest = cpp.find_library('gtest', required: false)
 gtest_main = cpp.find_library('gtest_main', required: false)
+d3d12_lib = cpp.find_library('d3d12')
 
 if gtest.found() and gtest_main.found()
   feature_support_test = executable('Feature-Support-Test', 'feature_support_test.cpp',
