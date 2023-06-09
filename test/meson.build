@@ -1,8 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-d3d12_lib = cpp.find_library('d3d12')
-
 headers_test = executable('DirectX-Headers-Test', 'test.cpp',
     dependencies : [dep_dxheaders, d3d12_lib, dxcore_lib],
     cpp_args : test_compile_opts,
