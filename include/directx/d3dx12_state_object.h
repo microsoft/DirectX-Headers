@@ -27,6 +27,8 @@
 //
 //================================================================================================
 #include <list>
+#include <forward_list>
+#include <vector>
 #include <memory>
 #include <string>
 #include <vector>
@@ -55,9 +57,18 @@ public:
         Init(Type);
     }
     void SetStateObjectType(D3D12_STATE_OBJECT_TYPE Type) noexcept { m_Desc.Type = Type; }
-    operator const D3D12_STATE_OBJECT_DESC&()
+    operator const D3D12_STATE_OBJECT_DESC& ()
     {
         // Do final preparation work
+        for (auto& ownedSubobject : m_OwnedSubobjectHelpers)
+        {
+#if(__cplusplus >= 201103L)
+            ownedSubobject->Finalize();
+#else
+            ownedSubobject.m_pHelper->Finalize();
+#endif
+        }
+
         m_RepointedAssociations.clear();
         m_SubobjectArray.clear();
         m_SubobjectArray.reserve(m_Desc.NumSubobjects);
@@ -90,7 +101,7 @@ public:
         m_Desc.pSubobjects = m_Desc.NumSubobjects ? &m_SubobjectArray[0] : nullptr;
         return m_Desc;
     }
-    operator const D3D12_STATE_OBJECT_DESC*()
+    operator const D3D12_STATE_OBJECT_DESC* ()
     {
         // Cast calls the above final preparation work
         return &static_cast<const D3D12_STATE_OBJECT_DESC&>(*this);
@@ -160,8 +171,8 @@ private:
     std::vector<D3D12_STATE_SUBOBJECT> m_SubobjectArray; // Built at the end, copying list contents
 
     std::list<D3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION>
-            m_RepointedAssociations; // subobject type that contains pointers to other subobjects,
-                                     // repointed to flattened array
+        m_RepointedAssociations; // subobject type that contains pointers to other subobjects,
+                                 // repointed to flattened array
 
     class StringContainer
     {
@@ -201,6 +212,7 @@ private:
         {
             m_pSubobject = ContainingStateObject.TrackSubobject(Type(), Data());
         }
+        virtual void Finalize() {};
     protected:
         virtual void* Data() noexcept = 0;
         void Init() noexcept { m_pSubobject = nullptr; }
@@ -208,14 +220,14 @@ private:
     };
 
 #if(__cplusplus >= 201103L)
-    std::list<std::unique_ptr<const SUBOBJECT_HELPER_BASE>> m_OwnedSubobjectHelpers;
+    std::list<std::unique_ptr<SUBOBJECT_HELPER_BASE>> m_OwnedSubobjectHelpers;
 #else
     class OWNED_HELPER
     {
     public:
-        OWNED_HELPER(const SUBOBJECT_HELPER_BASE* pHelper) noexcept { m_pHelper = pHelper; }
+        OWNED_HELPER(SUBOBJECT_HELPER_BASE* pHelper) noexcept { m_pHelper = pHelper; }
         ~OWNED_HELPER() { delete m_pHelper; }
-        const SUBOBJECT_HELPER_BASE* m_pHelper;
+        SUBOBJECT_HELPER_BASE* m_pHelper;
     };
 
     std::list<OWNED_HELPER> m_OwnedSubobjectHelpers;
@@ -233,6 +245,12 @@ private:
     friend class CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT;
     friend class CD3DX12_STATE_OBJECT_CONFIG_SUBOBJECT;
     friend class CD3DX12_NODE_MASK_SUBOBJECT;
+    friend class CD3DX12_WORK_GRAPH_SUBOBJECT;
+    friend class CD3DX12_NODE_OUTPUT_OVERRIDES;
+    friend class CD3DX12_SHADER_NODE;
+    friend class CD3DX12_BROADCASTING_LAUNCH_NODE_OVERRIDES;
+    friend class CD3DX12_COALESCING_LAUNCH_NODE_OVERRIDES;
+    friend class CD3DX12_THREAD_LAUNCH_NODE_OVERRIDES;
 };
 
 //------------------------------------------------------------------------------------------------
@@ -783,6 +801,398 @@ private:
     }
     void* Data() noexcept override { return &m_Desc; }
     D3D12_NODE_MASK m_Desc;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_NODE_OUTPUT_OVERRIDES
+{
+public:
+    CD3DX12_NODE_OUTPUT_OVERRIDES(const D3D12_NODE_OUTPUT_OVERRIDES** ppOwner, UINT* pNumOutputOverrides) noexcept
+    {
+        m_Desc.clear();
+        m_ppOwner = ppOwner;
+        *m_ppOwner = nullptr;
+        m_pNumOutputOverrides = pNumOutputOverrides;
+        *m_pNumOutputOverrides = 0;
+    }
+    void NewOutputOverride()
+    {
+        m_Desc.emplace_back(D3D12_NODE_OUTPUT_OVERRIDES{});
+        *m_ppOwner = m_Desc.data();
+        (*m_pNumOutputOverrides)++;
+    }
+    void OutputIndex(UINT index)
+    {
+        m_Desc.back().OutputIndex = index;
+    }
+    void NewName(LPCWSTR Name, UINT ArrayIndex = 0)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(Name),ArrayIndex });
+        m_Desc.back().pNewName = &m_NodeIDs.front();
+    }
+    void AllowSparseNodes(BOOL bAllow)
+    {
+        m_UINTs.emplace_front((UINT)bAllow);
+        m_Desc.back().pAllowSparseNodes = (BOOL*)&m_UINTs.front();
+    }
+    void MaxOutputRecords(UINT maxOutputRecords) noexcept
+    {
+        m_UINTs.emplace_front(maxOutputRecords);
+        m_Desc.back().pMaxRecords = &m_UINTs.front();
+    }
+    void MaxOutputRecordsSharedWith(UINT outputIndex) noexcept
+    {
+        m_UINTs.emplace_front(outputIndex);
+        m_Desc.back().pMaxRecordsSharedWithOutputIndex = &m_UINTs.front();
+    }
+private:
+    std::vector<D3D12_NODE_OUTPUT_OVERRIDES> m_Desc;
+    // Cached parameters
+    CD3DX12_STATE_OBJECT_DESC::StringContainer m_Strings;
+    std::forward_list<UINT> m_UINTs;
+    std::forward_list<D3D12_NODE_ID> m_NodeIDs;
+    const D3D12_NODE_OUTPUT_OVERRIDES** m_ppOwner;
+    UINT* m_pNumOutputOverrides;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_NODE_HELPER_BASE
+{
+public:
+    virtual ~CD3DX12_NODE_HELPER_BASE() = default;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_SHADER_NODE // Not specifying launch mode.
+                          // Don't need to distinguish if no parameter overriding is happening
+    : public CD3DX12_NODE_HELPER_BASE
+{
+public:
+    CD3DX12_SHADER_NODE(
+        D3D12_NODE* pNode,
+        LPCWSTR _Shader = nullptr)
+    {
+        m_pDesc = pNode;
+        m_pDesc->NodeType = D3D12_NODE_TYPE_SHADER;
+        Shader(_Shader);
+    }
+    void Shader(LPCWSTR _Shader)
+    {
+        m_pDesc->Shader.Shader = m_Strings.LocalCopy(_Shader);
+    }
+    D3D12_NODE* m_pDesc;
+private:
+    CD3DX12_STATE_OBJECT_DESC::StringContainer m_Strings;
+};
+
+//------------------------------------------------------------------------------------------------
+// Use this class when defining a broadcasting launch node where configuration parameters
+// need to be overridden.  If overrides are not needed, just use CD3DX12_COMPUTE_SHADER_NODE
+class CD3DX12_BROADCASTING_LAUNCH_NODE_OVERRIDES
+    : public CD3DX12_NODE_HELPER_BASE
+{
+public:
+    CD3DX12_BROADCASTING_LAUNCH_NODE_OVERRIDES(
+        D3D12_NODE* pNode,
+        LPCWSTR _Shader = nullptr) :
+        m_NodeOutputOverrides(&Overrides.pOutputOverrides, &Overrides.NumOutputOverrides)
+    {
+        Overrides = {};
+        m_pDesc = pNode;
+        m_pDesc->NodeType = D3D12_NODE_TYPE_SHADER;
+        m_pDesc->Shader.OverridesType = D3D12_NODE_OVERRIDES_TYPE_BROADCASTING_LAUNCH;
+        m_pDesc->Shader.pBroadcastingLaunchOverrides = &Overrides;
+        Shader(_Shader);
+    }
+    void Shader(LPCWSTR _Shader)
+    {
+        m_pDesc->Shader.Shader = m_Strings.LocalCopy(_Shader);
+    }
+    void LocalRootArgumentsTableIndex(UINT index)
+    {
+        m_UINTs.emplace_front(index);
+        Overrides.pLocalRootArgumentsTableIndex = &m_UINTs.front();
+    }
+    void ProgramEntry(BOOL bIsProgramEntry)
+    {
+        m_UINTs.emplace_front(bIsProgramEntry);
+        Overrides.pProgramEntry = (BOOL*)&m_UINTs.front();
+    }
+    void NewName(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pNewName = &m_NodeIDs.front();
+    }
+    void ShareInputOf(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pShareInputOf = &m_NodeIDs.front();
+    }
+    void DispatchGrid(UINT x, UINT y, UINT z)
+    {
+        m_UINT3s.emplace_front(UINT3{ x,y,z });
+        Overrides.pDispatchGrid = (UINT*)&m_UINT3s.front();
+    }
+    void MaxDispatchGrid(UINT x, UINT y, UINT z)
+    {
+        m_UINT3s.emplace_front(UINT3{x,y,z});
+        Overrides.pMaxDispatchGrid = (UINT*)&m_UINT3s.front();
+    }
+    CD3DX12_NODE_OUTPUT_OVERRIDES& NodeOutputOverrides()
+    {
+        return m_NodeOutputOverrides;
+    }
+    D3D12_BROADCASTING_LAUNCH_OVERRIDES Overrides;
+    D3D12_NODE* m_pDesc;
+private:
+    // Cached parameters
+    CD3DX12_STATE_OBJECT_DESC::StringContainer m_Strings;
+    std::forward_list<UINT> m_UINTs;
+    struct UINT3
+    {
+        UINT x;
+        UINT y;
+        UINT z;
+    };
+    std::forward_list<UINT3> m_UINT3s;
+    std::forward_list<D3D12_NODE_ID> m_NodeIDs;
+    CD3DX12_NODE_OUTPUT_OVERRIDES m_NodeOutputOverrides;
+};
+
+//------------------------------------------------------------------------------------------------
+// Use this class when defining a coalescing launch node where configuration parameters
+// need to be overridden.  If overrides are not needed, just use CD3DX12_COMPUTE_SHADER_NODE
+class CD3DX12_COALESCING_LAUNCH_NODE_OVERRIDES
+    : public CD3DX12_NODE_HELPER_BASE
+{
+public:
+    CD3DX12_COALESCING_LAUNCH_NODE_OVERRIDES(
+        D3D12_NODE* pNode,
+        LPCWSTR _Shader = nullptr) :
+        m_NodeOutputOverrides(&Overrides.pOutputOverrides, &Overrides.NumOutputOverrides)
+    {
+        Overrides = {};
+        m_pDesc = pNode;
+        m_pDesc->NodeType = D3D12_NODE_TYPE_SHADER;
+        m_pDesc->Shader.OverridesType = D3D12_NODE_OVERRIDES_TYPE_COALESCING_LAUNCH;
+        m_pDesc->Shader.pCoalescingLaunchOverrides = &Overrides;
+        Shader(_Shader);
+    }
+    void Shader(LPCWSTR _Shader)
+    {
+        m_pDesc->Shader.Shader = m_Strings.LocalCopy(_Shader);
+    }
+    void LocalRootArgumentsTableIndex(UINT index)
+    {
+        m_UINTs.emplace_front(index);
+        Overrides.pLocalRootArgumentsTableIndex = &m_UINTs.front();
+    }
+    void ProgramEntry(BOOL bIsProgramEntry)
+    {
+        m_UINTs.emplace_front(bIsProgramEntry);
+        Overrides.pProgramEntry = (BOOL*)&m_UINTs.front();
+    }
+    void NewName(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pNewName = &m_NodeIDs.front();
+    }
+    void ShareInputOf(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pShareInputOf = &m_NodeIDs.front();
+    }
+    CD3DX12_NODE_OUTPUT_OVERRIDES& NodeOutputOverrides()
+    {
+        return m_NodeOutputOverrides;
+    }
+    D3D12_COALESCING_LAUNCH_OVERRIDES Overrides;
+    D3D12_NODE* m_pDesc;
+private:
+    // Cached parameters
+    CD3DX12_STATE_OBJECT_DESC::StringContainer m_Strings;
+    std::forward_list<UINT> m_UINTs;
+    struct UINT3
+    {
+        UINT x;
+        UINT y;
+        UINT z;
+    };
+    std::forward_list<UINT3> m_UINT3s;
+    std::forward_list<D3D12_NODE_ID> m_NodeIDs;
+    CD3DX12_NODE_OUTPUT_OVERRIDES m_NodeOutputOverrides;
+};
+
+//------------------------------------------------------------------------------------------------
+// Use this class when defining a thread launch node where configuration parameters
+// need to be overridden.  If overrides are not needed, just use CD3DX12_COMPUTE_SHADER_NODE
+class CD3DX12_THREAD_LAUNCH_NODE_OVERRIDES
+    : public CD3DX12_NODE_HELPER_BASE
+{
+public:
+    CD3DX12_THREAD_LAUNCH_NODE_OVERRIDES(
+        D3D12_NODE* pNode,
+        LPCWSTR _Shader = nullptr) :
+        m_NodeOutputOverrides(&Overrides.pOutputOverrides, &Overrides.NumOutputOverrides)
+    {
+        Overrides = {};
+        m_pDesc = pNode;
+        m_pDesc->NodeType = D3D12_NODE_TYPE_SHADER;
+        m_pDesc->Shader.OverridesType = D3D12_NODE_OVERRIDES_TYPE_THREAD_LAUNCH;
+        m_pDesc->Shader.pThreadLaunchOverrides = &Overrides;
+        Shader(_Shader);
+    }
+    void Shader(LPCWSTR _Shader)
+    {
+        m_pDesc->Shader.Shader = m_Strings.LocalCopy(_Shader);
+    }
+    void LocalRootArgumentsTableIndex(UINT index)
+    {
+        m_UINTs.emplace_front(index);
+        Overrides.pLocalRootArgumentsTableIndex = &m_UINTs.front();
+    }
+    void ProgramEntry(BOOL bIsProgramEntry)
+    {
+        m_UINTs.emplace_front(bIsProgramEntry);
+        Overrides.pProgramEntry = (BOOL*)&m_UINTs.front();
+    }
+    void NewName(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pNewName = &m_NodeIDs.front();
+    }
+    void ShareInputOf(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pShareInputOf = &m_NodeIDs.front();
+    }
+    CD3DX12_NODE_OUTPUT_OVERRIDES& NodeOutputOverrides()
+    {
+        return m_NodeOutputOverrides;
+    }
+    D3D12_THREAD_LAUNCH_OVERRIDES Overrides;
+    D3D12_NODE* m_pDesc;
+private:
+    // Cached parameters
+    CD3DX12_STATE_OBJECT_DESC::StringContainer m_Strings;
+    std::forward_list<UINT> m_UINTs;
+    std::forward_list<D3D12_NODE_ID> m_NodeIDs;
+    CD3DX12_NODE_OUTPUT_OVERRIDES m_NodeOutputOverrides;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_WORK_GRAPH_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_WORK_GRAPH_SUBOBJECT() noexcept
+    {
+        Init();
+    }
+    CD3DX12_WORK_GRAPH_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_WORK_GRAPH;
+    }
+    void IncludeAllAvailableNodes()
+    {
+        m_Desc.Flags |= D3D12_WORK_GRAPH_FLAG_INCLUDE_ALL_AVAILABLE_NODES;
+    }
+    void SetProgramName(LPCWSTR ProgramName)
+    {
+        m_Desc.ProgramName = m_Strings.LocalCopy(ProgramName);
+    }
+    void AddEntrypoint(D3D12_NODE_ID Entrypoint)
+    {
+        m_Entrypoints.emplace_back(D3D12_NODE_ID{ m_Strings.LocalCopy(Entrypoint.Name),Entrypoint.ArrayIndex });
+        m_NumEntrypoints++;
+    }
+
+    template<typename T>
+    T* CreateNode()
+    {
+        m_NodeDescs.push_back({});
+        m_NumNodes++;
+        T* pNodeHelper = new T(&m_NodeDescs.back());
+        m_OwnedNodeHelpers.emplace_back(pNodeHelper);
+        return pNodeHelper;
+    }
+    CD3DX12_SHADER_NODE* CreateShaderNode(LPCWSTR Shader = nullptr)
+    {
+        auto pNode = CreateNode<CD3DX12_SHADER_NODE>();
+        pNode->Shader(Shader);
+        return pNode;
+    }
+    CD3DX12_BROADCASTING_LAUNCH_NODE_OVERRIDES* CreateBroadcastingLaunchNodeOverrides(LPCWSTR Shader = nullptr)
+    {
+        auto pNode = CreateNode<CD3DX12_BROADCASTING_LAUNCH_NODE_OVERRIDES>();
+        pNode->Shader(Shader);
+        return pNode;
+    }
+    CD3DX12_COALESCING_LAUNCH_NODE_OVERRIDES* CreateCoalescingLaunchNodeOverrides(LPCWSTR Shader = nullptr)
+    {
+        auto pNode = CreateNode<CD3DX12_COALESCING_LAUNCH_NODE_OVERRIDES>();
+        pNode->Shader(Shader);
+        return pNode;
+    }
+    CD3DX12_THREAD_LAUNCH_NODE_OVERRIDES* CreateThreadLaunchNodeOverrides(LPCWSTR Shader = nullptr)
+    {
+        auto pNode = CreateNode<CD3DX12_THREAD_LAUNCH_NODE_OVERRIDES>();
+        pNode->Shader(Shader);
+        return pNode;
+    }
+    operator const D3D12_STATE_SUBOBJECT& () noexcept
+    {
+        return *m_pSubobject;
+    }
+    operator const D3D12_WORK_GRAPH_DESC& () noexcept
+    {
+        return m_Desc;
+    }
+    virtual void Finalize()
+    {
+        m_EntrypointsVector.resize(m_NumEntrypoints);
+        std::list<D3D12_NODE_ID>::iterator entryIt = m_Entrypoints.begin();
+        for (UINT n = 0; n < m_NumEntrypoints; n++, entryIt++)
+        {
+            m_EntrypointsVector[n] = *entryIt;
+        }
+        m_Desc.NumEntrypoints = m_NumEntrypoints;
+        m_Desc.pEntrypoints = m_EntrypointsVector.data();
+
+        m_NodeDescsVector.resize(m_NumNodes);
+        std::list<D3D12_NODE>::iterator nodeIt = m_NodeDescs.begin();
+        for (UINT n = 0; n < m_NumNodes; n++, nodeIt++)
+        {
+            m_NodeDescsVector[n] = *nodeIt;
+        }
+        m_Desc.NumExplicitlyDefinedNodes = m_NumNodes;
+        m_Desc.pExplicitlyDefinedNodes = m_NodeDescsVector.data();
+    }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+        m_NodeDescs.clear();
+        m_NodeDescsVector.clear();
+        m_NumNodes = 0;
+        m_NumEntrypoints = 0;
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_WORK_GRAPH_DESC m_Desc;
+    std::list<D3D12_NODE_ID> m_Entrypoints;
+    UINT m_NumEntrypoints;
+    std::vector<D3D12_NODE_ID> m_EntrypointsVector;
+    std::list<D3D12_NODE> m_NodeDescs;
+    UINT m_NumNodes;
+    std::vector<D3D12_NODE> m_NodeDescsVector;
+    CD3DX12_STATE_OBJECT_DESC::StringContainer m_Strings;
+    std::list<std::unique_ptr<const CD3DX12_NODE_HELPER_BASE>> m_OwnedNodeHelpers;
 };
 
 #undef D3DX12_COM_PTR
