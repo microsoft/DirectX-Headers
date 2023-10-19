@@ -1257,6 +1257,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CanBeCastEvenFullyTyped(DXGI_FORMAT For
     //SRGB can be cast away/back, and XR_BIAS can be cast to/from UNORM
     switch(fl)
     {
+    case D3D_FEATURE_LEVEL_1_0_GENERIC:
     case D3D_FEATURE_LEVEL_1_0_CORE:
         return false;
     default:
