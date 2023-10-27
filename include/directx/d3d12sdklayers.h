@@ -3830,7 +3830,7 @@ EXTERN_C const IID IID_ID3D12InfoQueue1;
         virtual HRESULT STDMETHODCALLTYPE RegisterMessageCallback( 
             _In_  D3D12MessageFunc CallbackFunc,
             _In_  D3D12_MESSAGE_CALLBACK_FLAGS CallbackFilterFlags,
-            _In_  void *pContext,
+            _Inout_  void *pContext,
             _Inout_  DWORD *pCallbackCookie) = 0;
         
         virtual HRESULT STDMETHODCALLTYPE UnregisterMessageCallback( 
@@ -4032,7 +4032,7 @@ EXTERN_C const IID IID_ID3D12InfoQueue1;
             ID3D12InfoQueue1 * This,
             _In_  D3D12MessageFunc CallbackFunc,
             _In_  D3D12_MESSAGE_CALLBACK_FLAGS CallbackFilterFlags,
-            _In_  void *pContext,
+            _Inout_  void *pContext,
             _Inout_  DWORD *pCallbackCookie);
         
         DECLSPEC_XFGVIRT(ID3D12InfoQueue1, UnregisterMessageCallback)
