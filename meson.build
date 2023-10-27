@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-project('DirectX-Headers', 'cpp', version : '1.611.0',
+project('DirectX-Headers', 'cpp', version : '1.611.1',
         default_options : ['cpp_std=c++14'])
 
 cpp = meson.get_compiler('cpp')
