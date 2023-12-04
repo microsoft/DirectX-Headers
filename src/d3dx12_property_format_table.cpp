@@ -65,7 +65,7 @@ inline HRESULT Safe_UIntAdd(UINT uAugend, UINT uAddend, UINT* puResult)
 inline HRESULT Safe_UIntMult(UINT uMultiplicand, UINT uMultiplier, UINT* puResult)
 {
     ULONGLONG ull64Result = (ULONGLONG)uMultiplicand *  (ULONGLONG)uMultiplier;
-    
+
     if (ull64Result <= UINT_MAX)
     {
         *puResult = (UINT)ull64Result;
@@ -78,120 +78,120 @@ inline HRESULT Safe_UIntMult(UINT uMultiplicand, UINT uMultiplier, UINT* puResul
 const LPCSTR D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::s_FormatNames[] =  // separate from above structure so it can be compiled out of the runtime.
 {
 //   Name
-    "UNKNOWN",                      
-    "R32G32B32A32_TYPELESS",        
-        "R32G32B32A32_FLOAT",       
-        "R32G32B32A32_UINT",        
-        "R32G32B32A32_SINT",        
-    "R32G32B32_TYPELESS",           
-        "R32G32B32_FLOAT",          
-        "R32G32B32_UINT",           
-        "R32G32B32_SINT",           
-    "R16G16B16A16_TYPELESS",        
-        "R16G16B16A16_FLOAT",       
-        "R16G16B16A16_UNORM",       
-        "R16G16B16A16_UINT",        
-        "R16G16B16A16_SNORM",       
-        "R16G16B16A16_SINT",        
-    "R32G32_TYPELESS",              
-        "R32G32_FLOAT",             
-        "R32G32_UINT",              
-        "R32G32_SINT",              
-    "R32G8X24_TYPELESS",            
-        "D32_FLOAT_S8X24_UINT",     
-        "R32_FLOAT_X8X24_TYPELESS", 
-        "X32_TYPELESS_G8X24_UINT",  
-    "R10G10B10A2_TYPELESS",         
-        "R10G10B10A2_UNORM",        
-        "R10G10B10A2_UINT",         
-    "R11G11B10_FLOAT",              
-    "R8G8B8A8_TYPELESS",            
-        "R8G8B8A8_UNORM",           
-        "R8G8B8A8_UNORM_SRGB",      
-        "R8G8B8A8_UINT",            
-        "R8G8B8A8_SNORM",           
-        "R8G8B8A8_SINT",            
-    "R16G16_TYPELESS",              
-        "R16G16_FLOAT",             
-        "R16G16_UNORM",             
-        "R16G16_UINT",              
-        "R16G16_SNORM",             
-        "R16G16_SINT",              
-    "R32_TYPELESS",                 
-        "D32_FLOAT",                
-        "R32_FLOAT",                
-        "R32_UINT",                 
-        "R32_SINT",                 
-    "R24G8_TYPELESS",               
-        "D24_UNORM_S8_UINT",        
-        "R24_UNORM_X8_TYPELESS",    
-        "X24_TYPELESS_G8_UINT",     
-    "R8G8_TYPELESS",                
-        "R8G8_UNORM",               
-        "R8G8_UINT",                
-        "R8G8_SNORM",               
-        "R8G8_SINT",                
-    "R16_TYPELESS",                 
-        "R16_FLOAT",                
-        "D16_UNORM",                
-        "R16_UNORM",                
-        "R16_UINT",                 
-        "R16_SNORM",                
-        "R16_SINT",                 
-    "R8_TYPELESS",                  
-        "R8_UNORM",                 
-        "R8_UINT",                  
-        "R8_SNORM",                 
-        "R8_SINT",                  
-    "A8_UNORM",                     
-    "R1_UNORM",                     
-    "R9G9B9E5_SHAREDEXP",           
-    "R8G8_B8G8_UNORM",              
-    "G8R8_G8B8_UNORM",              
-    "BC1_TYPELESS",                 
-        "BC1_UNORM",                
-        "BC1_UNORM_SRGB",           
-    "BC2_TYPELESS",                 
-        "BC2_UNORM",                
-        "BC2_UNORM_SRGB",           
-    "BC3_TYPELESS",                 
-        "BC3_UNORM",                
-        "BC3_UNORM_SRGB",           
-    "BC4_TYPELESS",                 
-        "BC4_UNORM",                
-        "BC4_SNORM",                
-    "BC5_TYPELESS",                 
-        "BC5_UNORM",                
-        "BC5_SNORM",                
-    "B5G6R5_UNORM",                 
-    "B5G5R5A1_UNORM",               
-    "B8G8R8A8_UNORM",               
-    "B8G8R8X8_UNORM",               
-    "R10G10B10_XR_BIAS_A2_UNORM",   
-    "B8G8R8A8_TYPELESS",            
-       "B8G8R8A8_UNORM_SRGB",       
-    "B8G8R8X8_TYPELESS",            
-       "B8G8R8X8_UNORM_SRGB",       
-    "BC6H_TYPELESS",                
-       "BC6H_UF16",                 
-       "BC6H_SF16",                 
-    "BC7_TYPELESS",                 
-       "BC7_UNORM",                 
-       "BC7_UNORM_SRGB",            
-     "AYUV",                        
-     "Y410",                        
-     "Y416",                        
-     "NV12",                        
-     "P010",                        
-     "P016",                        
-     "420_OPAQUE",                  
-     "YUY2",                        
-     "Y210",                        
-     "Y216",                        
-     "NV11",                        
-     "AI44",                        
-     "IA44",                        
-     "P8",                          
+    "UNKNOWN",
+    "R32G32B32A32_TYPELESS",
+        "R32G32B32A32_FLOAT",
+        "R32G32B32A32_UINT",
+        "R32G32B32A32_SINT",
+    "R32G32B32_TYPELESS",
+        "R32G32B32_FLOAT",
+        "R32G32B32_UINT",
+        "R32G32B32_SINT",
+    "R16G16B16A16_TYPELESS",
+        "R16G16B16A16_FLOAT",
+        "R16G16B16A16_UNORM",
+        "R16G16B16A16_UINT",
+        "R16G16B16A16_SNORM",
+        "R16G16B16A16_SINT",
+    "R32G32_TYPELESS",
+        "R32G32_FLOAT",
+        "R32G32_UINT",
+        "R32G32_SINT",
+    "R32G8X24_TYPELESS",
+        "D32_FLOAT_S8X24_UINT",
+        "R32_FLOAT_X8X24_TYPELESS",
+        "X32_TYPELESS_G8X24_UINT",
+    "R10G10B10A2_TYPELESS",
+        "R10G10B10A2_UNORM",
+        "R10G10B10A2_UINT",
+    "R11G11B10_FLOAT",
+    "R8G8B8A8_TYPELESS",
+        "R8G8B8A8_UNORM",
+        "R8G8B8A8_UNORM_SRGB",
+        "R8G8B8A8_UINT",
+        "R8G8B8A8_SNORM",
+        "R8G8B8A8_SINT",
+    "R16G16_TYPELESS",
+        "R16G16_FLOAT",
+        "R16G16_UNORM",
+        "R16G16_UINT",
+        "R16G16_SNORM",
+        "R16G16_SINT",
+    "R32_TYPELESS",
+        "D32_FLOAT",
+        "R32_FLOAT",
+        "R32_UINT",
+        "R32_SINT",
+    "R24G8_TYPELESS",
+        "D24_UNORM_S8_UINT",
+        "R24_UNORM_X8_TYPELESS",
+        "X24_TYPELESS_G8_UINT",
+    "R8G8_TYPELESS",
+        "R8G8_UNORM",
+        "R8G8_UINT",
+        "R8G8_SNORM",
+        "R8G8_SINT",
+    "R16_TYPELESS",
+        "R16_FLOAT",
+        "D16_UNORM",
+        "R16_UNORM",
+        "R16_UINT",
+        "R16_SNORM",
+        "R16_SINT",
+    "R8_TYPELESS",
+        "R8_UNORM",
+        "R8_UINT",
+        "R8_SNORM",
+        "R8_SINT",
+    "A8_UNORM",
+    "R1_UNORM",
+    "R9G9B9E5_SHAREDEXP",
+    "R8G8_B8G8_UNORM",
+    "G8R8_G8B8_UNORM",
+    "BC1_TYPELESS",
+        "BC1_UNORM",
+        "BC1_UNORM_SRGB",
+    "BC2_TYPELESS",
+        "BC2_UNORM",
+        "BC2_UNORM_SRGB",
+    "BC3_TYPELESS",
+        "BC3_UNORM",
+        "BC3_UNORM_SRGB",
+    "BC4_TYPELESS",
+        "BC4_UNORM",
+        "BC4_SNORM",
+    "BC5_TYPELESS",
+        "BC5_UNORM",
+        "BC5_SNORM",
+    "B5G6R5_UNORM",
+    "B5G5R5A1_UNORM",
+    "B8G8R8A8_UNORM",
+    "B8G8R8X8_UNORM",
+    "R10G10B10_XR_BIAS_A2_UNORM",
+    "B8G8R8A8_TYPELESS",
+       "B8G8R8A8_UNORM_SRGB",
+    "B8G8R8X8_TYPELESS",
+       "B8G8R8X8_UNORM_SRGB",
+    "BC6H_TYPELESS",
+       "BC6H_UF16",
+       "BC6H_SF16",
+    "BC7_TYPELESS",
+       "BC7_UNORM",
+       "BC7_UNORM_SRGB",
+     "AYUV",
+     "Y410",
+     "Y416",
+     "NV12",
+     "P010",
+     "P016",
+     "420_OPAQUE",
+     "YUY2",
+     "Y210",
+     "Y216",
+     "NV11",
+     "AI44",
+     "IA44",
+     "P8",
      "A8P8",
 };
 
@@ -565,7 +565,7 @@ constexpr DXGI_FORMAT D3DFCS_V408[] =
     DXGI_FORMAT_V408,
     DXGI_FORMAT_UNKNOWN // not part of cast set, just the "null terminator"
 };
-     
+
 constexpr DXGI_FORMAT D3DFCS_A4B4G4R4[] =
 {
     DXGI_FORMAT_A4B4G4R4_UNORM,
@@ -675,22 +675,22 @@ constexpr D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FORMAT_DETAIL D3D12_PROPERTY_LAYOU
         {DXGI_FORMAT_BC7_TYPELESS                             ,DXGI_FORMAT_BC7_TYPELESS,                 D3DFCS_BC7,           {0,0,0,0},           128,            FALSE, 4,              4,               1,                D3DFL_CUSTOM,     D3DFTL_PARTIAL_TYPE,  R,G,B,A,         _TYPELESS, _TYPELESS, _TYPELESS, _TYPELESS,          FALSE,                  FALSE,               FALSE,            FALSE,   FALSE,  FALSE,                  FALSE,    },
         {    DXGI_FORMAT_BC7_UNORM                            ,DXGI_FORMAT_BC7_TYPELESS,                 D3DFCS_BC7,           {0,0,0,0},           128,            FALSE, 4,              4,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,G,B,A,         _UNORM, _UNORM, _UNORM, _UNORM,                      FALSE,                  FALSE,               TRUE,             FALSE,   FALSE,  FALSE,                  FALSE,    },
         {    DXGI_FORMAT_BC7_UNORM_SRGB                       ,DXGI_FORMAT_BC7_TYPELESS,                 D3DFCS_BC7,           {0,0,0,0},           128,            TRUE,  4,              4,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,G,B,A,         _UNORM_SRGB, _UNORM_SRGB, _UNORM_SRGB, _UNORM,       FALSE,                  FALSE,               TRUE,             FALSE,   FALSE,  FALSE,                  FALSE,    },
-        // YUV 4:4:4 formats                                                                                                                                                                                                       
+        // YUV 4:4:4 formats
         { DXGI_FORMAT_AYUV                                    ,DXGI_FORMAT_AYUV,                         D3DFCS_AYUV,          {8,8,8,8},           32,             FALSE, 1,              1,               1,                D3DFL_STANDARD,   D3DFTL_FULL_TYPE,     B,G,R,A,         _UNORM, _UNORM, _UNORM, _UNORM,                      FALSE,                  TRUE,                FALSE,            FALSE,   TRUE,   FALSE,                  FALSE,    },
         { DXGI_FORMAT_Y410                                    ,DXGI_FORMAT_Y410,                         D3DFCS_Y410,          {10,10,10,2},        32,             FALSE, 1,              1,               1,                D3DFL_STANDARD,   D3DFTL_FULL_TYPE,     B,G,R,A,         _UNORM, _UNORM, _UNORM, _UNORM,                      FALSE,                  FALSE,               FALSE,            FALSE,   TRUE,   FALSE,                  FALSE,    },
         { DXGI_FORMAT_Y416                                    ,DXGI_FORMAT_Y416,                         D3DFCS_Y416,          {16,16,16,16},       64,             FALSE, 1,              1,               1,                D3DFL_STANDARD,   D3DFTL_FULL_TYPE,     B,G,R,A,         _UNORM, _UNORM, _UNORM, _UNORM,                      FALSE,                  FALSE,               FALSE,            FALSE,   TRUE,   FALSE,                  FALSE,    },
-        // YUV 4:2:0 formats                                                                                                                                                                                                                            
+        // YUV 4:2:0 formats
         { DXGI_FORMAT_NV12                                    ,DXGI_FORMAT_NV12,                         D3DFCS_NV12,          {0,0,0,0},           8,              FALSE, 2,              2,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,X,X,X,         _UNORM, _TYPELESS, _TYPELESS, _TYPELESS,             FALSE,                  TRUE,                FALSE,            TRUE,    TRUE,   FALSE,                  FALSE,    },
         { DXGI_FORMAT_P010                                    ,DXGI_FORMAT_P010,                         D3DFCS_P010,          {0,0,0,0},           16,             FALSE, 2,              2,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,X,X,X,         _UNORM, _TYPELESS, _TYPELESS, _TYPELESS,             FALSE,                  FALSE,               FALSE,            TRUE,    TRUE,   FALSE,                  FALSE,    },
         { DXGI_FORMAT_P016                                    ,DXGI_FORMAT_P016,                         D3DFCS_P016,          {0,0,0,0},           16,             FALSE, 2,              2,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,X,X,X,         _UNORM, _TYPELESS, _TYPELESS, _TYPELESS,             FALSE,                  FALSE,               FALSE,            TRUE,    TRUE,   FALSE,                  FALSE,    },
         { DXGI_FORMAT_420_OPAQUE                              ,DXGI_FORMAT_420_OPAQUE,                   D3DFCS_420_OPAQUE,    {0,0,0,0},           8,              FALSE, 2,              2,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,X,X,X,         _UNORM, _TYPELESS, _TYPELESS, _TYPELESS,             FALSE,                  TRUE,                FALSE,            TRUE,    TRUE,   FALSE,                  FALSE,    },
-        // YUV 4:2:2 formats                                                                                                                                                                                                                            
+        // YUV 4:2:2 formats
         { DXGI_FORMAT_YUY2                                    ,DXGI_FORMAT_YUY2,                         D3DFCS_YUY2,          {0,0,0,0},           16,             FALSE, 2,              1,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,G,B,X,         _UNORM, _UNORM, _UNORM, _TYPELESS,                   FALSE,                  TRUE,                FALSE,            FALSE,   TRUE,   FALSE,                  FALSE,    },
         { DXGI_FORMAT_Y210                                    ,DXGI_FORMAT_Y210,                         D3DFCS_Y210,          {0,0,0,0},           32,             FALSE, 2,              1,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,G,B,X,         _UNORM, _UNORM, _UNORM, _TYPELESS,                   FALSE,                  FALSE,               FALSE,            FALSE,   TRUE,   FALSE,                  FALSE,    },
         { DXGI_FORMAT_Y216                                    ,DXGI_FORMAT_Y216,                         D3DFCS_Y216,          {0,0,0,0},           32,             FALSE, 2,              1,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,G,B,X,         _UNORM, _UNORM, _UNORM, _TYPELESS,                   FALSE,                  FALSE,               FALSE,            FALSE,   TRUE,   FALSE,                  FALSE,    },
-        // YUV 4:1:1 formats                                                                                                                                                                                                                            
+        // YUV 4:1:1 formats
         { DXGI_FORMAT_NV11                                    ,DXGI_FORMAT_NV11,                         D3DFCS_NV11,          {0,0,0,0},           8,              FALSE, 4,              1,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,X,X,X,         _UNORM, _TYPELESS, _TYPELESS, _TYPELESS,             FALSE,                  TRUE,                FALSE,            TRUE,    TRUE,   FALSE,                  FALSE,    },
-        // Legacy substream formats                                                                                                                                                                                                                     
+        // Legacy substream formats
         { DXGI_FORMAT_AI44                                    ,DXGI_FORMAT_AI44,                         D3DFCS_AI44,          {0,0,0,0},           8,              FALSE, 1,              1,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,X,X,X,         _UNORM, _TYPELESS, _TYPELESS, _TYPELESS,             FALSE,                  TRUE,                FALSE,            FALSE,   TRUE,   FALSE,                  FALSE,    },
         { DXGI_FORMAT_IA44                                    ,DXGI_FORMAT_IA44,                         D3DFCS_IA44,          {0,0,0,0},           8,              FALSE, 1,              1,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,X,X,X,         _UNORM, _TYPELESS, _TYPELESS, _TYPELESS,             FALSE,                  TRUE,                FALSE,            FALSE,   TRUE,   FALSE,                  FALSE,    },
         { DXGI_FORMAT_P8                                      ,DXGI_FORMAT_P8,                           D3DFCS_P8,            {0,0,0,0},           8,              FALSE, 1,              1,               1,                D3DFL_CUSTOM,     D3DFTL_FULL_TYPE,     R,X,X,X,         _UNORM, _TYPELESS, _TYPELESS, _TYPELESS,             FALSE,                  TRUE,                FALSE,            FALSE,   TRUE,   FALSE,                  FALSE,    },
@@ -784,9 +784,9 @@ const UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::s_NumFormats = (sizeof(D3D12_PROP
 
 //---------------------------------------------------------------------------------------------------------------------------------
 // GetHighestDefinedFeatureLevel
-D3D_FEATURE_LEVEL D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetHighestDefinedFeatureLevel() 
+D3D_FEATURE_LEVEL D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetHighestDefinedFeatureLevel()
 {
-    return D3D_FEATURE_LEVEL_12_2; 
+    return D3D_FEATURE_LEVEL_12_2;
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -832,16 +832,16 @@ UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetDetailTableIndex(DXGI_FORMAT  Format
 
 //---------------------------------------------------------------------------------------------------------------------------------
 // IsBlockCompressFormat - returns true if format is block compressed. This function is a helper function for GetBitsPerUnit and
-// if this function returns true then GetBitsPerUnit returns block size. 
+// if this function returns true then GetBitsPerUnit returns block size.
 bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::IsBlockCompressFormat(DXGI_FORMAT Format)
 {
     // Returns true if BC1, BC2, BC3, BC4, BC5, BC6, BC7, or ASTC
-    return (Format >= DXGI_FORMAT_BC1_TYPELESS && Format <= DXGI_FORMAT_BC5_SNORM) || 
+    return (Format >= DXGI_FORMAT_BC1_TYPELESS && Format <= DXGI_FORMAT_BC5_SNORM) ||
            (Format >= DXGI_FORMAT_BC6H_TYPELESS && Format <= DXGI_FORMAT_BC7_UNORM_SRGB);
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
-// GetByteAlignment 
+// GetByteAlignment
 UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetByteAlignment(DXGI_FORMAT Format)
 {
     UINT bits = GetBitsPerUnit(Format);
@@ -987,13 +987,13 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateExtraPlanarRows(
 //----------------------------------------------------------------------------
 // CalculateResourceSize
 HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
-    UINT width, 
-    UINT height, 
+    UINT width,
+    UINT height,
     UINT depth,
-    DXGI_FORMAT format, 
-    UINT mipLevels, 
-    UINT subresources, 
-    _Out_ SIZE_T& totalByteSize, 
+    DXGI_FORMAT format,
+    UINT mipLevels,
+    UINT subresources,
+    _Out_ SIZE_T& totalByteSize,
     _Out_writes_opt_(subresources) D3D12_MEMCPY_DEST *pDst)
 {
     UINT tableIndex = GetDetailTableIndexNoThrow( format );
@@ -1058,12 +1058,12 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
 
         // Calculate rowPitch, depthPitch, and total subresource size.
         UINT rowPitch, depthPitch;
-   
+
         if (   FAILED(Safe_UIntMult(blockWidth, blockSize, &rowPitch))
             || FAILED(Safe_UIntMult(blockHeight, rowPitch, &depthPitch)))
         {
             return INTSAFE_E_ARITHMETIC_OVERFLOW;
-        } 
+        }
         SIZE_T subresourceByteSize = subDepth * depthPitch;
 
         if (pDst)
@@ -1074,13 +1074,13 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
             dst.pData = reinterpret_cast<void*>(totalByteSize);
             assert(s != 0 || dst.pData == nullptr);
 
-            dst.RowPitch = rowPitch; 
+            dst.RowPitch = rowPitch;
             dst.SlicePitch = depthPitch;
         }
 
         // Align the subresource size.
         static_assert((MAP_ALIGN_REQUIREMENT & (MAP_ALIGN_REQUIREMENT - 1)) == 0, "This code expects MAP_ALIGN_REQUIREMENT to be a power of 2.");
-        
+
         SIZE_T subresourceByteSizeAligned = subresourceByteSize + MAP_ALIGN_REQUIREMENT - 1;
         subresourceByteSizeAligned = subresourceByteSizeAligned & ~(MAP_ALIGN_REQUIREMENT - 1);
         totalByteSize = totalByteSize + subresourceByteSizeAligned;
@@ -1112,9 +1112,9 @@ inline bool IsPow2( UINT Val )
 }
 
 // This helper function calculates the Row Pitch for a given format. For Planar formats this function returns
-// the row major RowPitch of the resource. The RowPitch is the same for all the planes. For Planar 
+// the row major RowPitch of the resource. The RowPitch is the same for all the planes. For Planar
 // also use the CalculateExtraPlanarRows function to calculate the corresonding height or use the CalculateMinimumRowMajorSlicePitch
-// function. For Block Compressed Formats, this function returns the RowPitch of a row of blocks. For packed subsampled formats and other formats, 
+// function. For Block Compressed Formats, this function returns the RowPitch of a row of blocks. For packed subsampled formats and other formats,
 // this function returns the row pitch of one single row of pixels.
 HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateMinimumRowMajorRowPitch(DXGI_FORMAT Format, UINT Width, _Out_ UINT &RowPitch)
 {
@@ -1130,8 +1130,8 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateMinimumRowMajorRowPitch(DXG
     UINT NumUnits;
     if (IsBlockCompressFormat(Format))
     {
-        // This function calculates the minimum stride needed for a block row when the format 
-        // is block compressed.The GetBitsPerUnit value stored in the format table indicates 
+        // This function calculates the minimum stride needed for a block row when the format
+        // is block compressed.The GetBitsPerUnit value stored in the format table indicates
         // the size of a compressed block for block compressed formats.
         assert(WidthAlignment != 0);
         if (FAILED(DivideAndRoundUp(Width, WidthAlignment, NumUnits)))
@@ -1142,10 +1142,10 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateMinimumRowMajorRowPitch(DXG
     else
     {
         // All other formats must have strides aligned to their width alignment requirements.
-        // The Width may not be aligned to the WidthAlignment.  This is not an error for this 
+        // The Width may not be aligned to the WidthAlignment.  This is not an error for this
         // function as we expect to allow formats like NV12 to have odd dimensions in the future.
 
-        // The following alignement code expects only pow2 alignment requirements.  Only block 
+        // The following alignement code expects only pow2 alignment requirements.  Only block
         // compressed formats currently have non-pow2 alignment requriements.
         assert(IsPow2(WidthAlignment));
 
@@ -1170,7 +1170,7 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateMinimumRowMajorRowPitch(DXG
     return S_OK;
 }
 
-// This helper function calculates the SlicePitch for a given format. For Planar formats the slice pitch includes the extra 
+// This helper function calculates the SlicePitch for a given format. For Planar formats the slice pitch includes the extra
 // planes.
 HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateMinimumRowMajorSlicePitch(DXGI_FORMAT Format, UINT TightRowPitch, UINT Height, _Out_ UINT &SlicePitch)
 {
@@ -1212,7 +1212,7 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateMinimumRowMajorSlicePitch(D
 
 
 //---------------------------------------------------------------------------------------------------------------------------------
-// GetBitsPerUnit - returns bits per pixel unless format is a block compress format then it returns bits per block. 
+// GetBitsPerUnit - returns bits per pixel unless format is a block compress format then it returns bits per block.
 // use IsBlockCompressFormat() to determine if block size is returned.
 UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetBitsPerUnit(DXGI_FORMAT Format)
 {
@@ -1282,7 +1282,7 @@ const D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FORMAT_DETAIL* D3D12_PROPERTY_LAYOUT_F
     {
         return nullptr;
     }
-  
+
   return &s_FormatDetail[ Index ];
 }
 
@@ -1333,7 +1333,7 @@ UINT8 D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetAddressingBitsPerAlignedSize(DXGI_F
 {
     UINT byteAlignment = GetByteAlignment(Format);
     UINT8 addressBitsPerElement = 0;
-    
+
     switch(byteAlignment)
     {
         case 1:  addressBitsPerElement  = 0; break;
@@ -1345,7 +1345,7 @@ UINT8 D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetAddressingBitsPerAlignedSize(DXGI_F
         // The format is not supported
         default: return UINT8( -1 );
     }
-  
+
     return addressBitsPerElement;
 }
 
@@ -1558,14 +1558,14 @@ UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetDetailTableIndexNoThrow(DXGI_FORMAT 
 //---------------------------------------------------------------------------------------------------------------------------------
 // GetYCbCrChromaSubsampling
 void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetYCbCrChromaSubsampling(
-    DXGI_FORMAT Format, 
-    _Out_ UINT& HorizontalSubsampling, 
+    DXGI_FORMAT Format,
+    _Out_ UINT& HorizontalSubsampling,
     _Out_ UINT& VerticalSubsampling
     )
 {
     switch( Format)
     {
-        // YCbCr 4:2:0 
+        // YCbCr 4:2:0
         case DXGI_FORMAT_NV12:
         case DXGI_FORMAT_P010:
         case DXGI_FORMAT_P016:
@@ -1628,7 +1628,7 @@ UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::NonOpaquePlaneCount(DXGI_FORMAT Format)
         return 1;
     }
 
-    // V208 and V408 are the only 3-plane formats. 
+    // V208 and V408 are the only 3-plane formats.
     return (Format == DXGI_FORMAT_V208 || Format == DXGI_FORMAT_V408) ? 3 : 2;
 }
 
@@ -1637,9 +1637,9 @@ UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::NonOpaquePlaneCount(DXGI_FORMAT Format)
 //
 // Retrieve 64K Tiled Resource tile shape
 void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetTileShape(
-    D3D12_TILE_SHAPE* pTileShape, 
-    DXGI_FORMAT Format, 
-    D3D12_RESOURCE_DIMENSION Dimension, 
+    D3D12_TILE_SHAPE* pTileShape,
+    DXGI_FORMAT Format,
+    D3D12_RESOURCE_DIMENSION Dimension,
     UINT SampleCount
     )
 {
@@ -1708,7 +1708,7 @@ void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetTileShape(
                 {
                     ASSUME( FALSE );
                 }
-                
+
                 if (SampleCount <= 1)
                 { /* Do nothing */ }
                 else if (SampleCount <= 2)
@@ -1807,9 +1807,9 @@ void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetTileShape(
 //
 // Retrieve 4K Tiled Resource tile shape
 void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::Get4KTileShape(
-    D3D12_TILE_SHAPE* pTileShape, 
-    DXGI_FORMAT Format, 
-    D3D12_RESOURCE_DIMENSION Dimension, 
+    D3D12_TILE_SHAPE* pTileShape,
+    DXGI_FORMAT Format,
+    D3D12_RESOURCE_DIMENSION Dimension,
     UINT SampleCount
     )
 {
@@ -1904,7 +1904,7 @@ void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::Get4KTileShape(
                 {
                     ASSUME( FALSE );
                 }
-                    
+
                 assert(GetWidthAlignment(Format) == 1);
                 assert(GetHeightAlignment(Format) == 1);
                 assert(GetDepthAlignment(Format) == 1);
@@ -2050,12 +2050,12 @@ UINT8 D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSliceFromViewFormat(
 //----------------------------------------------------------------------------------------------------------------------------------
 void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSubsampledSizeAndFormatForCopyableLayout(
     UINT PlaneSlice,
-    DXGI_FORMAT Format, 
-    UINT Width, 
-    UINT Height, 
-    _Out_ DXGI_FORMAT& PlaneFormat, 
-    _Out_ UINT& MinPlanePitchWidth, 
-    _Out_ UINT& PlaneWidth, 
+    DXGI_FORMAT Format,
+    UINT Width,
+    UINT Height,
+    _Out_ DXGI_FORMAT& PlaneFormat,
+    _Out_ UINT& MinPlanePitchWidth,
+    _Out_ UINT& PlaneWidth,
     _Out_ UINT& PlaneHeight)
 {
     DXGI_FORMAT ParentFormat = GetParentFormat(Format);
@@ -2064,7 +2064,7 @@ void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSubsampledSizeAndFormatForCopya
     {
         switch (ParentFormat)
         {
-        // YCbCr 4:2:0 
+        // YCbCr 4:2:0
         case DXGI_FORMAT_NV12:
             switch(PlaneSlice)
             {
@@ -2150,7 +2150,7 @@ void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSubsampledSizeAndFormatForCopya
 
             // YCbCr 4:4:4
         case DXGI_FORMAT_V408:
-            
+
             switch(PlaneSlice)
             {
             case 0:
@@ -2173,21 +2173,21 @@ void D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSubsampledSizeAndFormatForCopya
             case 0:
                 PlaneFormat = DXGI_FORMAT_R8_TYPELESS;
                 PlaneWidth = Width;
-                PlaneHeight = Height;                
+                PlaneHeight = Height;
                 MinPlanePitchWidth = Width;
                 break;
             case 1:
                 PlaneFormat = DXGI_FORMAT_R8G8_TYPELESS;
                 PlaneWidth = (Width + 3) >> 2;
                 PlaneHeight = Height;
-                
+
                 // NV11 has unused padding to the right of the chroma plane in the RowMajor (linear) copyable layout.
                 MinPlanePitchWidth = (Width + 1) >> 1;
                 break;
             default:
                 ASSUME(FALSE);
             };
-            
+
             break;
 
         case DXGI_FORMAT_R32G8X24_TYPELESS:
@@ -2298,28 +2298,28 @@ BOOL D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FloatNormTextureFormat(DXGI_FORMAT Form
 // We were able to allow resources (Texture1D/2D/3D), created with a format from a small set of families that have 32 bits per element
 // (such as R8G8B8A8_TYPELESS), to be cast to R32_* when creating a UAV.  This means the Compute Shader or Pixel Shader can
 // do simultaneous read+write on the resource when bound as an R32_* UAV, with the caveat that the shader code has to do manual
-// type conversion manually, but later on the resource can be used as an SRV or RT as the desired type (e.g. R8G8B8A8_UNORM), and 
-// thus have access to filtering/blending where the hardware knows what the format is.  
+// type conversion manually, but later on the resource can be used as an SRV or RT as the desired type (e.g. R8G8B8A8_UNORM), and
+// thus have access to filtering/blending where the hardware knows what the format is.
 //
-// If we didn't have this ability to cast some formats to R32_* UAVs, applications would have to keep an extra allocation around 
-// and do a rendering pass that copies from the R32_* UAV to whatever typed resource they really wanted.  For formats not included 
-// in this list, such as any format that doesn't have 32-bits per component, as well as some 32-bit per component formats like 
-// R24G8 or R11G11B10_FLOAT there is no alternative for an application but to do the extra copy as mentioned, or avoid in-place 
+// If we didn't have this ability to cast some formats to R32_* UAVs, applications would have to keep an extra allocation around
+// and do a rendering pass that copies from the R32_* UAV to whatever typed resource they really wanted.  For formats not included
+// in this list, such as any format that doesn't have 32-bits per component, as well as some 32-bit per component formats like
+// R24G8 or R11G11B10_FLOAT there is no alternative for an application but to do the extra copy as mentioned, or avoid in-place
 // image editing in favor of ping-ponging between buffers with multiple passes.
-// 
+//
 bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::ValidCastToR32UAV(DXGI_FORMAT from, DXGI_FORMAT to)
 {
     // Allow casting of 32 bit formats to R32_*
     if(
         ((to == DXGI_FORMAT_R32_UINT)||(to == DXGI_FORMAT_R32_SINT)||(to == DXGI_FORMAT_R32_FLOAT))
-        && 
+        &&
         (
             (from == DXGI_FORMAT_R10G10B10A2_TYPELESS) ||
             (from == DXGI_FORMAT_R8G8B8A8_TYPELESS) ||
             (from == DXGI_FORMAT_B8G8R8A8_TYPELESS) ||
             (from == DXGI_FORMAT_B8G8R8X8_TYPELESS) ||
             (from == DXGI_FORMAT_R16G16_TYPELESS) ||
-            (from == DXGI_FORMAT_R32_TYPELESS) 
+            (from == DXGI_FORMAT_R32_TYPELESS)
         )
     )
     {
@@ -2396,7 +2396,7 @@ bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SNORMAndUNORMFormats(DXGI_FORMAT Forma
 // Formats allowed by runtime for decode histogram.  Scopes to tested formats.
  bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::DecodeHistogramAllowedForOutputFormatSupport(DXGI_FORMAT Format)
  {
-     return Format == DXGI_FORMAT_NV12 
+     return Format == DXGI_FORMAT_NV12
          || Format == DXGI_FORMAT_P010;
  }
 
@@ -2407,22 +2407,22 @@ bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SNORMAndUNORMFormats(DXGI_FORMAT Forma
      return Format == DXGI_FORMAT_NV12;
  }
 
-#undef R 
-#undef G 
-#undef B 
-#undef A 
-#undef D 
-#undef S 
-#undef X 
+#undef R
+#undef G
+#undef B
+#undef A
+#undef D
+#undef S
+#undef X
 
-#undef _TYPELESS   
-#undef _FLOAT      
-#undef _SNORM      
-#undef _UNORM      
-#undef _SINT       
-#undef _UINT       
-#undef _UNORM_SRGB 
-#undef _FIXED_2_8  
+#undef _TYPELESS
+#undef _FLOAT
+#undef _SNORM
+#undef _UNORM
+#undef _SINT
+#undef _UINT
+#undef _UNORM_SRGB
+#undef _FIXED_2_8
 
 #endif // D3D12_SDK_VERSION >= 606
 
