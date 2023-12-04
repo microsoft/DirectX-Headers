@@ -53,12 +53,6 @@ if (NOT WIN32)
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/wsl/stubs>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/wsl/stubs>"
     )
-elseif((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
-    # MinGW has RPC headers which define old versions, and complain if D3D
-    # headers are included before the RPC headers, since D3D headers were
-    # generated with new MIDL and "require" new RPC headers.
-   target_compile_options(DirectX-Headers PRIVATE "-D__REQUIRED_RPCNDR_H_VERSION__=475")
-   target_compile_options(DirectX-Guids PRIVATE "-D__REQUIRED_RPCNDR_H_VERSION__=475")
 endif()
 
 if (DXHEADERS_INSTALL)
