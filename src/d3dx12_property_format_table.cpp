@@ -14,12 +14,7 @@
 #ifndef NOMINMAX
     #define NOMINMAX 1
 #endif
-#ifdef __MINGW32__
-    #include <unknwn.h>
-#endif
-#ifndef _WIN32
-    #include <wsl/winadapter.h>
-#endif
+#include <wsl/winadapter.h>
 #include "d3dx12_property_format_table.h"
 #include <assert.h>
 #include <algorithm>
