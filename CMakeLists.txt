@@ -6,7 +6,7 @@ project(DirectX-Headers
     VERSION 1.611.1
 )
 include(CTest)
-set(CMAKE_CXX_STANDARD 14) 
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 enable_testing()
@@ -89,25 +89,26 @@ if (DXHEADERS_INSTALL)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/directx-headers-config.cmake"
                 "${CMAKE_CURRENT_BINARY_DIR}/directx-headers-config-version.cmake"
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/directx-headers/cmake)
-    
-    # Create pkg-config file 
-    include(cmake/JoinPaths.cmake)
-    # from: https://github.com/jtojnar/cmake-snips#concatenating-paths-when-building-pkg-config-files
-    join_paths(DIRECTX_INCLUDEDIR_FOR_PKG_CONFIG "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
-    join_paths(DIRECTX_LIBDIR_FOR_PKG_CONFIG "\${prefix}"     "${CMAKE_INSTALL_LIBDIR}")        
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DirectX-Headers.pc.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc" @ONLY)
 
-    # Install the pkg-config file
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc"
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    if(NOT VCPKG_TOOLCHAIN)
+        # Create pkg-config file
+        include(cmake/JoinPaths.cmake)
+        # from: https://github.com/jtojnar/cmake-snips#concatenating-paths-when-building-pkg-config-files
+        join_paths(DIRECTX_INCLUDEDIR_FOR_PKG_CONFIG "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
+        join_paths(DIRECTX_LIBDIR_FOR_PKG_CONFIG "\${prefix}"     "${CMAKE_INSTALL_LIBDIR}")
+        configure_file(
+            "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DirectX-Headers.pc.in"
+            "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc" @ONLY)
 
+        # Install the pkg-config file
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DirectX-Headers.pc"
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    endif()
 endif()
 
 if (BUILD_TESTING)
     if (DXHEADERS_BUILD_TEST)
-       add_subdirectory(test) 
+       add_subdirectory(test)
     endif()
 
     if (DXHEADERS_BUILD_GOOGLE_TEST)
