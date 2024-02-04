@@ -995,6 +995,11 @@ struct CD3DX12_GPU_DESCRIPTOR_HANDLE : public D3D12_GPU_DESCRIPTOR_HANDLE
 // To help enable root signature 1.1 features when they are available and not require maintaining
 // two code paths for building root signatures, this helper method reconstructs a 1.0 signature when
 // 1.1 is not supported.
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcovered-switch-default"
+#endif
+
 inline HRESULT D3DX12SerializeVersionedRootSignature(
     _In_ const D3D12_VERSIONED_ROOT_SIGNATURE_DESC* pRootSignatureDesc,
     D3D_ROOT_SIGNATURE_VERSION MaxVersion,
@@ -1216,3 +1221,7 @@ inline HRESULT D3DX12SerializeVersionedRootSignature(
 
     return E_INVALIDARG;
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
