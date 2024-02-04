@@ -1054,8 +1054,12 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestFeatureLevel()
         D3D_FEATURE_LEVEL_9_3,
         D3D_FEATURE_LEVEL_9_2,
         D3D_FEATURE_LEVEL_9_1,
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 5)
         D3D_FEATURE_LEVEL_1_0_CORE,
+#endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 611)
         D3D_FEATURE_LEVEL_1_0_GENERIC
+#endif
     };
 
     D3D12_FEATURE_DATA_FEATURE_LEVELS dFeatureLevel;
