@@ -1143,12 +1143,16 @@ inline HRESULT D3DX12SerializeVersionedRootSignature(
 
                     return hr;
                 }
+
+                default:
+                    break;
             }
             break;
 
         case D3D_ROOT_SIGNATURE_VERSION_1_1:
             switch (pRootSignatureDesc->Version)
             {
+            default:
             case D3D_ROOT_SIGNATURE_VERSION_1_0:
             case D3D_ROOT_SIGNATURE_VERSION_1_1:
                 return D3D12SerializeVersionedRootSignature(pRootSignatureDesc, ppBlob, ppErrorBlob);
@@ -1198,7 +1202,6 @@ inline HRESULT D3DX12SerializeVersionedRootSignature(
                 return hr;
             }
 #endif
-
             }
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 609)
         case D3D_ROOT_SIGNATURE_VERSION_1_2:
