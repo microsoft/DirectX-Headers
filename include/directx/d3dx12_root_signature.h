@@ -1205,6 +1205,8 @@ inline HRESULT D3DX12SerializeVersionedRootSignature(
             default:
                 break;
             }
+            break;
+
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 609)
         case D3D_ROOT_SIGNATURE_VERSION_1_2:
 #endif
