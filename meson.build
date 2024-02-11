@@ -25,11 +25,6 @@ compile_options = []
 if host_machine.system() != 'windows'
     inc_dirs += include_directories('include/wsl/stubs', is_system : true)
     install_inc_subdirs += ['', 'wsl/stubs', 'directx']
-elif meson.get_compiler('cpp').get_id() != 'msvc' and meson.get_compiler('cpp').get_id() != 'clang-cl'
-    # MinGW has RPC headers which define old versions, and complain if D3D
-    # headers are included before the RPC headers, since D3D headers were
-    # generated with new MIDL and "require" new RPC headers.
-    compile_options = ['-D__REQUIRED_RPCNDR_H_VERSION__=475']
 endif
 
 format_properties_lib = static_library(

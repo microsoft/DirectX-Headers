@@ -17,7 +17,7 @@ Make sure that you visit the [DirectX Landing Page](https://devblogs.microsoft.c
 
 ## Use on Windows
 
-Note that these headers may conflict with the headers from the Windows SDK, depending on include ordering. These headers should be added to the include directory list before the SDK, and should be included before other graphics headers (e.g. `d3d11.h`) from the Windows SDK. Otherwise, the corresponding header from the Windows SDK may be included first, and will define the include guards which prevents these headers from being used.
+Note that these headers may conflict with the headers from the Windows SDK, depending on include ordering. These headers should be added to the include directory list before the SDK, and should be included before other graphics headers (e.g. `d3d11.h`) from the Windows SDK. Otherwise, the corresponding header from the Windows SDK may be included first, and will define the include guards which prevents these headers from being used. To make sure the souce to be compatiable for both Win32(MSVC/MINGW)/Linux, `wsl/winadapter.h` and `wsl/wrladapter.h` should be included at the begnning of the souce file.
 
 ## Use on WSL
 
