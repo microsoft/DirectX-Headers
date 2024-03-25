@@ -7,9 +7,9 @@ project('DirectX-Headers', 'cpp', version : '1.613.1',
 cpp = meson.get_compiler('cpp')
 compiler_id = cpp.get_id()
 #d3d12_lib is not available in linux
-d3d12_lib = cpp.find_library('d3d12', required : host_machine.system() == 'windows')
+d3d12_lib = cpp.find_library('d3d12', required : host_machine.system() == 'windows', disabler : true)
 #dxcore is not available in Mingw-w64
-dxcore_lib = cpp.find_library('dxcore', required: compiler_id == 'msvc')
+dxcore_lib = cpp.find_library('dxcore', required: compiler_id == 'msvc', disabler : true)
 test_compile_opts = []
 if host_machine.system() == 'windows'
     test_compile_opts = ['-DUNICODE', '-D_WIN32_WINNT=0x0A00']
