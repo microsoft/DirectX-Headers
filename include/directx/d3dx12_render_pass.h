@@ -34,6 +34,11 @@ inline bool operator==( const D3D12_RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETER
     return a.ClearValue == b.ClearValue;
 }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcovered-switch-default"
+#endif
+
 inline bool operator==( const D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_PARAMETERS &a, const D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_PARAMETERS &b) noexcept
 {
     if (a.pSrcResource != b.pSrcResource) return false;
@@ -60,6 +65,8 @@ inline bool operator==( const D3D12_RENDER_PASS_BEGINNING_ACCESS &a, const D3D12
         if (!(a.PreserveLocal == b.PreserveLocal)) return false;
         break;
 #endif
+    default:
+        break;
     }
     return true;
 }
@@ -79,10 +86,16 @@ inline bool operator==(const D3D12_RENDER_PASS_ENDING_ACCESS& a, const D3D12_REN
         if (!(a.PreserveLocal == b.PreserveLocal)) return false;
         break;
 #endif
+    default:
+        break;
     }
 
     return true;
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 inline bool operator==( const D3D12_RENDER_PASS_RENDER_TARGET_DESC &a, const D3D12_RENDER_PASS_RENDER_TARGET_DESC &b) noexcept
 {
