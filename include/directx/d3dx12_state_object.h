@@ -71,8 +71,8 @@ public:
             ownedSubobject->Finalize();
         }
 
-        m_RepointedSubobjectVectors.clear();
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
+        m_RepointedSubobjectVectors.clear();
         m_RepointedPrograms.clear();
 #endif
         m_RepointedAssociations.clear();
@@ -189,8 +189,8 @@ private:
         m_SubobjectList.clear();
         m_SubobjectArray.clear();
         m_RepointedAssociations.clear();
-        m_RepointedSubobjectVectors.clear();
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
+        m_RepointedSubobjectVectors.clear();
         m_RepointedPrograms.clear();
 #endif
     }
@@ -208,9 +208,9 @@ private:
         m_RepointedAssociations; // subobject type that contains pointers to other subobjects,
                                  // repointed to flattened array
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
     std::list<std::vector<D3D12_STATE_SUBOBJECT const*>>
         m_RepointedSubobjectVectors;
-#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
     std::list<D3D12_GENERIC_PROGRAM_DESC>
         m_RepointedPrograms;
 #endif
