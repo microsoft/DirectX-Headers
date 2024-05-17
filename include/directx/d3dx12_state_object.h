@@ -72,7 +72,9 @@ public:
         }
 
         m_RepointedSubobjectVectors.clear();
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
         m_RepointedPrograms.clear();
+#endif
         m_RepointedAssociations.clear();
         m_SubobjectArray.clear();
         m_SubobjectArray.reserve(m_Desc.NumSubobjects);
@@ -100,6 +102,7 @@ public:
                 m_RepointedAssociations.push_back(Repointed);
                 m_SubobjectArray[i].pDesc = &m_RepointedAssociations.back();
             }
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
             else if (m_SubobjectArray[i].Type == D3D12_STATE_SUBOBJECT_TYPE_GENERIC_PROGRAM)
             {
                 auto originalGenericProgramDesc =
@@ -122,6 +125,7 @@ public:
                 m_RepointedPrograms.push_back(Repointed);
                 m_SubobjectArray[i].pDesc = &m_RepointedPrograms.back();
             }
+#endif
         }
         // Below: using ugly way to get pointer in case .data() is not defined
         m_Desc.pSubobjects = m_Desc.NumSubobjects ? &m_SubobjectArray[0] : nullptr;
@@ -186,7 +190,9 @@ private:
         m_SubobjectArray.clear();
         m_RepointedAssociations.clear();
         m_RepointedSubobjectVectors.clear();
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
         m_RepointedPrograms.clear();
+#endif
     }
     typedef struct SUBOBJECT_WRAPPER : public D3D12_STATE_SUBOBJECT
     {
@@ -204,8 +210,10 @@ private:
 
     std::list<std::vector<D3D12_STATE_SUBOBJECT const*>>
         m_RepointedSubobjectVectors;
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
     std::list<D3D12_GENERIC_PROGRAM_DESC>
         m_RepointedPrograms;
+#endif
 
     template<typename CStr, typename StdStr>
     class StringContainer
