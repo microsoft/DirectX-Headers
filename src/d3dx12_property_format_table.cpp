@@ -1257,6 +1257,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CanBeCastEvenFullyTyped(DXGI_FORMAT For
     //SRGB can be cast away/back, and XR_BIAS can be cast to/from UNORM
     switch(fl)
     {
+    case D3D_FEATURE_LEVEL_1_0_GENERIC:
     case D3D_FEATURE_LEVEL_1_0_CORE:
         return false;
     default:
@@ -2366,7 +2367,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::IsSupportedTextureDisplayableFormat
 //---------------------------------------------------------------------------------------------------------------------------------
 bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FloatAndNotFloatFormats(DXGI_FORMAT FormatA, DXGI_FORMAT FormatB)
 {
-    UINT NumComponents = std::min(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
+    UINT NumComponents = (std::min)(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
     for (UINT c = 0; c < NumComponents; c++)
     {
         D3D_FORMAT_COMPONENT_INTERPRETATION fciA = GetFormatComponentInterpretation(FormatA, c);
@@ -2382,7 +2383,7 @@ bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FloatAndNotFloatFormats(DXGI_FORMAT Fo
 //---------------------------------------------------------------------------------------------------------------------------------
 bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SNORMAndUNORMFormats(DXGI_FORMAT FormatA, DXGI_FORMAT FormatB)
 {
-    UINT NumComponents = std::min(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
+    UINT NumComponents = (std::min)(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
     for (UINT c = 0; c < NumComponents; c++)
     {
         D3D_FORMAT_COMPONENT_INTERPRETATION fciA = GetFormatComponentInterpretation(FormatA, c);
@@ -2397,11 +2398,23 @@ bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SNORMAndUNORMFormats(DXGI_FORMAT Forma
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
-// Formats allowed by runtime for decode histogram.  Scopes to tested formats.
+// Formats allowed by runtime for decode histogram.
  bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::DecodeHistogramAllowedForOutputFormatSupport(DXGI_FORMAT Format)
  {
-     return Format == DXGI_FORMAT_NV12 
-         || Format == DXGI_FORMAT_P010;
+     return (
+         /* YUV 4:2:0 */
+            Format == DXGI_FORMAT_NV12
+         || Format == DXGI_FORMAT_P010
+         || Format == DXGI_FORMAT_P016
+         /* YUV 4:2:2 */
+         || Format == DXGI_FORMAT_YUY2
+         || Format == DXGI_FORMAT_Y210
+         || Format == DXGI_FORMAT_Y216
+         /* YUV 4:4:4 */
+         || Format == DXGI_FORMAT_AYUV
+         || Format == DXGI_FORMAT_Y410
+         || Format == DXGI_FORMAT_Y416
+     );
  }
 
 //---------------------------------------------------------------------------------------------------------------------------------

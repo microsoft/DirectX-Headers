@@ -721,7 +721,7 @@ struct CD3DX12_RASTERIZER_DESC2 : public D3D12_RASTERIZER_DESC2
     }
     operator D3D12_RASTERIZER_DESC() const noexcept
     {
-        return (D3D12_RASTERIZER_DESC)CD3DX12_RASTERIZER_DESC1((D3D12_RASTERIZER_DESC1)*this);
+        return static_cast<D3D12_RASTERIZER_DESC>(CD3DX12_RASTERIZER_DESC1(static_cast<D3D12_RASTERIZER_DESC1>(*this)));
     }
 };
 #endif // D3D12_SDK_VERSION >= 610
@@ -1495,6 +1495,7 @@ inline const CD3DX12_RESOURCE_DESC1* D3DX12ConditionallyExpandAPIDesc(
     }
 }
 
+
 //------------------------------------------------------------------------------------------------
 struct CD3DX12_VIEW_INSTANCING_DESC : public D3D12_VIEW_INSTANCING_DESC
 {
@@ -1533,3 +1534,4 @@ struct CD3DX12_RT_FORMAT_ARRAY : public D3D12_RT_FORMAT_ARRAY
         // assumes ARRAY_SIZE(pFormats) == ARRAY_SIZE(RTFormats)
     }
 };
+
