@@ -329,6 +329,10 @@ typedef struct _D3D12_FUNCTION_DESC
     BOOL                                    Has10Level9VertexShader;      // TRUE, if there is a 10L9 VS blob
     BOOL                                    Has10Level9PixelShader;       // TRUE, if there is a 10L9 PS blob
 
+} D3D12_FUNCTION_DESC;
+
+typedef struct _D3D12_FUNCTION_DESC1 {                                    // Only accessible via DXC
+
     D3D12_SHADER_VERSION_TYPE               ShaderType;                   // Function's shader stage
 
     union {
@@ -343,7 +347,7 @@ typedef struct _D3D12_FUNCTION_DESC
         D3D12_PIXEL_SHADER_DESC             PixelShader;                  // ShaderType == D3D12_SHVER_PIXEL_SHADER
     };
 
-} D3D12_FUNCTION_DESC;
+} D3D12_FUNCTION_DESC1;
 
 typedef struct _D3D12_PARAMETER_DESC
 {
@@ -537,6 +541,7 @@ DEFINE_GUID(IID_ID3D12FunctionReflection,
 DECLARE_INTERFACE(ID3D12FunctionReflection)
 {
     STDMETHOD(GetDesc)(THIS_ _Out_ D3D12_FUNCTION_DESC * pDesc) PURE;
+    STDMETHOD(GetDesc1)(THIS_ _Out_ D3D12_FUNCTION_DESC1 * pDesc) PURE;
     
     STDMETHOD_(ID3D12ShaderReflectionConstantBuffer *, GetConstantBufferByIndex)(THIS_ _In_ UINT BufferIndex) PURE;
     STDMETHOD_(ID3D12ShaderReflectionConstantBuffer *, GetConstantBufferByName)(THIS_ _In_ LPCSTR Name) PURE;
