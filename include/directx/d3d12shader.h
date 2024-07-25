@@ -153,6 +153,10 @@ typedef struct _D3D12_SHADER_DESC
     D3D_TESSELLATOR_OUTPUT_PRIMITIVE HSOutputPrimitive;  // Primitive output by the tessellator
     D3D_TESSELLATOR_PARTITIONING HSPartitioning;         // Partitioning mode of the tessellator
     D3D_TESSELLATOR_DOMAIN  TessellatorDomain;           // Domain of the tessellator (quad, tri, isoline)
+    // instruction counts
+    UINT cBarrierInstructions;                           // Number of barrier instructions in a compute shader
+    UINT cInterlockedInstructions;                       // Number of interlocked instructions
+    UINT cTextureStoreInstructions;                      // Number of texture writes
 } D3D12_SHADER_DESC;
 
 typedef struct _D3D12_COMPUTE_SHADER_DESC {
