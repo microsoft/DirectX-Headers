@@ -143,6 +143,10 @@ typedef struct _D3D12_HULL_SHADER_DESC {
     FLOAT                                   MaxTessFactor;                // Max tessellation factor
 } D3D12_HULL_SHADER_DESC;
 
+typedef D3D_PRIMITIVE_TOPOLOGY D3D12_PRIMITIVE_TOPOLOGY;
+
+typedef D3D_PRIMITIVE D3D12_PRIMITIVE;
+
 typedef struct _D3D12_GEOMETRY_SHADER_DESC {
     D3D12_PRIMITIVE                         InputPrimitive;               // Input primitive
     UINT                                    MaxVertexCount;               // Max vertex count
@@ -162,52 +166,60 @@ typedef struct _D3D12_MESH_SHADER_DESC {
     D3D12_MESH_OUTPUT_TOPOLOGY              OutputTopology;               // Output topology
 } D3D12_MESH_SHADER_DESC;
 
-typedef struct _D3D12_SHADER_DESC
-{
-    UINT                                Version;                     // Shader version
-    LPCSTR                              Creator;                     // Creator string
-    UINT                                Flags;                       // Shader compilation/parse flags
-    						            
-    UINT                                ConstantBuffers;             // Number of constant buffers
-    UINT                                BoundResources;              // Number of bound resources
-    UINT                                InputParameters;             // Number of parameters in the input signature
-    UINT                                OutputParameters;            // Number of parameters in the output signature
-							            
-    UINT                                InstructionCount;            // Number of emitted instructions
-    UINT                                TempRegisterCount;           // Number of temporary registers used 
-    UINT                                TempArrayCount;              // Number of temporary arrays used
-    UINT                                DefCount;                    // Number of constant defines 
-    UINT                                DclCount;                    // Number of declarations (input + output)
-    UINT                                TextureNormalInstructions;   // Number of non-categorized texture instructions
-    UINT                                TextureLoadInstructions;     // Number of texture load instructions
-    UINT                                TextureCompInstructions;     // Number of texture comparison instructions
-    UINT                                TextureBiasInstructions;     // Number of texture bias instructions
-    UINT                                TextureGradientInstructions; // Number of texture gradient instructions
-    UINT                                FloatInstructionCount;       // Number of floating point arithmetic instructions used
-    UINT                                IntInstructionCount;         // Number of signed integer arithmetic instructions used
-    UINT                                UintInstructionCount;        // Number of unsigned integer arithmetic instructions used
-    UINT                                StaticFlowControlCount;      // Number of static flow control instructions used
-    UINT                                DynamicFlowControlCount;     // Number of dynamic flow control instructions used
-    UINT                                MacroInstructionCount;       // Number of macro instructions used
-    UINT                                ArrayInstructionCount;       // Number of array instructions used
-    UINT                                CutInstructionCount;         // Number of cut instructions used
-    UINT                                EmitInstructionCount;        // Number of emit instructions used
-							            
-    UINT                                cBarrierInstructions;        // Number of barrier instructions in a compute shader
-    UINT                                cInterlockedInstructions;    // Number of interlocked instructions
-    UINT                                cTextureStoreInstructions;   // Number of texture writes
-	
-    D3D12_SHADER_VERSION_TYPE           ShaderType;                  // Function's shader stage
+typedef struct _D3D12_SHADER_DESC {
 
-    union {
-        D3D12_HULL_SHADER_DESC          HullShader;                  // ShaderType == D3D12_SHVER_HULL_SHADER
-        D3D12_COMPUTE_SHADER_DESC       ComputeShader;               // ShaderType == D3D12_SHVER_COMPUTE_SHADER
-        D3D12_MESH_SHADER_DESC          MeshShader;                  // ShaderType == D3D12_SHVER_MESH_SHADER
-        D3D12_GEOMETRY_SHADER_DESC      GeometryShader;              // ShaderType == D3D12_SHVER_GEOMETRY_SHADER
-        D3D12_DOMAIN_SHADER_DESC        DomainShader;                // ShaderType == D3D12_SHVER_DOMAIN_SHADER
-        D3D12_AMPLIFICATION_SHADER_DESC AmplificationShader;         // ShaderType == D3D12_SHVER_AMPLIFICATION_SHADER
-        D3D12_PIXEL_SHADER_DESC         PixelShader;                 // ShaderType == D3D12_SHVER_PIXEL_SHADER
-    };
+    UINT Version;   // Shader version
+    LPCSTR Creator; // Creator string
+    UINT Flags;     // Shader compilation/parse flags
+
+    UINT ConstantBuffers;  // Number of constant buffers
+    UINT BoundResources;   // Number of bound resources
+    UINT InputParameters;  // Number of parameters in the input signature
+    UINT OutputParameters; // Number of parameters in the output signature
+
+    UINT InstructionCount;          // Number of emitted instructions
+    UINT TempRegisterCount;         // Number of temporary registers used
+    UINT TempArrayCount;            // Number of temporary arrays used
+    UINT DefCount;                  // Number of constant defines
+    UINT DclCount;                  // Number of declarations (input + output)
+    UINT TextureNormalInstructions; // Number of non-categorized texture
+                                    // instructions
+    UINT TextureLoadInstructions;   // Number of texture load instructions
+    UINT TextureCompInstructions;   // Number of texture comparison instructions
+    UINT TextureBiasInstructions;   // Number of texture bias instructions
+    UINT TextureGradientInstructions; // Number of texture gradient instructions
+    UINT FloatInstructionCount;       // Number of floating point arithmetic
+                                      // instructions used
+    UINT IntInstructionCount;         // Number of signed integer arithmetic
+                                      // instructions used
+    UINT UintInstructionCount;        // Number of unsigned integer arithmetic
+                                      // instructions used
+    UINT StaticFlowControlCount;  // Number of static flow control instructions
+                                  // used
+    UINT DynamicFlowControlCount; // Number of dynamic flow control instructions
+                                  // used
+    UINT MacroInstructionCount;   // Number of macro instructions used
+    UINT ArrayInstructionCount;   // Number of array instructions used
+    UINT CutInstructionCount;     // Number of cut instructions used
+    UINT EmitInstructionCount;    // Number of emit instructions used
+    D3D_PRIMITIVE_TOPOLOGY GSOutputTopology; // Geometry shader output topology
+    UINT GSMaxOutputVertexCount;  // Geometry shader maximum output vertex count
+    D3D_PRIMITIVE InputPrimitive; // GS/HS input primitive
+    UINT PatchConstantParameters; // Number of parameters in the patch constant
+                                  // signature
+    UINT cGSInstanceCount;        // Number of Geometry shader instances
+    UINT cControlPoints; // Number of control points in the HS->DS stage
+    D3D_TESSELLATOR_OUTPUT_PRIMITIVE
+        HSOutputPrimitive; // Primitive output by the tessellator
+    D3D_TESSELLATOR_PARTITIONING
+        HSPartitioning; // Partitioning mode of the tessellator
+    D3D_TESSELLATOR_DOMAIN
+        TessellatorDomain; // Domain of the tessellator (quad, tri, isoline)
+    // instruction counts
+    UINT cBarrierInstructions; // Number of barrier instructions in a compute
+                               // shader
+    UINT cInterlockedInstructions;  // Number of interlocked instructions
+    UINT cTextureStoreInstructions; // Number of texture writes
 
 } D3D12_SHADER_DESC;
 
@@ -267,8 +279,16 @@ typedef struct _D3D12_LIBRARY_DESC
     UINT      FunctionCount;     // Number of functions exported from the library.
 } D3D12_LIBRARY_DESC;
 
+typedef enum D3D12_NODE_OVERRIDES_TYPE {
+    D3D12_NODE_OVERRIDES_TYPE_NONE = 0,
+    D3D12_NODE_OVERRIDES_TYPE_BROADCASTING_LAUNCH = 1,
+    D3D12_NODE_OVERRIDES_TYPE_COALESCING_LAUNCH = 2,
+    D3D12_NODE_OVERRIDES_TYPE_THREAD_LAUNCH = 3,
+    D3D12_NODE_OVERRIDES_TYPE_COMMON_COMPUTE = 4
+} D3D12_NODE_OVERRIDES_TYPE;
+
 typedef struct _D3D12_NODE_SHADER_DESC {
-    D3D12_FUNCTION_COMPUTE_DESC             ComputeDesc;                  // Node extends ComputeDesc
+    D3D12_COMPUTE_SHADER_DESC               ComputeDesc;                  // Node extends ComputeDesc
     D3D12_NODE_OVERRIDES_TYPE               LaunchType;                   // Launch type
     BOOL                                    IsProgramEntry;               // Is program entry
     INT                                     LocalRootArgumentsTableIndex; // Local root arguments table index
