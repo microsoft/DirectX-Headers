@@ -386,6 +386,9 @@ typedef interface ID3D12ShaderReflection *LPD3D12SHADERREFLECTION;
 typedef interface ID3D12LibraryReflection ID3D12LibraryReflection;
 typedef interface ID3D12LibraryReflection *LPD3D12LIBRARYREFLECTION;
 
+typedef interface ID3D12LibraryReflection1 ID3D12LibraryReflection1;
+typedef interface ID3D12LibraryReflection1 *LPD3D12LIBRARYREFLECTION1;
+
 typedef interface ID3D12FunctionReflection ID3D12FunctionReflection;
 typedef interface ID3D12FunctionReflection *LPD3D12FUNCTIONREFLECTION;
 
