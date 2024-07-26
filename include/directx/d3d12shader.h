@@ -267,7 +267,8 @@ typedef struct _D3D12_LIBRARY_DESC
     UINT      FunctionCount;     // Number of functions exported from the library.
 } D3D12_LIBRARY_DESC;
 
-typedef enum D3D12_NODE_OVERRIDES_TYPE {
+typedef enum D3D12_NODE_OVERRIDES_TYPE
+{
     D3D12_NODE_OVERRIDES_TYPE_NONE = 0,
     D3D12_NODE_OVERRIDES_TYPE_BROADCASTING_LAUNCH = 1,
     D3D12_NODE_OVERRIDES_TYPE_COALESCING_LAUNCH = 2,
@@ -275,7 +276,14 @@ typedef enum D3D12_NODE_OVERRIDES_TYPE {
     D3D12_NODE_OVERRIDES_TYPE_COMMON_COMPUTE = 4
 } D3D12_NODE_OVERRIDES_TYPE;
 
-typedef struct _D3D12_NODE_SHADER_DESC {
+typedef struct _D3D12_NODE_ID_DESC
+{
+    const char*                             Name;
+	UINT                                    ID;
+} D3D12_NODE_ID_DESC;
+
+typedef struct _D3D12_NODE_SHADER_DESC
+{
     D3D12_COMPUTE_SHADER_DESC               ComputeDesc;                  // Node extends ComputeDesc
     D3D12_NODE_OVERRIDES_TYPE               LaunchType;                   // Launch type
     BOOL                                    IsProgramEntry;               // Is program entry
@@ -283,9 +291,84 @@ typedef struct _D3D12_NODE_SHADER_DESC {
     UINT                                    DispatchGrid[3];              // Dispatch grid
     UINT                                    MaxDispatchGrid[3];           // Max dispatch grid
     UINT                                    MaxRecursionDepth;            // Max recursion depth
+    D3D12_NODE_ID_DESC                      ShaderId;                     // Node shader id
+    D3D12_NODE_ID_DESC                      ShaderSharedInput;            // Node shader shared input
+    UINT                                    InputNodes;                   // Input nodes
+    UINT                                    OutputNodes;                  // Output nodes
 } D3D12_NODE_SHADER_DESC;
 
-typedef struct _D3D12_RAYTRACING_SHADER_DESC {
+typedef enum D3D12_NODE_IO_FLAGS
+{
+    D3D12_NODE_IO_FLAGS_NONE                   = 0,
+    D3D12_NODE_IO_FLAGS_INPUT                  = 1 << 0,
+    D3D12_NODE_IO_FLAGS_OUTPUT                 = 1 << 1,
+    D3D12_NODE_IO_FLAGS_READ_WRITE             = 1 << 2,
+    D3D12_NODE_IO_FLAGS_EMPTY_RECORD           = 1 << 3,
+    D3D12_NODE_IO_FLAGS_NODE_ARRAY             = 1 << 4,
+    D3D12_NODE_IO_FLAGS_THREAD_RECORD          = 1 << 5,
+    D3D12_NODE_IO_FLAGS_GROUP_RECORD           = 1 << 6,
+    D3D12_NODE_IO_FLAGS_DISPATCH_RECORD        = 1 << 7,
+
+    D3D12_NODE_IO_FLAGS_NODE_IO_MASK           = (1 << 8) - 1,
+	
+    D3D12_NODE_IO_FLAGS_TRACK_RW_INPUT_SHARING = 1 << 8,
+    D3D12_NODE_IO_FLAGS_GLOBALLY_COHERENT      = 1 << 9,
+	
+    D3D12_NODE_IO_FLAGS_RECORD_FLAG_MASK       = 3 << 8,
+    D3D12_NODE_IO_FLAGS_NODE_FLAGS_MASK        = 1 << 8
+
+} D3D12_NODE_IO_FLAGS;
+
+typedef enum D3D12_DISPATCH_COMPONENT_TYPE
+{
+    D3D12_DISPATCH_COMPONENT_TYPE_I1           = 1,
+    D3D12_DISPATCH_COMPONENT_TYPE_I16          = 2,
+    D3D12_DISPATCH_COMPONENT_TYPE_U16          = 3,
+    D3D12_DISPATCH_COMPONENT_TYPE_I32          = 4,
+    D3D12_DISPATCH_COMPONENT_TYPE_U32          = 5,
+    D3D12_DISPATCH_COMPONENT_TYPE_I64          = 6,
+    D3D12_DISPATCH_COMPONENT_TYPE_U64          = 7,
+    D3D12_DISPATCH_COMPONENT_TYPE_F16          = 8,
+    D3D12_DISPATCH_COMPONENT_TYPE_F32          = 9,
+    D3D12_DISPATCH_COMPONENT_TYPE_F64          = 10,
+    D3D12_DISPATCH_COMPONENT_TYPE_SNORM_F16    = 11,
+    D3D12_DISPATCH_COMPONENT_TYPE_UNORM_F16    = 12,
+    D3D12_DISPATCH_COMPONENT_TYPE_SNORM_F32    = 13,
+    D3D12_DISPATCH_COMPONENT_TYPE_UNORM_F32    = 14,
+    D3D12_DISPATCH_COMPONENT_TYPE_SNORM_F64    = 15,
+    D3D12_DISPATCH_COMPONENT_TYPE_UNORM_F64    = 16,
+    D3D12_DISPATCH_COMPONENT_TYPE_PACKED_S8X32 = 17,
+    D3D12_DISPATCH_COMPONENT_TYPE_PACKED_U8X32 = 18
+
+} D3D12_DISPATCH_COMPONENT_TYPE;
+
+typedef struct _D3D12_DISPATCH_GRID_DESC
+{
+    UINT                                    ByteOffset;                   // Byte offset
+    D3D12_DISPATCH_COMPONENT_TYPE           ComponentType;                // Component type
+    UINT                                    NumComponents;
+} D3D12_DISPATCH_GRID_DESC;
+
+typedef struct _D3D12_NODE_RECORD_TYPE_DESC
+{
+    UINT                                    Size;                         // Size
+    UINT                                    Alignment;                    // Alignment
+    D3D12_DISPATCH_GRID_DESC                DispatchGrid;                 // Dispatch grid
+} D3D12_NODE_RECORD_TYPE_DESC;
+
+typedef struct _D3D12_NODE_DESC
+{
+    D3D12_NODE_IO_FLAGS                     Flags;                        // Node flags
+    D3D12_NODE_RECORD_TYPE_DESC             Type;                         // Node type
+    D3D12_NODE_ID_DESC                      OutputID;                     // Node output id
+    UINT                                    MaxRecords;                   // Max records
+    INT                                     MaxRecordsSharedWith;         // Max records shared with
+    UINT                                    OutputArraySize;              // Output array size
+    BOOL                                    AllowSparseNodes;             // Allow sparse nodes
+} D3D12_NODE_DESC;
+
+typedef struct _D3D12_RAYTRACING_SHADER_DESC
+{
     UINT                                    ParamPayloadSize;             // Payload or param size (callable) in bytes
     UINT                                    AttributeSize;                // Attribute size in bytes
 } D3D12_RAYTRACING_SHADER_DESC;
@@ -331,7 +414,10 @@ typedef struct _D3D12_FUNCTION_DESC
 
 } D3D12_FUNCTION_DESC;
 
-typedef struct _D3D12_FUNCTION_DESC1 {                                    // Only accessible via DXC
+typedef struct _D3D12_FUNCTION_DESC1                                      // Only accessible via DXC
+{
+    UINT                                    RootSignatureSize;            // Serialized root signature size
+    const uint8_t*                          RootSignaturePtr;             // Serialized root signature pointer
 
     D3D12_SHADER_VERSION_TYPE               ShaderType;                   // Function's shader stage
 
@@ -587,6 +673,9 @@ DEFINE_GUID(IID_ID3D12FunctionReflection1,
 DECLARE_INTERFACE_(ID3D12FunctionReflection1, ID3D12FunctionReflection)
 {
     STDMETHOD(GetDesc1)(THIS_ _Out_ D3D12_FUNCTION_DESC1 * pDesc) PURE;
+	
+    STDMETHOD(GetInputNode)(UINT i, THIS_ _Out_ D3D12_NODE_DESC * pDesc) PURE;
+    STDMETHOD(GetOutputNode)(UINT i, THIS_ _Out_ D3D12_NODE_DESC * pDesc) PURE;
 };
 
 // {EC25F42D-7006-4F2B-B33E-02CC3375733F}
