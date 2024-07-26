@@ -159,27 +159,32 @@ typedef struct _D3D12_SHADER_DESC
     UINT cTextureStoreInstructions;                      // Number of texture writes
 } D3D12_SHADER_DESC;
 
-typedef struct _D3D12_COMPUTE_SHADER_DESC {
+typedef struct _D3D12_COMPUTE_SHADER_DESC
+{
     UINT                                    WaveSizeMin;                  // SM 6.8+ WaveSize(n, ..., ...) min, max, pref
     UINT                                    WaveSizeMax;                  // SM 6.8+ WaveSize(..., n, ...) min, max, pref
     UINT                                    WaveSizePreferred;            // SM 6.6 WaveSize(n) or WaveSize(.., ..., n)
     UINT                                    NumThreads[3];                // numthreads(x, y, z)
 } D3D12_COMPUTE_SHADER_DESC;
 
-typedef struct _D3D12_AMPLIFICATION_SHADER_DESC {
+typedef struct _D3D12_AMPLIFICATION_SHADER_DESC
+{
     UINT                                    PayloadSize;                  // Payload size in bytes
 } D3D12_AMPLIFICATION_SHADER_DESC;
 
-typedef struct _D3D12_PIXEL_SHADER_DESC {
+typedef struct _D3D12_PIXEL_SHADER_DESC
+{
     BOOL                                    EarlyDepthStencil;            // Early depth stencil
 } D3D12_PIXEL_SHADER_DESC;
 
-typedef struct _D3D12_DOMAIN_SHADER_DESC {
+typedef struct _D3D12_DOMAIN_SHADER_DESC
+{
     D3D12_TESSELLATOR_DOMAIN                Domain;                       // Domain
     UINT                                    InputControlPoints;           // Input control points
 } D3D12_DOMAIN_SHADER_DESC;
 
-typedef struct _D3D12_HULL_SHADER_DESC {
+typedef struct _D3D12_HULL_SHADER_DESC
+{
     D3D12_TESSELLATOR_DOMAIN                Domain;                       // Domain
     D3D12_TESSELLATOR_PARTITIONING          Partition;                    // Partition
     D3D12_TESSELLATOR_OUTPUT_PRIMITIVE      OutputPrimitive;              // Output primitive
@@ -192,19 +197,22 @@ typedef D3D_PRIMITIVE_TOPOLOGY D3D12_PRIMITIVE_TOPOLOGY;
 
 typedef D3D_PRIMITIVE D3D12_PRIMITIVE;
 
-typedef struct _D3D12_GEOMETRY_SHADER_DESC {
+typedef struct _D3D12_GEOMETRY_SHADER_DESC
+{
     D3D12_PRIMITIVE                         InputPrimitive;               // Input primitive
     UINT                                    MaxVertexCount;               // Max vertex count
     UINT                                    InstanceCount;                // Instance count
     D3D12_PRIMITIVE_TOPOLOGY                StreamPrimitiveTopologies[4]; // Stream primitive topologies
 } D3D12_GEOMETRY_SHADER_DESC;
 
-typedef enum D3D12_MESH_OUTPUT_TOPOLOGY {
+typedef enum D3D12_MESH_OUTPUT_TOPOLOGY
+{
   D3D12_MESH_OUTPUT_TOPOLOGY_LINE = 1,
   D3D12_MESH_OUTPUT_TOPOLOGY_TRIANGLE = 2
 } D3D12_MESH_OUTPUT_TOPOLOGY;
 
-typedef struct _D3D12_MESH_SHADER_DESC {
+typedef struct _D3D12_MESH_SHADER_DESC
+{
     UINT                                    PayloadSize;                  // Payload size in bytes
     UINT                                    MaxVertexCount;               // Max vertex count
     UINT                                    MaxPrimitiveCount;            // Max primitive count
@@ -259,6 +267,7 @@ typedef struct _D3D12_SHADER_INPUT_BIND_DESC
 #define D3D_SHADER_REQUIRES_WRITEABLE_MSAA_TEXTURES                                         0x40000000
 #define D3D_SHADER_REQUIRES_SAMPLE_CMP_GRADIENT_OR_BIAS                                     0x80000000
 #define D3D_SHADER_REQUIRES_EXTENDED_COMMAND_INFO                                           0x100000000ull
+
 
 typedef struct _D3D12_LIBRARY_DESC
 {
@@ -375,43 +384,41 @@ typedef struct _D3D12_RAYTRACING_SHADER_DESC
 
 typedef struct _D3D12_FUNCTION_DESC
 {
-    UINT                                    Version;                      // Shader version
-    LPCSTR                                  Creator;                      // Creator string
-    UINT                                    Flags;                        // Shader compilation/parse flags
+    UINT                    Version;                     // Shader version
+    LPCSTR                  Creator;                     // Creator string
+    UINT                    Flags;                       // Shader compilation/parse flags
 
-    UINT                                    ConstantBuffers;              // Number of constant buffers
-    UINT                                    BoundResources;               // Number of bound resources
+    UINT                    ConstantBuffers;             // Number of constant buffers
+    UINT                    BoundResources;              // Number of bound resources
+    UINT                    InstructionCount;            // Number of emitted instructions
+    UINT                    TempRegisterCount;           // Number of temporary registers used 
+    UINT                    TempArrayCount;              // Number of temporary arrays used
+    UINT                    DefCount;                    // Number of constant defines 
+    UINT                    DclCount;                    // Number of declarations (input + output)
+    UINT                    TextureNormalInstructions;   // Number of non-categorized texture instructions
+    UINT                    TextureLoadInstructions;     // Number of texture load instructions
+    UINT                    TextureCompInstructions;     // Number of texture comparison instructions
+    UINT                    TextureBiasInstructions;     // Number of texture bias instructions
+    UINT                    TextureGradientInstructions; // Number of texture gradient instructions
+    UINT                    FloatInstructionCount;       // Number of floating point arithmetic instructions used
+    UINT                    IntInstructionCount;         // Number of signed integer arithmetic instructions used
+    UINT                    UintInstructionCount;        // Number of unsigned integer arithmetic instructions used
+    UINT                    StaticFlowControlCount;      // Number of static flow control instructions used
+    UINT                    DynamicFlowControlCount;     // Number of dynamic flow control instructions used
+    UINT                    MacroInstructionCount;       // Number of macro instructions used
+    UINT                    ArrayInstructionCount;       // Number of array instructions used
+    UINT                    MovInstructionCount;         // Number of mov instructions used
+    UINT                    MovcInstructionCount;        // Number of movc instructions used
+    UINT                    ConversionInstructionCount;  // Number of type conversion instructions used
+    UINT                    BitwiseInstructionCount;     // Number of bitwise arithmetic instructions used
+    D3D_FEATURE_LEVEL       MinFeatureLevel;             // Min target of the function byte code
+    UINT64                  RequiredFeatureFlags;        // Required feature flags
 
-    UINT                                    InstructionCount;             // Number of emitted instructions
-    UINT                                    TempRegisterCount;            // Number of temporary registers used 
-    UINT                                    TempArrayCount;               // Number of temporary arrays used
-    UINT                                    DefCount;                     // Number of constant defines 
-    UINT                                    DclCount;                     // Number of declarations (input + output)
-    UINT                                    TextureNormalInstructions;    // Number of non-categorized texture instructions
-    UINT                                    TextureLoadInstructions;      // Number of texture load instructions
-    UINT                                    TextureCompInstructions;      // Number of texture comparison instructions
-    UINT                                    TextureBiasInstructions;      // Number of texture bias instructions
-    UINT                                    TextureGradientInstructions;  // Number of texture gradient instructions
-    UINT                                    FloatInstructionCount;        // Number of floating point arithmetic instructions used
-    UINT                                    IntInstructionCount;          // Number of signed integer arithmetic instructions used
-    UINT                                    UintInstructionCount;         // Number of unsigned integer arithmetic instructions used
-    UINT                                    StaticFlowControlCount;       // Number of static flow control instructions used
-    UINT                                    DynamicFlowControlCount;      // Number of dynamic flow control instructions used
-    UINT                                    MacroInstructionCount;        // Number of macro instructions used
-    UINT                                    ArrayInstructionCount;        // Number of array instructions used
-    UINT                                    MovInstructionCount;          // Number of mov instructions used
-    UINT                                    MovcInstructionCount;         // Number of movc instructions used
-    UINT                                    ConversionInstructionCount;   // Number of type conversion instructions used
-    UINT                                    BitwiseInstructionCount;      // Number of bitwise arithmetic instructions used
-    D3D_FEATURE_LEVEL                       MinFeatureLevel;              // Min target of the function byte code
-    UINT64                                  RequiredFeatureFlags;         // Required feature flags
-
-    LPCSTR                                  Name;                         // Function name
-    INT                                     FunctionParameterCount;       // Number of logical parameters in the function signature (not including return)
-    BOOL                                    HasReturn;                    // TRUE, if function returns a value, false - it is a subroutine
-    BOOL                                    Has10Level9VertexShader;      // TRUE, if there is a 10L9 VS blob
-    BOOL                                    Has10Level9PixelShader;       // TRUE, if there is a 10L9 PS blob
-
+    LPCSTR                  Name;                        // Function name
+    INT                     FunctionParameterCount;      // Number of logical parameters in the function signature (not including return)
+    BOOL                    HasReturn;                   // TRUE, if function returns a value, false - it is a subroutine
+    BOOL                    Has10Level9VertexShader;     // TRUE, if there is a 10L9 VS blob
+    BOOL                    Has10Level9PixelShader;      // TRUE, if there is a 10L9 PS blob
 } D3D12_FUNCTION_DESC;
 
 typedef struct _D3D12_FUNCTION_DESC1                                      // Only accessible via DXC
