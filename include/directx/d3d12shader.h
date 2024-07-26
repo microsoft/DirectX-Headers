@@ -276,14 +276,13 @@ typedef struct _D3D12_LIBRARY_DESC
     UINT      FunctionCount;     // Number of functions exported from the library.
 } D3D12_LIBRARY_DESC;
 
-typedef enum D3D12_NODE_OVERRIDES_TYPE
+typedef enum D3D12_NODE_LAUNCH_TYPE
 {
-    D3D12_NODE_OVERRIDES_TYPE_NONE = 0,
-    D3D12_NODE_OVERRIDES_TYPE_BROADCASTING_LAUNCH = 1,
-    D3D12_NODE_OVERRIDES_TYPE_COALESCING_LAUNCH = 2,
-    D3D12_NODE_OVERRIDES_TYPE_THREAD_LAUNCH = 3,
-    D3D12_NODE_OVERRIDES_TYPE_COMMON_COMPUTE = 4
-} D3D12_NODE_OVERRIDES_TYPE;
+    D3D12_NODE_LAUNCH_TYPE_NONE = 0,
+    D3D12_NODE_LAUNCH_TYPE_BROADCASTING_LAUNCH = 1,
+    D3D12_NODE_LAUNCH_TYPE_COALESCING_LAUNCH = 2,
+    D3D12_NODE_LAUNCH_TYPE_THREAD_LAUNCH = 3
+} D3D12_NODE_LAUNCH_TYPE;
 
 typedef struct _D3D12_NODE_ID_DESC
 {
@@ -294,7 +293,7 @@ typedef struct _D3D12_NODE_ID_DESC
 typedef struct _D3D12_NODE_SHADER_DESC
 {
     D3D12_COMPUTE_SHADER_DESC               ComputeDesc;                  // Node extends ComputeDesc
-    D3D12_NODE_OVERRIDES_TYPE               LaunchType;                   // Launch type
+    D3D12_NODE_LAUNCH_TYPE                  LaunchType;                   // Launch type
     BOOL                                    IsProgramEntry;               // Is program entry
     INT                                     LocalRootArgumentsTableIndex; // Local root arguments table index
     UINT                                    DispatchGrid[3];              // Dispatch grid
