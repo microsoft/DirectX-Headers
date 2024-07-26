@@ -279,7 +279,7 @@ typedef enum D3D12_NODE_OVERRIDES_TYPE
 typedef struct _D3D12_NODE_ID_DESC
 {
     const char*                             Name;
-	UINT                                    ID;
+    UINT                                    ID;
 } D3D12_NODE_ID_DESC;
 
 typedef struct _D3D12_NODE_SHADER_DESC
