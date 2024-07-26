@@ -389,6 +389,9 @@ typedef interface ID3D12LibraryReflection *LPD3D12LIBRARYREFLECTION;
 typedef interface ID3D12FunctionReflection ID3D12FunctionReflection;
 typedef interface ID3D12FunctionReflection *LPD3D12FUNCTIONREFLECTION;
 
+typedef interface ID3D12FunctionReflection1 ID3D12FunctionReflection1;
+typedef interface ID3D12FunctionReflection1 *LPD3D12FUNCTIONREFLECTION1;
+
 typedef interface ID3D12FunctionParameterReflection ID3D12FunctionParameterReflection;
 typedef interface ID3D12FunctionParameterReflection *LPD3D12FUNCTIONPARAMETERREFLECTION;
 
@@ -530,6 +533,19 @@ DECLARE_INTERFACE_(ID3D12LibraryReflection, IUnknown)
     STDMETHOD_(ID3D12FunctionReflection *, GetFunctionByIndex)(THIS_ _In_ INT FunctionIndex) PURE;
 };
 
+// {07692220-8721-4514-BFFE-969BB33196B6}
+interface DECLSPEC_UUID("07692220-8721-4514-BFFE-969BB33196B6") ID3D12LibraryReflection1;
+DEFINE_GUID(IID_ID3D12LibraryReflection1,
+0x7692220, 0x8721, 0x4514, 0xbf, 0xfe, 0x96, 0x9b, 0xb3, 0x31, 0x96, 0xb6);
+
+#undef INTERFACE
+#define INTERFACE ID3D12LibraryReflection1
+
+DECLARE_INTERFACE_(ID3D12LibraryReflection1, ID3D12LibraryReflection)
+{
+    STDMETHOD_(ID3D12FunctionReflection1 *, GetFunctionByIndex1)(THIS_ _In_ INT FunctionIndex) PURE;
+};
+
 // {1108795C-2772-4BA9-B2A8-D464DC7E2799}
 interface DECLSPEC_UUID("1108795C-2772-4BA9-B2A8-D464DC7E2799") ID3D12FunctionReflection;
 DEFINE_GUID(IID_ID3D12FunctionReflection, 
@@ -541,7 +557,6 @@ DEFINE_GUID(IID_ID3D12FunctionReflection,
 DECLARE_INTERFACE(ID3D12FunctionReflection)
 {
     STDMETHOD(GetDesc)(THIS_ _Out_ D3D12_FUNCTION_DESC * pDesc) PURE;
-    STDMETHOD(GetDesc1)(THIS_ _Out_ D3D12_FUNCTION_DESC1 * pDesc) PURE;
     
     STDMETHOD_(ID3D12ShaderReflectionConstantBuffer *, GetConstantBufferByIndex)(THIS_ _In_ UINT BufferIndex) PURE;
     STDMETHOD_(ID3D12ShaderReflectionConstantBuffer *, GetConstantBufferByName)(THIS_ _In_ LPCSTR Name) PURE;
@@ -556,6 +571,19 @@ DECLARE_INTERFACE(ID3D12FunctionReflection)
 
     // Use D3D_RETURN_PARAMETER_INDEX to get description of the return value.
     STDMETHOD_(ID3D12FunctionParameterReflection *, GetFunctionParameter)(THIS_ _In_ INT ParameterIndex) PURE;
+};
+
+// {3DE08670-5E87-4E72-AF92-35CF81947AD7}
+interface DECLSPEC_UUID("3DE08670-5E87-4E72-AF92-35CF81947AD7") ID3D12FunctionReflection1;
+DEFINE_GUID(IID_ID3D12FunctionReflection1,
+0x3de08670, 0x5e87, 0x4e72, 0xaf, 0x92, 0x35, 0xcf, 0x81, 0x94, 0x7a, 0xd7);
+
+#undef INTERFACE
+#define INTERFACE ID3D12FunctionReflection1
+
+DECLARE_INTERFACE_(ID3D12FunctionReflection1, ID3D12FunctionReflection)
+{
+    STDMETHOD(GetDesc1)(THIS_ _Out_ D3D12_FUNCTION_DESC1 * pDesc) PURE;
 };
 
 // {EC25F42D-7006-4F2B-B33E-02CC3375733F}
