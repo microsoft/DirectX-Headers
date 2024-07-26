@@ -119,7 +119,7 @@ typedef struct _D3D12_SHADER_DESC
     UINT                    Version;                     // Shader version
     LPCSTR                  Creator;                     // Creator string
     UINT                    Flags;                       // Shader compilation/parse flags
-
+    
     UINT                    ConstantBuffers;             // Number of constant buffers
     UINT                    BoundResources;              // Number of bound resources
     UINT                    InputParameters;             // Number of parameters in the input signature
@@ -387,9 +387,10 @@ typedef struct _D3D12_FUNCTION_DESC
     UINT                    Version;                     // Shader version
     LPCSTR                  Creator;                     // Creator string
     UINT                    Flags;                       // Shader compilation/parse flags
-
+    
     UINT                    ConstantBuffers;             // Number of constant buffers
     UINT                    BoundResources;              // Number of bound resources
+
     UINT                    InstructionCount;            // Number of emitted instructions
     UINT                    TempRegisterCount;           // Number of temporary registers used 
     UINT                    TempArrayCount;              // Number of temporary arrays used
