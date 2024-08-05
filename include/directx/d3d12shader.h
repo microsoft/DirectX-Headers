@@ -170,6 +170,7 @@ typedef struct _D3D12_COMPUTE_SHADER_DESC
 typedef struct _D3D12_AMPLIFICATION_SHADER_DESC
 {
     UINT                                    PayloadSize;                  // Payload size in bytes
+	UINT                                    NumThreads[3];                // numthreads(x, y, z)
 } D3D12_AMPLIFICATION_SHADER_DESC;
 
 typedef struct _D3D12_PIXEL_SHADER_DESC
@@ -217,6 +218,7 @@ typedef struct _D3D12_MESH_SHADER_DESC
     UINT                                    MaxVertexCount;               // Max vertex count
     UINT                                    MaxPrimitiveCount;            // Max primitive count
     D3D12_MESH_OUTPUT_TOPOLOGY              OutputTopology;               // Output topology
+	UINT                                    NumThreads[3];                // numthreads(x, y, z)
 } D3D12_MESH_SHADER_DESC;
 
 typedef struct _D3D12_SHADER_INPUT_BIND_DESC
