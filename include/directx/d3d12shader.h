@@ -551,15 +551,10 @@ DECLARE_INTERFACE(ID3D12ShaderReflectionConstantBuffer)
     STDMETHOD_(ID3D12ShaderReflectionVariable*, GetVariableByName)(THIS_ _In_ LPCSTR Name) PURE;
 };
 
-// The ID3D12ShaderReflection IID may change from SDK version to SDK version
-// if the reflection API changes.  This prevents new code with the new API
-// from working with an old binary.  Recompiling with the new header
-// will pick up the new IID.
-
-// {9C886958-23F1-4126-B294-FCF3DA13E7C6}
-interface DECLSPEC_UUID("9C886958-23F1-4126-B294-FCF3DA13E7C6") ID3D12ShaderReflection;
+// {5A58797D-A72C-478D-8BA2-EFC6B0EFE88E}
+interface DECLSPEC_UUID("5A58797D-A72C-478D-8BA2-EFC6B0EFE88E") ID3D12ShaderReflection;
 DEFINE_GUID(IID_ID3D12ShaderReflection, 
-0x9c886958, 0x23f1, 0x4126, { 0xb2, 0x94, 0xfc, 0xf3, 0xda, 0x13, 0xe7, 0xc6);
+0x5a58797d, 0xa72c, 0x478d, 0x8b, 0xa2, 0xef, 0xc6, 0xb0, 0xef, 0xe8, 0x8e);
 
 #undef INTERFACE
 #define INTERFACE ID3D12ShaderReflection
@@ -608,7 +603,18 @@ DECLARE_INTERFACE_(ID3D12ShaderReflection, IUnknown)
                                          _Out_opt_ UINT* pSizeZ) PURE;
 
     STDMETHOD_(UINT64, GetRequiresFlags)(THIS) PURE;
+};
 
+// {9C886958-23F1-4126-B294-FCF3DA13E7C6}
+interface DECLSPEC_UUID("9C886958-23F1-4126-B294-FCF3DA13E7C6") ID3D12ShaderReflection1;
+DEFINE_GUID(IID_ID3D12ShaderReflection1, 
+0x9c886958, 0x23f1, 0x4126, { 0xb2, 0x94, 0xfc, 0xf3, 0xda, 0x13, 0xe7, 0xc6);
+
+#undef INTERFACE
+#define INTERFACE ID3D12ShaderReflection1
+
+DECLARE_INTERFACE_(ID3D12ShaderReflection1, ID3D12ShaderReflection)
+{
     STDMETHOD_(BOOL, GetWaveSize)
     (THIS_ _Out_opt_ UINT* pWavePreferred, _Out_opt_ UINT* pWaveSizeMin,
      _Out_opt_ UINT* pWaveSizeMax) PURE;
