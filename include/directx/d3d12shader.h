@@ -613,7 +613,7 @@ DECLARE_INTERFACE_(ID3D12ShaderReflection, IUnknown)
 // {9C886958-23F1-4126-B294-FCF3DA13E7C6}
 interface DECLSPEC_UUID("9C886958-23F1-4126-B294-FCF3DA13E7C6") ID3D12ShaderReflection1;
 DEFINE_GUID(IID_ID3D12ShaderReflection1, 
-0x9c886958, 0x23f1, 0x4126, { 0xb2, 0x94, 0xfc, 0xf3, 0xda, 0x13, 0xe7, 0xc6);
+0x9c886958, 0x23f1, 0x4126, 0xb2, 0x94, 0xfc, 0xf3, 0xda, 0x13, 0xe7, 0xc6);
 
 #undef INTERFACE
 #define INTERFACE ID3D12ShaderReflection1

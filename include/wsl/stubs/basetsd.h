@@ -20,7 +20,7 @@ typedef uint8_t UINT8;
 typedef int8_t INT8;
 typedef uint16_t UINT16;
 typedef int16_t INT16;
-typedef uint32_t UINT32, UINT, ULONG, DWORD, BOOL, WINBOOL;
+typedef uint32_t UINT32, UINT, ULONG, DWORD, WINBOOL;
 typedef int32_t INT32, INT, LONG;
 typedef uint64_t UINT64, ULONG_PTR;
 typedef int64_t INT64, LONG_PTR;
@@ -48,6 +48,8 @@ typedef uint64_t ULONG_PTR, *PULONG_PTR;
 typedef uint64_t UINT_PTR, *PUINT_PTR;
 typedef int64_t INT_PTR, *PINT_PTR;
 
+typedef bool BOOL;
+
 // Note: WCHAR is not the same between Windows and Linux, to enable
 // string manipulation APIs to work with resulting strings.
 // APIs to D3D/DXCore will work on Linux wchars, but beware with
@@ -63,26 +65,31 @@ typedef const wchar_t *LPCWSTR, *PCWSTR;
 #define ULONG_MAX UINT_MAX
 
 // Misc defines
+
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 #define MIDL_INTERFACE(x) interface
-#define __analysis_assume(x)
 #define TRUE 1u
 #define FALSE 0u
 #define DECLSPEC_UUID(x)
-#define DECLSPEC_NOVTABLE
 #define DECLSPEC_SELECTANY
 #ifdef __cplusplus
 #define EXTERN_C extern "C"
 #else
 #define EXTERN_C extern
 #endif
+#define C_ASSERT(expr) static_assert((expr))
+#define _countof(a) (sizeof(a) / sizeof(*(a)))
+#endif
+
+#define __analysis_assume(x)
+#define DECLSPEC_NOVTABLE
+
 #define APIENTRY
 #define OUT
 #define IN
 #define CONST const
 #define MAX_PATH 260
 #define GENERIC_ALL 0x10000000L
-#define C_ASSERT(expr) static_assert((expr))
-#define _countof(a) (sizeof(a) / sizeof(*(a)))
 
 typedef struct tagRECTL
 {
@@ -98,6 +105,7 @@ typedef struct tagPOINT
     int y;
 } POINT;
 
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 typedef struct _GUID {
     uint32_t Data1;
     uint16_t Data2;
@@ -114,6 +122,7 @@ typedef struct _GUID {
 #else
 #define DEFINE_GUID(name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) EXTERN_C const GUID name
 #endif
+#endif
 
 typedef GUID IID;
 typedef GUID UUID;
@@ -123,13 +132,15 @@ typedef GUID CLSID;
 #define REFIID const IID &
 #define REFCLSID const IID &
 
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
+
 __inline int InlineIsEqualGUID(REFGUID rguid1, REFGUID rguid2)
 {
-    return (
-        ((uint32_t *)&rguid1)[0] == ((uint32_t *)&rguid2)[0] &&
-        ((uint32_t *)&rguid1)[1] == ((uint32_t *)&rguid2)[1] &&
-        ((uint32_t *)&rguid1)[2] == ((uint32_t *)&rguid2)[2] &&
-        ((uint32_t *)&rguid1)[3] == ((uint32_t *)&rguid2)[3]);
+  // Optimization:
+  if (&rguid1 == &rguid2)
+    return true;
+
+  return !memcmp(&rguid1, &rguid2, sizeof(GUID));
 }
 
 inline bool operator==(REFGUID guidOne, REFGUID guidOther)
@@ -142,6 +153,8 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
     return !(guidOne == guidOther);
 }
 
+#endif
+
 #else
 #define REFGUID const GUID *
 #define REFIID const IID *
@@ -149,25 +162,31 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #endif
 
 // SAL annotations
+
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 #define _In_
 #define _In_z_
 #define _In_opt_
 #define _In_opt_z_
-#define _In_reads_(x)
-#define _In_reads_opt_(x)
-#define _In_reads_bytes_(x)
-#define _In_reads_bytes_opt_(x)
-#define _In_range_(x, y)
 #define _In_bytecount_(x)
 #define _Out_
 #define _Out_opt_
 #define _Outptr_
 #define _Outptr_opt_result_z_
-#define _Outptr_opt_result_bytebuffer_(x)
 #define _COM_Outptr_
 #define _COM_Outptr_result_maybenull_
 #define _COM_Outptr_opt_
 #define _COM_Outptr_opt_result_maybenull_
+#define _In_count_(x)
+#define _In_opt_count_(x)
+#endif
+
+#define _In_reads_(x)
+#define _In_reads_opt_(x)
+#define _In_reads_bytes_(x)
+#define _In_reads_bytes_opt_(x)
+#define _In_range_(x, y)
+#define _Outptr_opt_result_bytebuffer_(x)
 #define _Out_writes_(x)
 #define _Out_writes_z_(x)
 #define _Out_writes_opt_(x)
@@ -205,8 +224,6 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define _Outptr_result_nullonfailure_
 #define _Analysis_assume_(x)
 #define _Success_(x)
-#define _In_count_(x)
-#define _In_opt_count_(x)
 #define _Use_decl_annotations_
 #define _Null_terminated_
 
@@ -218,6 +235,7 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define STDAPI EXTERN_C HRESULT STDAPICALLTYPE
 #define WINAPI
 
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 #define interface struct
 #if defined (__cplusplus) && !defined (CINTERFACE)
 #define STDMETHOD(method) virtual HRESULT STDMETHODCALLTYPE method
@@ -251,6 +269,7 @@ extern "C++"
 #endif
 #define DECLARE_INTERFACE_(iface, baseiface) DECLARE_INTERFACE (iface)
 #endif
+#endif
 
 #define IFACEMETHOD(method) /*override*/ STDMETHOD (method)
 #define IFACEMETHOD_(type, method) /*override*/ STDMETHOD_(type, method)
@@ -261,6 +280,8 @@ extern "C++"
 
 // Error codes
 typedef LONG HRESULT;
+
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 #define SUCCEEDED(hr)  (((HRESULT)(hr)) >= 0)
 #define FAILED(hr)     (((HRESULT)(hr)) < 0)
 #define S_OK           ((HRESULT)0L)
@@ -275,6 +296,8 @@ typedef LONG HRESULT;
 #define E_FAIL         ((HRESULT)0x80004005L)
 #define E_ACCESSDENIED ((HRESULT)0x80070005L)
 #define E_UNEXPECTED   ((HRESULT)0x8000FFFFL)
+#endif
+
 #define DXGI_ERROR_INVALID_CALL ((HRESULT)0x887A0001L)
 #define DXGI_ERROR_NOT_FOUND ((HRESULT)0x887A0002L)
 #define DXGI_ERROR_MORE_DATA ((HRESULT)0x887A0003L)
@@ -299,6 +322,8 @@ typedef struct _RECT
     int bottom;
 } RECT;
 
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
+
 typedef union _LARGE_INTEGER {
   struct {
     uint32_t LowPart;
@@ -317,17 +342,22 @@ typedef union _ULARGE_INTEGER {
 } ULARGE_INTEGER;
 typedef ULARGE_INTEGER *PULARGE_INTEGER;
 
+
 #define DECLARE_HANDLE(name)                                                   \
   struct name##__ {                                                            \
     int unused;                                                                \
   };                                                                           \
   typedef struct name##__ *name
 
+#endif
+
 typedef struct _SECURITY_ATTRIBUTES {
     DWORD nLength;
     LPVOID lpSecurityDescriptor;
     WINBOOL bInheritHandle;
 } SECURITY_ATTRIBUTES;
+
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 
 struct STATSTG;
 
@@ -385,12 +415,15 @@ inline ENUMTYPE &operator ^= (ENUMTYPE &a, ENUMTYPE b) { return (ENUMTYPE &)(((_
 #else
 #define DEFINE_ENUM_FLAG_OPERATORS(ENUMTYPE) /* */
 #endif
+#endif
 
 // D3DX12 uses these
 #include <stdlib.h>
 #define HeapAlloc(heap, flags, size) malloc(size)
 #define HeapFree(heap, flags, ptr) free(ptr)
 
+
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 #if defined(lint)
 // Note: lint -e530 says don't complain about uninitialized variables for
 // this variable.  Error 527 has to do with unreachable code.
@@ -403,4 +436,5 @@ inline ENUMTYPE &operator ^= (ENUMTYPE &a, ENUMTYPE b) { return (ENUMTYPE &)(((_
     /*lint -restore */
 #else
 #define UNREFERENCED_PARAMETER(P) (P)
+#endif
 #endif
