@@ -478,6 +478,9 @@ typedef interface ID3D12ShaderReflectionConstantBuffer *LPD3D12SHADERREFLECTIONC
 typedef interface ID3D12ShaderReflection ID3D12ShaderReflection;
 typedef interface ID3D12ShaderReflection *LPD3D12SHADERREFLECTION;
 
+typedef interface ID3D12ShaderReflection1 ID3D12ShaderReflection1;
+typedef interface ID3D12ShaderReflection1 *LPD3D12SHADERREFLECTION1;
+
 typedef interface ID3D12LibraryReflection ID3D12LibraryReflection;
 typedef interface ID3D12LibraryReflection *LPD3D12LIBRARYREFLECTION;
 
