@@ -418,9 +418,11 @@ inline ENUMTYPE &operator ^= (ENUMTYPE &a, ENUMTYPE b) { return (ENUMTYPE &)(((_
 #endif
 
 // D3DX12 uses these
+#ifndef LLVM_SUPPORT_WINFUNCTIONS_H
 #include <stdlib.h>
 #define HeapAlloc(heap, flags, size) malloc(size)
 #define HeapFree(heap, flags, ptr) free(ptr)
+#endif
 
 
 #ifndef LLVM_SUPPORT_WIN_ADAPTER_H
