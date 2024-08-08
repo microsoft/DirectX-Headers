@@ -322,6 +322,12 @@ typedef struct _RECT
     int bottom;
 } RECT;
 
+typedef struct _SECURITY_ATTRIBUTES {
+    DWORD nLength;
+    LPVOID lpSecurityDescriptor;
+    WINBOOL bInheritHandle;
+} SECURITY_ATTRIBUTES;
+
 #ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 
 typedef union _LARGE_INTEGER {
@@ -348,16 +354,6 @@ typedef ULARGE_INTEGER *PULARGE_INTEGER;
     int unused;                                                                \
   };                                                                           \
   typedef struct name##__ *name
-
-#endif
-
-typedef struct _SECURITY_ATTRIBUTES {
-    DWORD nLength;
-    LPVOID lpSecurityDescriptor;
-    WINBOOL bInheritHandle;
-} SECURITY_ATTRIBUTES;
-
-#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 
 struct STATSTG;
 
@@ -415,17 +411,12 @@ inline ENUMTYPE &operator ^= (ENUMTYPE &a, ENUMTYPE b) { return (ENUMTYPE &)(((_
 #else
 #define DEFINE_ENUM_FLAG_OPERATORS(ENUMTYPE) /* */
 #endif
-#endif
 
 // D3DX12 uses these
-#ifndef LLVM_SUPPORT_WINFUNCTIONS_H
 #include <stdlib.h>
 #define HeapAlloc(heap, flags, size) malloc(size)
 #define HeapFree(heap, flags, ptr) free(ptr)
-#endif
 
-
-#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 #if defined(lint)
 // Note: lint -e530 says don't complain about uninitialized variables for
 // this variable.  Error 527 has to do with unreachable code.
