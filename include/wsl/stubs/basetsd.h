@@ -57,13 +57,15 @@ typedef const char *LPCSTR, *PCSTR, *LPCTSTR, *PCTSTR;
 typedef wchar_t WCHAR, *PWSTR, *LPWSTR, *PWCHAR;
 typedef const wchar_t *LPCWSTR, *PCWSTR;
 
+typedef signed int HRESULT;
+
 #undef LONG_MAX
 #define LONG_MAX INT_MAX
 #undef ULONG_MAX
 #define ULONG_MAX UINT_MAX
 
 // Misc defines
-#define MIDL_INTERFACE(x) interface
+#define MIDL_INTERFACE(x) struct
 #define __analysis_assume(x)
 #define TRUE 1u
 #define FALSE 0u
@@ -76,8 +78,6 @@ typedef const wchar_t *LPCWSTR, *PCWSTR;
 #define EXTERN_C extern
 #endif
 #define APIENTRY
-#define OUT
-#define IN
 #define CONST const
 #define MAX_PATH 260
 #define GENERIC_ALL 0x10000000L
@@ -107,34 +107,36 @@ typedef struct _GUID {
 
 #ifdef INITGUID
 #ifdef __cplusplus
-#define DEFINE_GUID(name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) EXTERN_C const GUID DECLSPEC_SELECTANY name = { l, w1, w2, { b1, b2, b3, b4, b5, b6, b7, b8 } }
+#define DEFINE_GUID(IID_name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) EXTERN_C const GUID DECLSPEC_SELECTANY name = { l, w1, w2, { b1, b2, b3, b4, b5, b6, b7, b8 } }
 #else
-#define DEFINE_GUID(name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) const GUID DECLSPEC_SELECTANY name = { l, w1, w2, { b1, b2, b3, b4, b5, b6, b7, b8 } }
+#define DEFINE_GUID(IID_name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) const GUID DECLSPEC_SELECTANY name = { l, w1, w2, { b1, b2, b3, b4, b5, b6, b7, b8 } }
 #endif
 #else
-#define DEFINE_GUID(name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) EXTERN_C const GUID name
+#define DEFINE_GUID(IID_name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) EXTERN_C const GUID name
 #endif
 
 typedef GUID IID;
 typedef GUID UUID;
 typedef GUID CLSID;
-#ifdef __cplusplus
-#define REFGUID const GUID &
-#define REFIID const IID &
-#define REFCLSID const IID &
 
-__inline int InlineIsEqualGUID(REFGUID rguid1, REFGUID rguid2)
+#ifdef __cplusplus
+
+typedef const GUID &REFGUID;
+typedef const GUID &REFCLSID;
+typedef const IID &REFIID;
+
+__inline int IsEqualGUID(REFGUID rguid1, REFGUID rguid2)
 {
-    return (
-        ((uint32_t *)&rguid1)[0] == ((uint32_t *)&rguid2)[0] &&
-        ((uint32_t *)&rguid1)[1] == ((uint32_t *)&rguid2)[1] &&
-        ((uint32_t *)&rguid1)[2] == ((uint32_t *)&rguid2)[2] &&
-        ((uint32_t *)&rguid1)[3] == ((uint32_t *)&rguid2)[3]);
+  // Optimization:
+  if (&rguid1 == &rguid2)
+    return true;
+
+  return !memcmp(&rguid1, &rguid2, sizeof(GUID));
 }
 
 inline bool operator==(REFGUID guidOne, REFGUID guidOther)
 {
-    return !!InlineIsEqualGUID(guidOne, guidOther);
+    return !!IsEqualGUID(guidOne, guidOther);
 }
 
 inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
@@ -218,17 +220,17 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define STDAPI EXTERN_C HRESULT STDAPICALLTYPE
 #define WINAPI
 
-#define interface struct
 #if defined (__cplusplus) && !defined (CINTERFACE)
 #define STDMETHOD(method) virtual HRESULT STDMETHODCALLTYPE method
 #define STDMETHOD_(type, method) virtual type STDMETHODCALLTYPE method
 #define PURE = 0
 #define THIS_
 #define THIS void
-#define DECLARE_INTERFACE(iface) interface DECLSPEC_NOVTABLE iface
-#define DECLARE_INTERFACE_(iface, baseiface) interface DECLSPEC_NOVTABLE iface : public baseiface
+#define DECLARE_INTERFACE(iface) struct DECLSPEC_NOVTABLE iface
+#define DECLARE_INTERFACE_(iface, baseiface) struct DECLSPEC_NOVTABLE iface : public baseiface
 
-interface IUnknown;
+struct IUnknown;
+
 extern "C++"
 {
     template<typename T> void** IID_PPV_ARGS_Helper(T** pp)
@@ -245,9 +247,9 @@ extern "C++"
 #define THIS_ INTERFACE *This,
 #define THIS INTERFACE *This
 #ifdef CONST_VTABLE
-#define DECLARE_INTERFACE(iface) typedef interface iface { const struct iface##Vtbl *lpVtbl; } iface; typedef const struct iface##Vtbl iface##Vtbl; const struct iface##Vtbl
+#define DECLARE_INTERFACE(iface) typedef struct iface { const struct iface##Vtbl *lpVtbl; } iface; typedef const struct iface##Vtbl iface##Vtbl; const struct iface##Vtbl
 #else
-#define DECLARE_INTERFACE(iface) typedef interface iface { struct iface##Vtbl *lpVtbl; } iface; typedef struct iface##Vtbl iface##Vtbl; struct iface##Vtbl
+#define DECLARE_INTERFACE(iface) typedef struct iface { struct iface##Vtbl *lpVtbl; } iface; typedef struct iface##Vtbl iface##Vtbl; struct iface##Vtbl
 #endif
 #define DECLARE_INTERFACE_(iface, baseiface) DECLARE_INTERFACE (iface)
 #endif
@@ -260,7 +262,6 @@ extern "C++"
 #endif
 
 // Error codes
-typedef LONG HRESULT;
 #define SUCCEEDED(hr)  (((HRESULT)(hr)) >= 0)
 #define FAILED(hr)     (((HRESULT)(hr)) < 0)
 #define S_OK           ((HRESULT)0L)
@@ -329,7 +330,7 @@ typedef struct _SECURITY_ATTRIBUTES {
     WINBOOL bInheritHandle;
 } SECURITY_ATTRIBUTES;
 
-struct STATSTG;
+typedef struct tagSTATSTG STATSTG;
 
 #ifdef __cplusplus
 // ENUM_FLAG_OPERATORS
@@ -387,20 +388,12 @@ inline ENUMTYPE &operator ^= (ENUMTYPE &a, ENUMTYPE b) { return (ENUMTYPE &)(((_
 #endif
 
 // D3DX12 uses these
+
+#ifndef LLVM_SUPPORT_WIN_ADAPTER_H
 #include <stdlib.h>
 #define HeapAlloc(heap, flags, size) malloc(size)
 #define HeapFree(heap, flags, ptr) free(ptr)
-
-#if defined(lint)
-// Note: lint -e530 says don't complain about uninitialized variables for
-// this variable.  Error 527 has to do with unreachable code.
-// -restore restores checking to the -save state
-#define UNREFERENCED_PARAMETER(P) \
-    /*lint -save -e527 -e530 */ \
-    { \
-        (P) = (P); \
-    } \
-    /*lint -restore */
-#else
-#define UNREFERENCED_PARAMETER(P) (P)
 #endif
+
+
+#define UNREFERENCED_PARAMETER(P) (void)(P)
