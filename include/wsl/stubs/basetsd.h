@@ -63,9 +63,10 @@ typedef signed int HRESULT;
 #define LONG_MAX INT_MAX
 #undef ULONG_MAX
 #define ULONG_MAX UINT_MAX
+#define interface struct
 
 // Misc defines
-#define MIDL_INTERFACE(x) struct
+#define MIDL_INTERFACE(x) interface
 #define __analysis_assume(x)
 #define TRUE 1u
 #define FALSE 0u
@@ -226,10 +227,10 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define PURE = 0
 #define THIS_
 #define THIS void
-#define DECLARE_INTERFACE(iface) struct DECLSPEC_NOVTABLE iface
-#define DECLARE_INTERFACE_(iface, baseiface) struct DECLSPEC_NOVTABLE iface : public baseiface
+#define DECLARE_INTERFACE(iface) interface DECLSPEC_NOVTABLE iface
+#define DECLARE_INTERFACE_(iface, baseiface) interface DECLSPEC_NOVTABLE iface : public baseiface
 
-struct IUnknown;
+interface IUnknown;
 
 extern "C++"
 {
@@ -247,9 +248,9 @@ extern "C++"
 #define THIS_ INTERFACE *This,
 #define THIS INTERFACE *This
 #ifdef CONST_VTABLE
-#define DECLARE_INTERFACE(iface) typedef struct iface { const struct iface##Vtbl *lpVtbl; } iface; typedef const struct iface##Vtbl iface##Vtbl; const struct iface##Vtbl
+#define DECLARE_INTERFACE(iface) typedef interface iface { const struct iface##Vtbl *lpVtbl; } iface; typedef const struct iface##Vtbl iface##Vtbl; const struct iface##Vtbl
 #else
-#define DECLARE_INTERFACE(iface) typedef struct iface { struct iface##Vtbl *lpVtbl; } iface; typedef struct iface##Vtbl iface##Vtbl; struct iface##Vtbl
+#define DECLARE_INTERFACE(iface) typedef interface iface { struct iface##Vtbl *lpVtbl; } iface; typedef struct iface##Vtbl iface##Vtbl; struct iface##Vtbl
 #endif
 #define DECLARE_INTERFACE_(iface, baseiface) DECLARE_INTERFACE (iface)
 #endif
