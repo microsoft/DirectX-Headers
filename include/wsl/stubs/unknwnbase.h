@@ -42,7 +42,7 @@
 
 #ifndef __IUnknown_FWD_DEFINED__
 #define __IUnknown_FWD_DEFINED__
-typedef struct IUnknown IUnknown;
+typedef interface IUnknown IUnknown;
 
 #endif 	/* __IUnknown_FWD_DEFINED__ */
 
@@ -104,7 +104,7 @@ typedef struct IUnknownVtbl {
     END_INTERFACE
 } IUnknownVtbl;
 
-struct IUnknown {
+interface IUnknown {
     CONST_VTBL IUnknownVtbl* lpVtbl;
 };
 
