@@ -4880,9 +4880,24 @@ EXTERN_C const IID IID_ID3D12Resource;
         
 #if defined(_MSC_VER) || !defined(_WIN32)
         virtual D3D12_RESOURCE_DESC STDMETHODCALLTYPE GetDesc( void) = 0;
+#ifdef MIDL_FIX_AGGREGATE_RETURNS
+        inline D3D12_RESOURCE_DESC *GetDesc(
+            D3D12_RESOURCE_DESC * RetVal)
+        {
+            *RetVal = GetDesc();
+            return RetVal;
+        }
+#endif
 #else
         virtual D3D12_RESOURCE_DESC *STDMETHODCALLTYPE GetDesc( 
             D3D12_RESOURCE_DESC * RetVal) = 0;
+#ifdef MIDL_FIX_AGGREGATE_RETURNS
+        inline D3D12_RESOURCE_DESC GetDesc( void)
+        {
+            D3D12_RESOURCE_DESC RetVal;
+            return *GetDesc(&RetVal);
+        }
+#endif
 #endif
         
         virtual D3D12_GPU_VIRTUAL_ADDRESS STDMETHODCALLTYPE GetGPUVirtualAddress( void) = 0;
@@ -5059,9 +5074,14 @@ EXTERN_C const IID IID_ID3D12Resource;
 #define ID3D12Resource_Unmap(This,Subresource,pWrittenRange)	\
     ( (This)->lpVtbl -> Unmap(This,Subresource,pWrittenRange) ) 
 #if !defined(_WIN32)
-
-#define ID3D12Resource_GetDesc(This)	\
-    ( (This)->lpVtbl -> GetDesc(This) ) 
+static inline __attribute__((always_inline))
+D3D12_RESOURCE_DESC *ID3D12Resource_GetDesc(
+            ID3D12Resource * This,
+            D3D12_RESOURCE_DESC * RetVal)
+{
+    *RetVal = (This)->lpVtbl -> GetDesc(This);
+    return RetVal;
+}
 #else
 #define ID3D12Resource_GetDesc(This,RetVal)	\
     ( (This)->lpVtbl -> GetDesc(This,RetVal) ) 
