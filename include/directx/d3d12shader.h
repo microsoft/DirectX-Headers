@@ -169,7 +169,7 @@ typedef struct _D3D12_SHADER_INPUT_BIND_DESC
     UINT                        uFlags;         // Input binding flags
     D3D_RESOURCE_RETURN_TYPE    ReturnType;     // Return type (if texture)
     D3D_SRV_DIMENSION           Dimension;      // Dimension (if texture)
-    UINT                        NumSamples;     // Number of samples (0 if not MS texture)
+    UINT                        NumSamples;     // Number of samples (0 if MS texture, UINT_MAX otherwise)
     UINT                        Space;          // Register space
     UINT uID;                                   // Range ID in the bytecode
 } D3D12_SHADER_INPUT_BIND_DESC;
