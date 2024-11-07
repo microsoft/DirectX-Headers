@@ -21,8 +21,11 @@
     #include <wsl/winadapter.h>
 #endif
 #include "d3dx12_property_format_table.h"
-#include <assert.h>
 #include <algorithm>
+#include <cassert>
+#if defined(__cpp_exceptions) && (!defined(_HAS_EXCEPTIONS) || _HAS_EXCEPTIONS != 0)
+#include <stdexcept>
+#endif
 #include "D3D12TokenizedProgramFormat.hpp"
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
 #ifndef ASSUME
@@ -1403,7 +1406,7 @@ UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::Sequential2AbsoluteComponentIndex( DXGI
             n++;
         }
     }
-    return UINT(-1);
+    return UINT( -1 );
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -1465,14 +1468,18 @@ D3D_FORMAT_LAYOUT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetLayout(DXGI_FORMAT Form
 // GetComponentName
 D3D_FORMAT_COMPONENT_NAME D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetComponentName(DXGI_FORMAT Format, UINT AbsoluteComponentIndex)
 {
-    D3D_FORMAT_COMPONENT_NAME name;
+    D3D_FORMAT_COMPONENT_NAME name = {};
     switch( AbsoluteComponentIndex )
     {
     case 0: name = s_FormatDetail[GetDetailTableIndexNoThrow( Format )].ComponentName0; break;
     case 1: name = s_FormatDetail[GetDetailTableIndexNoThrow( Format )].ComponentName1; break;
     case 2: name = s_FormatDetail[GetDetailTableIndexNoThrow( Format )].ComponentName2; break;
     case 3: name = s_FormatDetail[GetDetailTableIndexNoThrow( Format )].ComponentName3; break;
-    default: throw E_FAIL;
+#if defined(__cpp_exceptions) && (!defined(_HAS_EXCEPTIONS) || _HAS_EXCEPTIONS != 0)
+    default: throw std::invalid_argument("AbsoluteComponentIndex");
+#else
+    default: break;
+#endif
     }
     return name;
 }
@@ -1482,7 +1489,11 @@ UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetBitsPerComponent(DXGI_FORMAT Format,
 {
     if( AbsoluteComponentIndex > 3 )
     {
-        throw E_FAIL;
+#if defined(__cpp_exceptions) && (!defined(_HAS_EXCEPTIONS) || _HAS_EXCEPTIONS != 0)
+        throw std::invalid_argument("AbsoluteComponentIndex");
+#else
+        return UINT( -1 );
+#endif
     }
     return s_FormatDetail[GetDetailTableIndexNoThrow( Format )].BitsPerComponent[AbsoluteComponentIndex];
 }
@@ -1499,7 +1510,11 @@ D3D_FORMAT_COMPONENT_INTERPRETATION D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetForma
     case 1: interp = s_FormatDetail[GetDetailTableIndexNoThrow( Format )].ComponentInterpretation1; break;
     case 2: interp = s_FormatDetail[GetDetailTableIndexNoThrow( Format )].ComponentInterpretation2; break;
     case 3: interp = s_FormatDetail[GetDetailTableIndexNoThrow( Format )].ComponentInterpretation3; break;
-//    default: throw E_FAIL;
+#if defined(__cpp_exceptions) && (!defined(_HAS_EXCEPTIONS) || _HAS_EXCEPTIONS != 0)
+    default: throw std::invalid_argument("AbsoluteComponentIndex");
+#else
+    default: break;
+#endif
     }
     return interp;
 }
@@ -1541,13 +1556,15 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FamilySupportsStencil(DXGI_FORMAT Forma
 
 //---------------------------------------------------------------------------------------------------------------------------------
 // GetDetailTableIndexThrow
-UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetDetailTableIndexThrow(DXGI_FORMAT  Format)
+UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetDetailTableIndexThrow(DXGI_FORMAT Format)
 {
     UINT Index = GetDetailTableIndex( Format );
+#if defined(__cpp_exceptions) && (!defined(_HAS_EXCEPTIONS) || _HAS_EXCEPTIONS != 0)
     if(UINT( -1 ) == Index )
     {
-        throw E_FAIL;
+        throw std::invalid_argument("Format");
     }
+#endif
     return Index;
 }
 
