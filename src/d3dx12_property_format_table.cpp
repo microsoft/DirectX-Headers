@@ -1002,6 +1002,11 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
     _Out_writes_opt_(subresources) D3D12_MEMCPY_DEST *pDst)
 {
     UINT tableIndex = GetDetailTableIndexNoThrow( format );
+    if (tableIndex == UINT(-1))
+        return E_INVALIDARG;
+
+    totalByteSize = 0;
+
     const FORMAT_DETAIL& formatDetail = s_FormatDetail[tableIndex];
 
     bool fIsBlockCompressedFormat = IsBlockCompressFormat(format );
@@ -1012,6 +1017,7 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
     UINT subWidth = width;
     UINT subHeight = height;
     UINT subDepth = depth;
+
     for (UINT s = 0, iM = 0; s < subresources; ++s)
     {
         UINT blockWidth;
@@ -1069,7 +1075,7 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
         {
             return INTSAFE_E_ARITHMETIC_OVERFLOW;
         } 
-        SIZE_T subresourceByteSize = subDepth * depthPitch;
+        SIZE_T subresourceByteSize = SIZE_T(UINT64(subDepth) * UINT64(depthPitch));
 
         if (pDst)
         {
