@@ -23,10 +23,10 @@
 #include "d3dx12_property_format_table.h"
 #include <algorithm>
 #include <cassert>
+#include "D3D12TokenizedProgramFormat.hpp"
 #if defined(__cpp_exceptions) && (!defined(_HAS_EXCEPTIONS) || _HAS_EXCEPTIONS != 0)
 #include <stdexcept>
 #endif
-#include "D3D12TokenizedProgramFormat.hpp"
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
 #ifndef ASSUME
   #define ASSUME(x) assert(x)
