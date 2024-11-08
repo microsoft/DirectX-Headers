@@ -1362,20 +1362,115 @@ inline HRESULT D3DX12ParsePipelineStream(const D3D12_PIPELINE_STATE_STREAM_DESC&
             pCallbacks->ErrorDuplicateSubobject(SubobjectType);
             return E_INVALIDARG; // disallow subobject duplicates in a stream
         }
+        switch (SubobjectType)
+        {
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_ROOT_SIGNATURE:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::pRootSignature);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_VS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::VS);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::PS);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::DS);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_HS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::HS);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_GS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::GS);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_CS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::CS);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_STREAM_OUTPUT:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::StreamOutput);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_BLEND:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::BlendState);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_MASK:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::SampleMask);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::RasterizerState);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_INPUT_LAYOUT:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::InputLayout);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_IB_STRIP_CUT_VALUE:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::IBStripCutValue);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PRIMITIVE_TOPOLOGY:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::PrimitiveTopologyType);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RENDER_TARGET_FORMATS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::RTVFormats);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL_FORMAT:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::DSVFormat);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_DESC:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::SampleDesc);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_NODE_MASK:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::NodeMask);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_CACHED_PSO:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::CachedPSO);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_FLAGS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::Flags);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL1:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::DepthStencilState);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_VIEW_INSTANCING:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM1::ViewInstancingDesc);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_AS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM2::AS);
+            break;
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MS:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM2::MS);
+            break;
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL2:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM3::DepthStencilState);
+            break;
+#endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER1:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM4::RasterizerState);
+            break;
+#endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 610)
+        case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER2:
+            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM5::RasterizerState);
+            break;
+#endif
+        default:
+            pCallbacks->ErrorUnknownSubobject(SubobjectType);
+            return E_INVALIDARG;
+        }
+        if (CurOffset + SizeOfSubobject > Desc.SizeInBytes)
+            return E_INVALIDARG;
         SubobjectSeen[SubobjectType] = true;
         switch (SubobjectType)
         {
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_ROOT_SIGNATURE:
             pCallbacks->RootSignatureCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::pRootSignature)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::pRootSignature);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_VS:
             pCallbacks->VSCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::VS)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::VS);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PS:
             pCallbacks->PSCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::PS)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::PS);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DS:
             pCallbacks->DSCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::DS)*>(pStream));
@@ -1383,105 +1478,81 @@ inline HRESULT D3DX12ParsePipelineStream(const D3D12_PIPELINE_STATE_STREAM_DESC&
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_HS:
             pCallbacks->HSCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::HS)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::HS);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_GS:
             pCallbacks->GSCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::GS)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::GS);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_CS:
             pCallbacks->CSCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::CS)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::CS);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_AS:
             pCallbacks->ASCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM2::AS)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM2::AS);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MS:
             pCallbacks->MSCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM2::MS)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM2::MS);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_STREAM_OUTPUT:
             pCallbacks->StreamOutputCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::StreamOutput)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::StreamOutput);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_BLEND:
             pCallbacks->BlendStateCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::BlendState)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::BlendState);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_MASK:
             pCallbacks->SampleMaskCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::SampleMask)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::SampleMask);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER:
             pCallbacks->RasterizerStateCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::RasterizerState)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::RasterizerState);
             break;
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER1:
             pCallbacks->RasterizerState1Cb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM4::RasterizerState)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM4::RasterizerState);
             break;
 #endif
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 610)
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER2:
             pCallbacks->RasterizerState2Cb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM5::RasterizerState)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM5::RasterizerState);
             break;
 #endif
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL:
             pCallbacks->DepthStencilStateCb(*reinterpret_cast<CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL1:
             pCallbacks->DepthStencilState1Cb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::DepthStencilState)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::DepthStencilState);
             break;
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL2:
             pCallbacks->DepthStencilState2Cb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM3::DepthStencilState)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM3::DepthStencilState);
             break;
 #endif
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_INPUT_LAYOUT:
             pCallbacks->InputLayoutCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::InputLayout)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::InputLayout);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_IB_STRIP_CUT_VALUE:
             pCallbacks->IBStripCutValueCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::IBStripCutValue)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::IBStripCutValue);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PRIMITIVE_TOPOLOGY:
             pCallbacks->PrimitiveTopologyTypeCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::PrimitiveTopologyType)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::PrimitiveTopologyType);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RENDER_TARGET_FORMATS:
             pCallbacks->RTVFormatsCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::RTVFormats)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::RTVFormats);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL_FORMAT:
             pCallbacks->DSVFormatCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::DSVFormat)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::DSVFormat);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_DESC:
             pCallbacks->SampleDescCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::SampleDesc)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::SampleDesc);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_NODE_MASK:
             pCallbacks->NodeMaskCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::NodeMask)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::NodeMask);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_CACHED_PSO:
             pCallbacks->CachedPSOCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::CachedPSO)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::CachedPSO);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_FLAGS:
             pCallbacks->FlagsCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM::Flags)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM::Flags);
             break;
         case D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_VIEW_INSTANCING:
             pCallbacks->ViewInstancingCb(*reinterpret_cast<decltype(CD3DX12_PIPELINE_STATE_STREAM1::ViewInstancingDesc)*>(pStream));
-            SizeOfSubobject = sizeof(CD3DX12_PIPELINE_STATE_STREAM1::ViewInstancingDesc);
             break;
         default:
             pCallbacks->ErrorUnknownSubobject(SubobjectType);
