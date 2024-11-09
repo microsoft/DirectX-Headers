@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 cmake_minimum_required(VERSION 3.10.2)
 project(DirectX-Headers
-    LANGUAGES CXX
+    LANGUAGES C CXX
     VERSION 1.614.1
 )
 include(CTest)
