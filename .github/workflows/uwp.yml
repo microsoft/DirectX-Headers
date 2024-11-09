@@ -30,6 +30,10 @@ jobs:
             arch: amd64_x86
           - build_type: x86-Release-UWP
             arch: amd64_x86
+          - build_type: x86-Debug-UWP-Clang
+            arch: amd64_x86
+          - build_type: x86-Release-UWP-Clang
+            arch: amd64_x86
           - build_type: arm64-Debug-UWP
             arch: amd64_arm64
           - build_type: arm64-Release-UWP
