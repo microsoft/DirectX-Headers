@@ -17,12 +17,25 @@
 
 //+-----------------------------------------------------------------------------
 //
+//  Constant:
+//      c_variableRefreshDuration
+//
+//  Synopsis:
+//      An SystemInterruptTime that can be passed into
+//      IPresentationManager::SetPreferredPresentDuration to allow variable
+//      refresh rate to engage for eligible periods of presents
+//
+//------------------------------------------------------------------------------
+static constexpr SystemInterruptTime c_variableRefreshDuration = { UINT64_MAX };
+
+//+-----------------------------------------------------------------------------
+//
 //  Interface:
 //      EXPERIMENTAL_IPresentationManagerSync
 //
 //  Synopsis:
-//      An interface to allow a presentation manager to engage in VRR
-//      presentation
+//      An interface to allow a presentation manager presents to tear (flip
+//      outside of vblank)
 //
 //------------------------------------------------------------------------------
 #undef INTERFACE
