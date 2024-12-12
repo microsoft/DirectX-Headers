@@ -49,24 +49,20 @@ DECLARE_INTERFACE_IID_(EXPERIMENTAL_IPresentationManagerSync, IUnknown, "685BBA4
 //+-----------------------------------------------------------------------------
 //
 //  Interface:
-//      EXPERIMENTAL_IPresentationManagerContextlessPresent
+//      EXPERIMENTAL_IPresentationManagerDX12
 //
 //  Synopsis:
-//      An interface to allow a presentation manager to engage in D3D12,
-//      contexless presentation
+//      Supports D3D12-based presentation of presentation manager
 //
 //------------------------------------------------------------------------------
 #undef INTERFACE
-#define INTERFACE EXPERIMENTAL_IPresentationManagerContextlessPresent
-DECLARE_INTERFACE_IID_(EXPERIMENTAL_IPresentationManagerContextlessPresent, IUnknown, "49967145-083F-47F2-A4A0-F9FDE65DA523")
+#define INTERFACE EXPERIMENTAL_IPresentationManagerDX12
+DECLARE_INTERFACE_IID_(EXPERIMENTAL_IPresentationManagerDX12, IUnknown, "B661B85A-B4F4-485C-865A-0389AD79C06D")
 {
-    STDMETHOD(PreparePresent)(THIS_
-        _In_ IUnknown *commandQueue,
-        _In_ IUnknown *commandList) PURE;
-
-    STDMETHOD(Present)(THIS_
-        _In_ IUnknown *fence,
-        _In_ UINT64 fenceValue) PURE;
+    STDMETHOD(ExecuteCommandListsAndPresent)(THIS_
+        _In_ ID3D12CommandQueue* commandQueue,
+        _In_ UINT commandListCount,
+        _In_reads_(commandListCount) ID3D12CommandList* const* commandLists) PURE;
 };
 
 #endif // #if (NTDDI_VERSION >= NTDDI_WIN10_GE)
