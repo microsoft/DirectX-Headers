@@ -699,7 +699,7 @@ DECLARE_INTERFACE_(ID3D12FunctionReflection1, ID3D12FunctionReflection)
     STDMETHOD(GetInputNode)(UINT i, THIS_ _Out_ D3D12_NODE_DESC * pDesc) PURE;
     STDMETHOD(GetOutputNode)(UINT i, THIS_ _Out_ D3D12_NODE_DESC * pDesc) PURE;
 
-    STDMETHOD_(UINT64, GetFeatureFlags)() PURE;
+    STDMETHOD_(UINT64, GetRequiresFlags)() PURE;
 };
 
 // {EC25F42D-7006-4F2B-B33E-02CC3375733F}
