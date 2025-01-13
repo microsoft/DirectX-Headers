@@ -13,24 +13,49 @@
  *
  *-------------------------------------------------------------------------------------*/
 
- #if (NTDDI_VERSION >= NTDDI_WIN10_GE)
+#if (NTDDI_VERSION >= NTDDI_WIN10_GE)
 
 //+-----------------------------------------------------------------------------
 //
 //  Interface:
-//      EXPERIMENTAL_IDCompositionTextureDirtyRegion
+//      EXPERIMENTAL_IDCompositionDynamicTexture
 //
 //  Synopsis:
-//      An interface to manage a dirty region of a composition texture.
+//      An interface representing a dynamically changing texture that can be bound to a
+//      dcomp visual as a content.
 //
 //------------------------------------------------------------------------------
 #undef INTERFACE
-#define INTERFACE EXPERIMENTAL_IDCompositionTextureDirtyRegion
-DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionTextureDirtyRegion, IUnknown, "4B14292F-87AC-4A9A-B935-A79B5C74485B")
+#define INTERFACE EXPERIMENTAL_IDCompositionDynamicTexture
+DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDynamicTexture, IUnknown, "9575B228-D8A9-4F1E-A35B-C8D585C9CFAC")
 {
-    STDMETHOD(SetDirtyRects)(THIS_
+    // Set current texture, assuming that every pixel has changed.
+    STDMETHOD(SetTexture)(THIS_
+        _In_ IDCompositionTexture* pContent) PURE;
+
+    // Set current texture, assuming that only pixels inside provided rects has changed.
+    // If provided with an empty array behaves like SetTexture(IDCompositionTexture*) above.
+    STDMETHOD(SetTexture)(THIS_
+        _In_ IDCompositionTexture* pContent,
         _In_ size_t rectCount,
         _In_count_(rectCount) const D2D_RECT_L *pRects) PURE;
+};
+
+//+-----------------------------------------------------------------------------
+//
+//  Interface:
+//      EXPERIMENTAL_IDCompositionDevice5
+//
+//  Synopsis:
+//      An extension of composition device interface that allows creating EXPERIMENTAL_IDCompositionDynamicTexture.
+//
+//------------------------------------------------------------------------------
+#undef INTERFACE
+#define INTERFACE EXPERIMENTAL_IDCompositionDevice5
+DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDevice5, IDCompositionDevice4, "1F09CCEE-53AD-4E83-84AD-A6C771C5AE32")
+{
+    STDMETHOD(CreateDynamicTexture)(THIS_
+        _Outptr_ EXPERIMENTAL_IDCompositionDynamicTexture** compositionDynamicTexture) PURE;
 };
 
 #endif // #if (NTDDI_VERSION >= NTDDI_WIN10_GE)
