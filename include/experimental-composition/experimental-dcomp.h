@@ -13,24 +13,6 @@
  *
  *-------------------------------------------------------------------------------------*/
 
- #if (NTDDI_VERSION >= NTDDI_WIN10_GE)
-
-//+-----------------------------------------------------------------------------
-//
-//  Interface:
-//      EXPERIMENTAL_IDCompositionTextureDirtyRegion
-//
-//  Synopsis:
-//      An interface to manage a dirty region of a composition texture.
-//
-//------------------------------------------------------------------------------
-#undef INTERFACE
-#define INTERFACE EXPERIMENTAL_IDCompositionTextureDirtyRegion
-DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionTextureDirtyRegion, IUnknown, "4B14292F-87AC-4A9A-B935-A79B5C74485B")
-{
-    STDMETHOD(SetDirtyRects)(THIS_
-        _In_ size_t rectCount,
-        _In_count_(rectCount) const D2D_RECT_L *pRects) PURE;
-};
+#if (NTDDI_VERSION >= NTDDI_WIN10_GE)
 
 #endif // #if (NTDDI_VERSION >= NTDDI_WIN10_GE)
