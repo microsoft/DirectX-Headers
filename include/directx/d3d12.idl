@@ -293,7 +293,7 @@ const UINT D3D12_OS_RESERVED_REGISTER_SPACE_VALUES_END = 0xffffffff;
 const UINT D3D12_OS_RESERVED_REGISTER_SPACE_VALUES_START = 0xfffffff8;
 const UINT D3D12_PACKED_TILE = 0xffffffff;
 const UINT D3D12_PIXEL_ADDRESS_RANGE_BIT_COUNT = 15;
-const UINT D3D12_PREVIEW_SDK_VERSION = 715;
+const UINT D3D12_PREVIEW_SDK_VERSION = 716;
 const UINT D3D12_PRE_SCISSOR_PIXEL_ADDRESS_RANGE_BIT_COUNT = 16;
 const UINT D3D12_PS_CS_UAV_REGISTER_COMPONENTS = 1;
 const UINT D3D12_PS_CS_UAV_REGISTER_COUNT = 8;
@@ -1045,8 +1045,9 @@ typedef enum D3D12_FEATURE
     D3D12_FEATURE_PLACED_RESOURCE_SUPPORT_INFO          = 51,
     D3D12_FEATURE_HARDWARE_COPY                         = 52,
     D3D12_FEATURE_D3D12_OPTIONS21                       = 53,
-    D3D12_FEATURE_D3D12_OPTIONS22                       = 54,
+    D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT                 = 54,
     D3D12_FEATURE_APPLICATION_SPECIFIC_DRIVER_STATE     = 56,
+    D3D12_FEATURE_BYTECODE_BYPASS_HASH_SUPPORTED        = 57,
 } D3D12_FEATURE;
 
 typedef enum D3D12_SHADER_MIN_PRECISION_SUPPORT
@@ -1629,10 +1630,16 @@ typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS21
     [annotation("_Out_")] BOOL ExtendedCommandInfoSupported;    
 } D3D12_FEATURE_DATA_D3D12_OPTIONS21;
 
-typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS22
+typedef enum D3D12_TIGHT_ALIGNMENT_TIER
 {
-    [annotation("_Out_")] BOOL TightAlignmentSupported;
-} D3D12_FEATURE_DATA_D3D12_OPTIONS22;
+    D3D12_TIGHT_ALIGNMENT_TIER_NOT_SUPPORTED,
+    D3D12_TIGHT_ALIGNMENT_TIER_1                // Tight alignment of buffers supported 
+} D3D12_TIGHT_ALIGNMENT_TIER;
+
+typedef struct D3D12_FEATURE_DATA_TIGHT_ALIGNMENT
+{
+    [annotation("_Out_")] D3D12_TIGHT_ALIGNMENT_TIER SupportTier;
+} D3D12_FEATURE_DATA_TIGHT_ALIGNMENT;
 
 
 typedef struct D3D12_FEATURE_DATA_PREDICATION
@@ -1649,6 +1656,11 @@ typedef struct D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE
 {
     [annotation("_Out_")] BOOL Supported;
 } D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE;
+
+typedef struct D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED
+{
+    [annotation("_Out_")] BOOL Supported;
+} D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED;
 
 typedef struct D3D12_RESOURCE_ALLOCATION_INFO
 {
@@ -1767,7 +1779,7 @@ typedef enum D3D12_RESOURCE_FLAGS
     D3D12_RESOURCE_FLAG_VIDEO_DECODE_REFERENCE_ONLY = 0x40, 
     D3D12_RESOURCE_FLAG_VIDEO_ENCODE_REFERENCE_ONLY = 0x80, 
     D3D12_RESOURCE_FLAG_RAYTRACING_ACCELERATION_STRUCTURE = 0x100,
-    D3D12_RESOURCE_FLAG_USE_TIGHT_ALIGNMENT = 0x200,
+    D3D12_RESOURCE_FLAG_USE_TIGHT_ALIGNMENT = 0x400,
 
 } D3D12_RESOURCE_FLAGS;
 cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_RESOURCE_FLAGS )" )
@@ -3002,8 +3014,20 @@ cpp_quote( "                                     _In_ SIZE_T SrcDataSizeInBytes,
 cpp_quote( "                                     _In_ REFIID pRootSignatureDeserializerInterface," )
 cpp_quote( "                                     _Out_ void** ppRootSignatureDeserializer);" )
 cpp_quote( "" )
-
-
+cpp_quote("typedef HRESULT (WINAPI* PFN_D3D12_CREATE_VERSIONED_ROOT_SIGNATURE_DESERIALIZER_FROM_SUBOBJECT_IN_LIBRARY)(")
+cpp_quote("                                     _In_reads_bytes_(SrcDataSizeInBytes) LPCVOID pSrcData,")
+cpp_quote("                                     _In_ SIZE_T SrcDataSizeInBytes,")
+cpp_quote("                                     _In_ LPCWSTR RootSignatureSubobjectName,")
+cpp_quote("                                     _In_ REFIID pRootSignatureDeserializerInterface,")
+cpp_quote("                                     _Out_ void** ppRootSignatureDeserializer);")
+cpp_quote("")
+cpp_quote("HRESULT WINAPI D3D12CreateVersionedRootSignatureDeserializerFromSubobjectInLibrary(")
+cpp_quote("                                     _In_reads_bytes_(SrcDataSizeInBytes) LPCVOID pSrcData,")
+cpp_quote("                                     _In_ SIZE_T SrcDataSizeInBytes,")
+cpp_quote("                                     _In_opt_ LPCWSTR RootSignatureSubobjectName,")
+cpp_quote("                                     _In_ REFIID pRootSignatureDeserializerInterface,")
+cpp_quote("                                     _Out_ void** ppRootSignatureDeserializer);")
+cpp_quote("")
 
 typedef struct D3D12_CPU_DESCRIPTOR_HANDLE
 {
@@ -4410,12 +4434,6 @@ interface ID3D12WorkGraphProperties : IUnknown
     UINT GetEntrypointRecordAlignmentInBytes(UINT WorkGraphIndex, UINT EntrypointIndex);
 }
 
-[uuid(5490ef66-165f-4b3f-9658-74e5c6d2e1d0), object, local, pointer_default(unique)]
-interface ID3D12WorkGraphProperties1 
-    : ID3D12WorkGraphProperties
-{
-    void SetMaximumInputRecords(UINT WorkGraphIndex, UINT MaxRecords, UINT MaxNodeInputs);
-}
 
 typedef enum D3D12_STATE_SUBOBJECT_TYPE
 {
@@ -5118,6 +5136,7 @@ typedef enum D3D12_AUTO_BREADCRUMB_OP
     D3D12_AUTO_BREADCRUMB_OP_BEGIN_COMMAND_LIST = 46,
     D3D12_AUTO_BREADCRUMB_OP_DISPATCHGRAPH = 47,
     D3D12_AUTO_BREADCRUMB_OP_SETPROGRAM = 48,
+    D3D12_AUTO_BREADCRUMB_OP_PROCESSFRAMES2 = 52,
 } D3D12_AUTO_BREADCRUMB_OP;
 
 typedef struct D3D12_AUTO_BREADCRUMB_NODE
@@ -6340,6 +6359,21 @@ cpp_quote("    0x4f56,")
 cpp_quote("    { 0x8c, 0x5b, 0xc5, 0x10, 0x39, 0xd6, 0x94, 0xfb }")
 cpp_quote("};")
 cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
+cpp_quote("// Experimental Feature: D3D12GPUUploadHeapsOnUnsupportedOS")
+cpp_quote("//")
+cpp_quote("// Use with D3D12EnableExperimentalFeatures to enable GPU upload heaps support on an unsupported OS, ")
+cpp_quote("// driver support is still required for this feature.")
+cpp_quote("//")
+cpp_quote("// Enabling D3D12GPUUploadHeapsOnUnsupportedOS needs no configuration struct, pass NULL in the pConfigurationStructs array.")
+cpp_quote("//")
+cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
+cpp_quote("static const UUID D3D12GPUUploadHeapsOnUnsupportedOS = { /* 45dc51f3-767f-4588-b206-0baa2b16fbae */")
+cpp_quote("    0x45dc51f3,")
+cpp_quote("    0x767f,")
+cpp_quote("    0x4588,")
+cpp_quote("    { 0xb2, 0x06, 0x0b, 0xaa, 0x2b, 0x16, 0xfb, 0xae }")
+cpp_quote("};")
+cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
 cpp_quote("// Experimental Feature: D3D12StateObjectsExperiment")
 cpp_quote("//")
 cpp_quote("// Use with D3D12EnableExperimentalFeatures to enable preview features related to state objects.")
@@ -6353,7 +6387,6 @@ cpp_quote("    0xa15a,")
 cpp_quote("    0x42c1,")
 cpp_quote("    {0x96, 0x05, 0x4b, 0xd9, 0x99, 0x9a, 0x61, 0xaf}")
 cpp_quote("};")
-
 cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
 cpp_quote("// D3D12GetInterface")
 cpp_quote("//")
@@ -6676,7 +6709,6 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12StateObject,0x47016943,0xfca8,0x4594,0x93,0xea
 cpp_quote( "DEFINE_GUID(IID_ID3D12StateObjectProperties,0xde5fa827,0x9bf9,0x4f26,0x89,0xff,0xd7,0xf5,0x6f,0xde,0x38,0x60);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12StateObjectProperties1,0x460caac7,0x1d24,0x446a,0xa1,0x84,0xca,0x67,0xdb,0x49,0x41,0x38);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12WorkGraphProperties,0x065acf71,0xf863,0x4b89,0x82,0xf4,0x02,0xe4,0xd5,0x88,0x67,0x57);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12WorkGraphProperties1,0x5490ef66,0x165f,0x4b3f,0x96,0x58,0x74,0xe5,0xc6,0xd2,0xe1,0xd0);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Device5,0x8b4f173b,0x2fea,0x4b80,0x8f,0x58,0x43,0x07,0x19,0x1a,0xb9,0x5d);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceRemovedExtendedDataSettings,0x82BC481C,0x6B9B,0x4030,0xAE,0xDB,0x7E,0xE3,0xD1,0xDF,0x1E,0x63);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceRemovedExtendedDataSettings1,0xDBD5AE51,0x3317,0x4F0A,0xAD,0xF9,0x1D,0x7C,0xED,0xCA,0xAE,0x0B);" )
