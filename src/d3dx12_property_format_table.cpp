@@ -200,7 +200,88 @@ const LPCSTR D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::s_FormatNames[] =  // separate 
      "AI44",                        
      "IA44",                        
      "P8",                          
-     "A8P8",
+     "A8P8",  
+     "B4G4R4A4_UNORM",
+
+     nullptr, // 116
+     nullptr, // 117
+     nullptr, // 118
+     nullptr, // 119
+     nullptr, // 120
+     nullptr, // 121
+     nullptr, // 122
+     nullptr, // 123
+     nullptr, // 124
+     nullptr, // 125
+     nullptr, // 126
+     nullptr, // 127
+     nullptr, // 128
+     nullptr, // 129
+
+     "P208",
+     "V208",
+     "V408",
+
+     NULL, // 133
+     NULL, // 134
+     NULL, // 135
+     NULL, // 136
+     NULL, // 137
+     NULL, // 138
+     NULL, // 139
+     NULL, // 140
+     NULL, // 141
+     NULL, // 142
+     NULL, // 143
+     NULL, // 144
+     NULL, // 145
+     NULL, // 146
+     NULL, // 147
+     NULL, // 148
+     NULL, // 149
+     NULL, // 150
+     NULL, // 151
+     NULL, // 152
+     NULL, // 153
+     NULL, // 154
+     NULL, // 155
+     NULL, // 156
+     NULL, // 157
+     NULL, // 158
+     NULL, // 159
+     NULL, // 160
+     NULL, // 161
+     NULL, // 162
+     NULL, // 163
+     NULL, // 164
+     NULL, // 165
+     NULL, // 166
+     NULL, // 167
+     NULL, // 168
+     NULL, // 169
+     NULL, // 170
+     NULL, // 171
+     NULL, // 172
+     NULL, // 173
+     NULL, // 174
+     NULL, // 175
+     NULL, // 176
+     NULL, // 177
+     NULL, // 178
+     NULL, // 179
+     NULL, // 180
+     NULL, // 181
+     NULL, // 182
+     NULL, // 183
+     NULL, // 184
+     NULL, // 185
+     NULL, // 186
+     NULL, // 187
+     NULL, // 188
+
+     "SAMPLER_FEEDBACK_MIN_MIP_OPAQUE",
+     "SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE",
+     "A4B4G4R4_UNORM",
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -889,7 +970,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FormatExistsInHeader(DXGI_FORMAT Format
 LPCSTR D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetName(DXGI_FORMAT Format, bool bHideInternalFormats)
 {
     const UINT Index = GetDetailTableIndex( Format );
-    if (UINT( -1 ) == Index || (bHideInternalFormats && GetFormatDetail( Format )->bInternal))
+    if (UINT( -1 ) == Index || (bHideInternalFormats && GetFormatDetail( Format )->bInternal) || !s_FormatNames[Index])
     {
         return "Unrecognized";
     }
@@ -1020,7 +1101,6 @@ HRESULT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::CalculateResourceSize(
     UINT subWidth = width;
     UINT subHeight = height;
     UINT subDepth = depth;
-
     for (UINT s = 0, iM = 0; s < subresources; ++s)
     {
         UINT blockWidth;
@@ -1329,6 +1409,34 @@ UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetBitsPerStencil(DXGI_FORMAT  Format)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
+// GetBitsPerDepth
+UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetBitsPerDepth(DXGI_FORMAT  Format)
+{
+    const UINT Index = GetDetailTableIndexThrow( Format );
+    if( (s_FormatDetail[Index].TypeLevel != D3DFTL_PARTIAL_TYPE) &&
+        (s_FormatDetail[Index].TypeLevel != D3DFTL_FULL_TYPE) )
+    {
+        return 0;
+    }
+    for( UINT comp = 0; comp < 4; comp++ )
+    {
+        D3D_FORMAT_COMPONENT_NAME name = D3DFCN_D;
+        switch(comp)
+        {
+        case 0: name = s_FormatDetail[Index].ComponentName0; break;
+        case 1: name = s_FormatDetail[Index].ComponentName1; break;
+        case 2: name = s_FormatDetail[Index].ComponentName2; break;
+        case 3: name = s_FormatDetail[Index].ComponentName3; break;
+        }
+        if( name == D3DFCN_D )
+        {
+            return s_FormatDetail[Index].BitsPerComponent[comp];
+        }
+    }
+    return 0;
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------
 // GetFormatReturnTypes
 void    D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetFormatReturnTypes(
         DXGI_FORMAT                            Format,
@@ -1385,6 +1493,16 @@ UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetNumComponentsInFormat( DXGI_FORMAT  
         }
     }
     return n;
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------
+// GetMinNumComponentsInFormats
+UINT D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetMinNumComponentsInFormats(DXGI_FORMAT FormatA, DXGI_FORMAT FormatB)
+{
+    UINT NumComponentsFormatA = GetNumComponentsInFormat(FormatA);
+    UINT NumComponentsFormatB = GetNumComponentsInFormat(FormatB);
+    UINT NumComponents = NumComponentsFormatA < NumComponentsFormatB ? NumComponentsFormatA : NumComponentsFormatB;
+    return NumComponents;
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -2390,7 +2508,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::IsSupportedTextureDisplayableFormat
 //---------------------------------------------------------------------------------------------------------------------------------
 bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FloatAndNotFloatFormats(DXGI_FORMAT FormatA, DXGI_FORMAT FormatB)
 {
-    UINT NumComponents = (std::min)(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
+    UINT NumComponents = GetMinNumComponentsInFormats(FormatA, FormatB);
     for (UINT c = 0; c < NumComponents; c++)
     {
         D3D_FORMAT_COMPONENT_INTERPRETATION fciA = GetFormatComponentInterpretation(FormatA, c);
@@ -2406,7 +2524,7 @@ bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FloatAndNotFloatFormats(DXGI_FORMAT Fo
 //---------------------------------------------------------------------------------------------------------------------------------
 bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SNORMAndUNORMFormats(DXGI_FORMAT FormatA, DXGI_FORMAT FormatB)
 {
-    UINT NumComponents = (std::min)(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
+    UINT NumComponents = GetMinNumComponentsInFormats(FormatA, FormatB);
     for (UINT c = 0; c < NumComponents; c++)
     {
         D3D_FORMAT_COMPONENT_INTERPRETATION fciA = GetFormatComponentInterpretation(FormatA, c);
@@ -2445,6 +2563,20 @@ bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SNORMAndUNORMFormats(DXGI_FORMAT Forma
  bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::MotionEstimatorAllowedInputFormat(DXGI_FORMAT Format)
  {
      return Format == DXGI_FORMAT_NV12;
+ }
+
+//---------------------------------------------------------------------------------------------------------------------------------
+ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SupportsDepth(DXGI_FORMAT Format)
+ {
+    // If the number of bits associated with depth in the format is greater then 0, then the format supports depth
+    return (GetComponentName(Format, 0) == D3DFCN_D);
+ }
+
+ //---------------------------------------------------------------------------------------------------------------------------------
+ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SupportsStencil(DXGI_FORMAT Format)
+ {
+    // If the number of bits associated with stencil in the format is greater then 0, then the format supports stencil
+    return GetBitsPerStencil(Format) > 0;
  }
 
 #undef R 
