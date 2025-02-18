@@ -4434,7 +4434,6 @@ interface ID3D12WorkGraphProperties : IUnknown
     UINT GetEntrypointRecordAlignmentInBytes(UINT WorkGraphIndex, UINT EntrypointIndex);
 }
 
-
 typedef enum D3D12_STATE_SUBOBJECT_TYPE
 {
     D3D12_STATE_SUBOBJECT_TYPE_STATE_OBJECT_CONFIG = 0, // D3D12_STATE_OBJECT_CONFIG

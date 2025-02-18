@@ -9,6 +9,8 @@
 #include <directx/d3dx12.h>
 #include "dxguids/dxguids.h"
 
+#include <wrl/client.h>
+
 // -----------------------------------------------------------------------------------------------------------------
 // Helper Macros for verifying feature check results
 // -----------------------------------------------------------------------------------------------------------------
@@ -164,7 +166,7 @@ int run_per_adapter(IUnknown* adapter)
         D3D12_CROSS_NODE_SHARING_TIER CrossNodeSharingTier = features.CrossNodeSharingTier();
         UINT MaxGPUVirtualAddressBitsPerResource = features.MaxGPUVirtualAddressBitsPerResource();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS Data = {};
         device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &Data, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS));
         VERIFY_FEATURE_CHECK_NO_DEFAULT(DoublePrecisionFloatShaderOps);
         VERIFY_FEATURE_CHECK_NO_DEFAULT(OutputMergerLogicOp);
@@ -186,7 +188,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         D3D_FEATURE_LEVEL HighestLevelSupported = features.MaxSupportedFeatureLevel();
         
-        D3D12_FEATURE_DATA_FEATURE_LEVELS Data;
+        D3D12_FEATURE_DATA_FEATURE_LEVELS Data = {};
         D3D_FEATURE_LEVEL KnownFeatureLevels[] =
         {
             D3D_FEATURE_LEVEL_1_0_CORE,
@@ -216,7 +218,7 @@ int run_per_adapter(IUnknown* adapter)
             return -1;
         }
 
-        D3D12_FEATURE_DATA_FORMAT_SUPPORT Data;
+        D3D12_FEATURE_DATA_FORMAT_SUPPORT Data = {};
         Data.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
         if (SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &Data, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT)))) 
         {
@@ -246,7 +248,7 @@ int run_per_adapter(IUnknown* adapter)
             return -1;
         }
 
-        D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS Data;
+        D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS Data = {};
         Data.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
         Data.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
         Data.SampleCount = 1;
@@ -269,7 +271,7 @@ int run_per_adapter(IUnknown* adapter)
             return -1;
         }
 
-        D3D12_FEATURE_DATA_FORMAT_INFO Data;
+        D3D12_FEATURE_DATA_FORMAT_INFO Data = {};
         Data.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
         device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &Data, sizeof(D3D12_FEATURE_DATA_FORMAT_INFO));
         if (PlaneCount != Data.PlaneCount)
@@ -283,7 +285,7 @@ int run_per_adapter(IUnknown* adapter)
         UINT MaxGPUVABitsPerProcess = features.MaxGPUVirtualAddressBitsPerProcess();
         UINT MaxGPUVABitsPerResource = features.MaxGPUVirtualAddressBitsPerResource();
 
-        D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT Data;
+        D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT Data = {};
         device->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &Data, sizeof(D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT));
         VERIFY_FEATURE_CHECK_NO_DEFAULT(MaxGPUVirtualAddressBitsPerProcess);
         VERIFY_FEATURE_CHECK_NO_DEFAULT(MaxGPUVirtualAddressBitsPerResource);
@@ -293,7 +295,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         D3D_SHADER_MODEL HighestShaderModel = features.HighestShaderModel();
 
-        D3D12_FEATURE_DATA_SHADER_MODEL Data;
+        D3D12_FEATURE_DATA_SHADER_MODEL Data = {};
         D3D_SHADER_MODEL KnownShaderModels[] =
         {
             D3D_SHADER_MODEL_6_7,
@@ -323,7 +325,7 @@ int run_per_adapter(IUnknown* adapter)
         UINT WaveLaneCountMin = features.WaveLaneCountMin();
         UINT WaveLaneCountMax = features.WaveLaneCountMax();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS1 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS1 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS1);
         VERIFY_FEATURE_CHECK(WaveOps, false);
         VERIFY_FEATURE_CHECK(WaveLaneCountMax, 0);
@@ -335,7 +337,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         D3D12_PROTECTED_RESOURCE_SESSION_SUPPORT_FLAGS ProtectedResourceSessionSupport = features.ProtectedResourceSessionSupport(NodeId);
 
-        D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_SUPPORT Data;
+        D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_SUPPORT Data = {};
         Data.NodeIndex = NodeId;
         INITIALIZE_FEATURE_SUPPORT_DATA(PROTECTED_RESOURCE_SESSION_SUPPORT);
         VERIFY_RENAMED_FEATURE_CHECK(ProtectedResourceSessionSupport, Support, D3D12_PROTECTED_RESOURCE_SESSION_SUPPORT_FLAG_NONE);
@@ -345,7 +347,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         D3D_ROOT_SIGNATURE_VERSION HighestRootSignatureVersion = features.HighestRootSignatureVersion();
 
-        D3D12_FEATURE_DATA_ROOT_SIGNATURE Data;
+        D3D12_FEATURE_DATA_ROOT_SIGNATURE Data = {};
         Data.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1; // Highest Known Version
         INITIALIZE_FEATURE_SUPPORT_DATA(ROOT_SIGNATURE);
         VERIFY_RENAMED_FEATURE_CHECK(HighestRootSignatureVersion, HighestVersion, (D3D_ROOT_SIGNATURE_VERSION)0);
@@ -359,12 +361,12 @@ int run_per_adapter(IUnknown* adapter)
         BOOL UMA = features.UMA(NodeId);
         BOOL CacheCoherentUMA = features.CacheCoherentUMA(NodeId);
 
-        D3D12_FEATURE_DATA_ARCHITECTURE1 Data;
+        D3D12_FEATURE_DATA_ARCHITECTURE1 Data = {};
         Data.NodeIndex = NodeId;
         INITIALIZE_FEATURE_SUPPORT_DATA(ARCHITECTURE1);
         if (FAILED(InitResult)) 
         {
-            D3D12_FEATURE_DATA_ARCHITECTURE Data;
+            D3D12_FEATURE_DATA_ARCHITECTURE Data = {};
             Data.NodeIndex = NodeId;
             INITIALIZE_FEATURE_SUPPORT_DATA(ARCHITECTURE);
             VERIFY_FEATURE_CHECK_NO_DEFAULT(TileBasedRenderer);
@@ -385,7 +387,7 @@ int run_per_adapter(IUnknown* adapter)
         BOOL DepthBoundsTestSupported = features.DepthBoundsTestSupported();
         D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER ProgrammableSamplePositionsTier = features.ProgrammableSamplePositionsTier();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS2 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS2 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS2);
         VERIFY_FEATURE_CHECK(DepthBoundsTestSupported, false);
         VERIFY_FEATURE_CHECK(ProgrammableSamplePositionsTier, D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_NOT_SUPPORTED);
@@ -395,7 +397,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         D3D12_SHADER_CACHE_SUPPORT_FLAGS ShaderCacheSupportFlags = features.ShaderCacheSupportFlags();
 
-        D3D12_FEATURE_DATA_SHADER_CACHE Data;
+        D3D12_FEATURE_DATA_SHADER_CACHE Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(SHADER_CACHE);
         VERIFY_RENAMED_FEATURE_CHECK(ShaderCacheSupportFlags, SupportFlags, D3D12_SHADER_CACHE_SUPPORT_NONE);
     }
@@ -409,7 +411,7 @@ int run_per_adapter(IUnknown* adapter)
         // Test on invalid inputs
         BOOL CommandQueuePrioritySupportedInvalid = features.CommandQueuePrioritySupported((D3D12_COMMAND_LIST_TYPE)7, 0);
 
-        D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY Data;
+        D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY Data = {};
         {
             Data.CommandListType = D3D12_COMMAND_LIST_TYPE_DIRECT;
             Data.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
@@ -447,7 +449,7 @@ int run_per_adapter(IUnknown* adapter)
         D3D12_VIEW_INSTANCING_TIER ViewInstancingTier = features.ViewInstancingTier();
         BOOL BarycentricsSupported = features.BarycentricsSupported();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS3 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS3 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS3);
         VERIFY_FEATURE_CHECK(CopyQueueTimestampQueriesSupported, false);
         VERIFY_FEATURE_CHECK(CastingFullyTypedFormatSupported, false);
@@ -460,7 +462,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         BOOL ExistingHeapsSupported = features.ExistingHeapsSupported();
         
-        D3D12_FEATURE_DATA_EXISTING_HEAPS Data;
+        D3D12_FEATURE_DATA_EXISTING_HEAPS Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(EXISTING_HEAPS);
         VERIFY_RENAMED_FEATURE_CHECK(ExistingHeapsSupported, Supported, false);
     }
@@ -471,7 +473,7 @@ int run_per_adapter(IUnknown* adapter)
         D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER SharedResourceCompatibilityTier = features.SharedResourceCompatibilityTier();
         BOOL Native16BitShaderOpsSupported = features.Native16BitShaderOpsSupported();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS4 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS4 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS4);
         VERIFY_FEATURE_CHECK(MSAA64KBAlignedTextureSupported, false);
         VERIFY_FEATURE_CHECK(SharedResourceCompatibilityTier, D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_0);
@@ -481,7 +483,7 @@ int run_per_adapter(IUnknown* adapter)
     // 24: Serialization
     {
         D3D12_HEAP_SERIALIZATION_TIER HeapSerializationTier = features.HeapSerializationTier();
-        D3D12_FEATURE_DATA_SERIALIZATION Data;
+        D3D12_FEATURE_DATA_SERIALIZATION Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(SERIALIZATION);
         VERIFY_FEATURE_CHECK(HeapSerializationTier, D3D12_HEAP_SERIALIZATION_TIER_0);
     }
@@ -489,7 +491,7 @@ int run_per_adapter(IUnknown* adapter)
     // 25: Cross Node
     {
         BOOL CrossNodeAtomicShaderInstructions = features.CrossNodeAtomicShaderInstructions();
-        D3D12_FEATURE_DATA_CROSS_NODE Data;
+        D3D12_FEATURE_DATA_CROSS_NODE Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(CROSS_NODE);
         VERIFY_RENAMED_FEATURE_CHECK(CrossNodeAtomicShaderInstructions, AtomicShaderInstructions, false);
     }
@@ -500,7 +502,7 @@ int run_per_adapter(IUnknown* adapter)
         D3D12_RENDER_PASS_TIER RenderPassesTier = features.RenderPassesTier();
         D3D12_RAYTRACING_TIER RaytracingTier = features.RaytracingTier();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS5 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS5 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS5);
         VERIFY_FEATURE_CHECK(SRVOnlyTiledResourceTier3, false);
         VERIFY_FEATURE_CHECK(RenderPassesTier, D3D12_RENDER_PASS_TIER_0);
@@ -511,7 +513,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         BOOL DisplayableTexture = features.DisplayableTexture();
 
-        D3D12_FEATURE_DATA_DISPLAYABLE Data;
+        D3D12_FEATURE_DATA_DISPLAYABLE Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(DISPLAYABLE);
         VERIFY_FEATURE_CHECK(DisplayableTexture, false);
     }
@@ -524,7 +526,7 @@ int run_per_adapter(IUnknown* adapter)
         BOOL ShadingRateImageTileSize = features.ShadingRateImageTileSize();
         BOOL BackgroundProcessingSupported = features.BackgroundProcessingSupported();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS6 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS6 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS6);
         VERIFY_FEATURE_CHECK(AdditionalShadingRatesSupported, false);
         VERIFY_FEATURE_CHECK(PerPrimitiveShadingRateSupportedWithViewportIndexing, false);
@@ -543,7 +545,7 @@ int run_per_adapter(IUnknown* adapter)
         D3D12_MESH_SHADER_TIER MeshShaderTier = features.MeshShaderTier();
         D3D12_SAMPLER_FEEDBACK_TIER SamplerFeedbackTier = features.SamplerFeedbackTier();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS7 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS7 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS7);
         VERIFY_FEATURE_CHECK(MeshShaderTier, D3D12_MESH_SHADER_TIER_NOT_SUPPORTED);
         VERIFY_FEATURE_CHECK(SamplerFeedbackTier, D3D12_SAMPLER_FEEDBACK_TIER_NOT_SUPPORTED);
@@ -554,7 +556,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         UINT ProtectedResourceSessionTypeCount = features.ProtectedResourceSessionTypeCount(NodeId);
 
-        D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPE_COUNT Data;
+        D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPE_COUNT Data = {};
         Data.NodeIndex = NodeId;
         INITIALIZE_FEATURE_SUPPORT_DATA(PROTECTED_RESOURCE_SESSION_TYPE_COUNT);
         VERIFY_RENAMED_FEATURE_CHECK(ProtectedResourceSessionTypeCount, Count, 0);
@@ -565,7 +567,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         std::vector<GUID> ProtectedResourceSessionTypes = features.ProtectedResourceSessionTypes(NodeId);
 
-        D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPE_COUNT CountData;
+        D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPE_COUNT CountData = {};
         CountData.NodeIndex = NodeId;
         if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPE_COUNT, &CountData, sizeof(D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPE_COUNT))))
         {
@@ -585,7 +587,7 @@ int run_per_adapter(IUnknown* adapter)
             return -1;
         }
 
-        D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES Data;
+        D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES Data = {};
         Data.NodeIndex = NodeId;
         Data.Count = CountData.Count;
         Data.pTypes = new GUID[Data.Count];
@@ -609,7 +611,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         BOOL UnalignedBlockTexturesSupported = features.UnalignedBlockTexturesSupported();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS8 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS8 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS8);
         VERIFY_FEATURE_CHECK(UnalignedBlockTexturesSupported, false);
     }
@@ -620,7 +622,7 @@ int run_per_adapter(IUnknown* adapter)
         BOOL MeshShaderSupportsFullRangeRenderTargetArrayIndex = features.MeshShaderSupportsFullRangeRenderTargetArrayIndex();
         D3D12_WAVE_MMA_TIER WaveMMATier = features.WaveMMATier();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS9 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS9 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS9);
         VERIFY_FEATURE_CHECK(MeshShaderPipelineStatsSupported, false);
         VERIFY_FEATURE_CHECK(MeshShaderSupportsFullRangeRenderTargetArrayIndex, false);
@@ -632,7 +634,7 @@ int run_per_adapter(IUnknown* adapter)
         BOOL VariableRateShadingSumCombinerSupported = features.VariableRateShadingSumCombinerSupported();
         BOOL MeshShaderPerPrimitiveShadingRateSupported = features.MeshShaderPerPrimitiveShadingRateSupported();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS10 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS10 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS10);
         VERIFY_FEATURE_CHECK(VariableRateShadingSumCombinerSupported, false);
         VERIFY_FEATURE_CHECK(MeshShaderPerPrimitiveShadingRateSupported, false);
@@ -642,7 +644,7 @@ int run_per_adapter(IUnknown* adapter)
     {
         BOOL AtomicInt64OnDescriptorHeapResourceSupported = features.AtomicInt64OnDescriptorHeapResourceSupported();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS11 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS11 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS11);
         VERIFY_FEATURE_CHECK(AtomicInt64OnDescriptorHeapResourceSupported, false);
     }
@@ -652,7 +654,7 @@ int run_per_adapter(IUnknown* adapter)
         D3D12_TRI_STATE MSPrimitivesPipelineStatisticIncludesCulledPrimitives = features.MSPrimitivesPipelineStatisticIncludesCulledPrimitives();
         BOOL EnhancedBarriersSupported = features.EnhancedBarriersSupported();
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS12 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS12 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS12);
         VERIFY_FEATURE_CHECK(MSPrimitivesPipelineStatisticIncludesCulledPrimitives, D3D12_TRI_STATE_UNKNOWN);
         VERIFY_FEATURE_CHECK(EnhancedBarriersSupported, false);
@@ -661,7 +663,7 @@ int run_per_adapter(IUnknown* adapter)
 
     // 41: Options13
     {
-        D3D12_FEATURE_DATA_D3D12_OPTIONS13 Data;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS13 Data = {};
         INITIALIZE_FEATURE_SUPPORT_DATA(D3D12_OPTIONS13);
         VERIFY_FEATURE_CHECK(UnrestrictedBufferTextureCopyPitchSupported, false);
         VERIFY_FEATURE_CHECK(UnrestrictedVertexElementAlignmentSupported, false);
