@@ -72,7 +72,7 @@ DECLARE_INTERFACE_IID_(PREVIEW_IDCompositionDynamicTexture, IUnknown, "A1DE1D3F-
 //      PREVIEW_IDCompositionDevice5
 //
 //  Synopsis:
-//      Servers as the root factory for composition dynamic textures
+//      Serves as the root factory for composition dynamic textures
 //
 //------------------------------------------------------------------------------
 #undef INTERFACE
