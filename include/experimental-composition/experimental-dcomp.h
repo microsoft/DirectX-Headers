@@ -13,7 +13,7 @@
  *
  *-------------------------------------------------------------------------------------*/
 
-#if (NTDDI_VERSION >= NTDDI_WIN10_GE)
+#if (NTDDI_VERSION >= NTDDI_WIN11_GE)
 
 //+-----------------------------------------------------------------------------
 //
@@ -27,7 +27,7 @@
 //------------------------------------------------------------------------------
 #undef INTERFACE
 #define INTERFACE EXPERIMENTAL_IDCompositionDynamicTexture
-DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDynamicTexture, IUnknown, "9575B228-D8A9-4F1E-A35B-C8D585C9CFAC")
+DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDynamicTexture, IUnknown, "A1DE1D3F-6405-447F-8E95-1383A34B0277")
 {
     // Set current texture, assuming that every pixel has changed.
     STDMETHOD(SetTexture)(THIS_
@@ -36,9 +36,9 @@ DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDynamicTexture, IUnknown, "9575
     // Set current texture, assuming that only pixels inside provided rects has changed.
     // If provided with an empty array behaves like SetTexture(IDCompositionTexture*) above.
     STDMETHOD(SetTexture)(THIS_
-        _In_ IDCompositionTexture* pContent,
-        _In_ size_t rectCount,
-        _In_count_(rectCount) const D2D_RECT_L *pRects) PURE;
+        _In_ IDCompositionTexture* pTexture,
+        _In_count_(rectCount) const D2D_RECT_L *pRects,
+        _In_ size_t rectCount) PURE;
 };
 
 //+-----------------------------------------------------------------------------
@@ -52,10 +52,34 @@ DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDynamicTexture, IUnknown, "9575
 //------------------------------------------------------------------------------
 #undef INTERFACE
 #define INTERFACE EXPERIMENTAL_IDCompositionDevice5
-DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDevice5, IDCompositionDevice4, "1F09CCEE-53AD-4E83-84AD-A6C771C5AE32")
+DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDevice5, IDCompositionDevice4, "2C6BEBFE-A603-472F-AF34-D2443356E61B")
 {
     STDMETHOD(CreateDynamicTexture)(THIS_
         _Outptr_ EXPERIMENTAL_IDCompositionDynamicTexture** compositionDynamicTexture) PURE;
 };
 
-#endif // #if (NTDDI_VERSION >= NTDDI_WIN10_GE)
+//+-----------------------------------------------------------------------------
+//
+//  Interface:
+//      EXPERIMENTAL_IDCompositionDevice6
+//
+//  Synopsis:
+//      An extension of composition device interface that enables support of d3d12 for composition textures.
+//
+//------------------------------------------------------------------------------
+#undef INTERFACE
+#define INTERFACE EXPERIMENTAL_IDCompositionDevice6
+DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDevice6, EXPERIMENTAL_IDCompositionDevice5, "4CA97A18-CBFD-4B0D-89E1-F7FA86D8D63E")
+{
+    // Schedules an internal present for composition textures.
+    // Each time you use SetVisual or SetTexture with composition texture that has d3d12 as underlying texture
+    // you should call this method before the Commit().
+    // You should provide an array of ID3D12CommandQueue objects, but not more than one queue per d3d device.
+    // If rendering commands that affect composition textures were performed on a different queues of the same device
+    // they all should be synchronized (for example by using fence) to the queue that is passed to this method.
+    STDMETHOD(PresentCompositionTextures)(
+        _In_reads_(queueCount) IUnknown* const* pCommandQueue,
+        _In_ UINT queueCount) PURE;
+};
+
+#endif // #if (NTDDI_VERSION >= NTDDI_WIN11_GE)
