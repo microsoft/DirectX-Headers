@@ -1158,3 +1158,5 @@ inline HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT No
 #undef FEATURE_SUPPORT_GET_NODE_INDEXED_NAME
 
 // end CD3DX12FeatureSupport
+
+

@@ -154,6 +154,7 @@ struct D3DX12_MESH_SHADER_PIPELINE_STATE_DESC
     D3D12_PIPELINE_STATE_FLAGS    Flags;
 };
 
+
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 610)
 // Use CD3DX12_PIPELINE_STATE_STREAM5 for D3D12_RASTERIZER_DESC2 when CheckFeatureSupport returns true for Options19::RasterizerDesc2Supported is true
 // Use CD3DX12_PIPELINE_STATE_STREAM4 for D3D12_RASTERIZER_DESC1 when CheckFeatureSupport returns true for Options16::DynamicDepthBiasSupported is true
@@ -913,6 +914,7 @@ struct CD3DX12_PIPELINE_STATE_STREAM
     }
 };
 
+
 struct CD3DX12_PIPELINE_STATE_STREAM2_PARSE_HELPER : public ID3DX12PipelineParserCallbacks
 {
     CD3DX12_PIPELINE_STATE_STREAM2 PipelineStream;
@@ -1257,6 +1259,7 @@ private:
 };
 #endif // D3D12_SDK_VERSION >= 610
 
+
 struct CD3DX12_PIPELINE_STATE_STREAM_PARSE_HELPER : public ID3DX12PipelineParserCallbacks
 {
     CD3DX12_PIPELINE_STATE_STREAM1 PipelineStream;
@@ -1314,6 +1317,7 @@ struct CD3DX12_PIPELINE_STATE_STREAM_PARSE_HELPER : public ID3DX12PipelineParser
 private:
     bool SeenDSS;
 };
+
 
 inline D3D12_PIPELINE_STATE_SUBOBJECT_TYPE D3DX12GetBaseSubobjectType(D3D12_PIPELINE_STATE_SUBOBJECT_TYPE SubobjectType) noexcept
 {
