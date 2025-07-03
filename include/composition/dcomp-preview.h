@@ -26,8 +26,7 @@
  * assuming that the target Windows system supports the required features.
  *
  *-------------------------------------------------------------------------------------*/
-#ifndef __COMPOSITION_DCOMP_PREVIEW_H__
-#define __COMPOSITION_DCOMP_PREVIEW_H__
+#pragma once
 
 #if (NTDDI_VERSION >= NTDDI_WIN11_GE)
 
@@ -84,5 +83,3 @@ DECLARE_INTERFACE_IID_(PREVIEW_IDCompositionDevice5, IDCompositionDevice4, "2C6B
 };
 
 #endif // #if (NTDDI_VERSION >= NTDDI_WIN11_GE)
-
-#endif // #ifndef __COMPOSITION_DCOMP_PREVIEW_H__
