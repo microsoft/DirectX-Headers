@@ -236,6 +236,10 @@ public: // Function declaration
     D3D12_WORK_GRAPHS_TIER WorkGraphsTier() const noexcept;
 #endif
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
+    D3D12_TIGHT_ALIGNMENT_TIER TightAlignmentSupportTier() const noexcept;
+#endif
+
 private: // Private structs and helpers declaration
     struct ProtectedResourceSessionTypesLocal : D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES
     {
@@ -324,6 +328,9 @@ private: // Member data
 #endif
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
     D3D12_FEATURE_DATA_D3D12_OPTIONS21 m_dOptions21;
+#endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
+    D3D12_FEATURE_DATA_TIGHT_ALIGNMENT m_dTightAlignment;
 #endif
 };
 
@@ -418,6 +425,9 @@ inline CD3DX12FeatureSupport::CD3DX12FeatureSupport() noexcept
 #endif
 #if defined (D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
 , m_dOptions21{}
+#endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
+, m_dTightAlignment{}
 #endif
 {}
 
@@ -591,6 +601,13 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
     if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &m_dOptions21, sizeof(m_dOptions21))))
     {
         m_dOptions21 = {};
+    }
+#endif
+
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
+    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &m_dTightAlignment, sizeof(m_dTightAlignment))))
+    {
+        m_dTightAlignment = {};
     }
 #endif
 
@@ -972,6 +989,11 @@ FEATURE_SUPPORT_GET(D3D12_EXECUTE_INDIRECT_TIER, m_dOptions21, ExecuteIndirectTi
 FEATURE_SUPPORT_GET(D3D12_WORK_GRAPHS_TIER, m_dOptions21, WorkGraphsTier);
 #endif
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
+// 51: TightAlignment
+FEATURE_SUPPORT_GET_NAME(D3D12_TIGHT_ALIGNMENT_TIER, m_dTightAlignment, SupportTier, TightAlignmentSupportTier);
+#endif
+
 // Helper function to decide the highest shader model supported by the system
 // Stores the result in m_dShaderModel
 // Must be updated whenever a new shader model is added to the d3d12.h header
@@ -1136,3 +1158,5 @@ inline HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT No
 #undef FEATURE_SUPPORT_GET_NODE_INDEXED_NAME
 
 // end CD3DX12FeatureSupport
+
+

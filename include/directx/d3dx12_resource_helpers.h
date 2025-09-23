@@ -395,9 +395,10 @@ inline T D3DX12AlignAtLeast(T uValue, T uAlign)
 
 inline const CD3DX12_RESOURCE_DESC1* D3DX12ConditionallyExpandAPIDesc(
     D3D12_RESOURCE_DESC1& LclDesc,
-    const D3D12_RESOURCE_DESC1* pDesc)
+    const D3D12_RESOURCE_DESC1* pDesc,
+    const bool alignAsCommitted = false)
 {
-    return D3DX12ConditionallyExpandAPIDesc(static_cast<CD3DX12_RESOURCE_DESC1&>(LclDesc), static_cast<const CD3DX12_RESOURCE_DESC1*>(pDesc));
+    return D3DX12ConditionallyExpandAPIDesc(static_cast<CD3DX12_RESOURCE_DESC1&>(LclDesc), static_cast<const CD3DX12_RESOURCE_DESC1*>(pDesc), alignAsCommitted);
 }
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
@@ -606,4 +607,5 @@ inline bool D3DX12GetCopyableFootprints(
 }
 
 #endif // D3D12_SDK_VERSION >= 606
+
 

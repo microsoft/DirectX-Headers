@@ -35,6 +35,126 @@ inline ID3D12CommandList * const * CommandListCast(t_CommandListType * const * p
     return reinterpret_cast<ID3D12CommandList * const *>(pp);
 }
 
+#ifdef D3DX12_USE_ARRAY_COM_PTR
+#include <vector>
+//------------------------------------------------------------------------------------------------
+// CArrayComPtr - Useful RAII container of raw IUnknown pointers.
+template<typename _T>
+class CArrayComPtr
+{
+    std::vector<_T *> m_array;
+
+public:
+    class CProxyPtr
+    {
+        _T *&pObj;
+
+        CProxyPtr(_T *&obj) :
+            pObj(obj) {}
+
+    public:
+        operator _T*() { return pObj; }
+        _T **operator&() { return &pObj; }
+        CProxyPtr &operator=(_T*&obj)
+        {
+            if(pObj)
+                pObj->Release();
+
+            pObj = obj;
+
+            if(pObj)
+                pObj->AddRef();
+        }
+
+        friend class CArrayComPtr<_T>;
+    };
+
+public:
+    CArrayComPtr() = default;
+
+    CArrayComPtr(size_t size) :
+        m_array(size) {
+    }
+
+    CArrayComPtr(const CArrayComPtr &o)
+    {
+        m_array = o.m_array;
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            m_array[i]->AddRef();
+        }
+    }
+
+    CArrayComPtr(CArrayComPtr &&o) = default;
+
+    ~CArrayComPtr()
+    {
+        for (auto ptr : m_array)
+        {
+            if (ptr)
+            {
+                ptr->Release();
+            }
+        }
+    }
+
+    _T *const *Get() { return m_array.data(); }
+
+    void Assign(size_t index, _T *ptr)
+    {
+        if (index >= m_array.size())
+        {
+            Resize(index + 1);
+        }
+
+        // Release the old pointer if it exists
+        if (m_array[index])
+        {
+            m_array[index]->Release();
+        }
+
+        // Assign the new pointer and AddRef it if not null
+        m_array[index] = ptr;
+        if (ptr)
+        {
+            ptr->AddRef();
+        }
+    }
+
+    void Resize(size_t size)
+    {
+        // If shrinking, release any pointers that will be discarded
+        if (size < m_array.size())
+        {
+            for (size_t i = size; i < m_array.size(); ++i)
+            {
+                if (m_array[i])
+                {
+                    m_array[i]->Release();
+                }
+            }
+        }
+
+        // Resize the vector, initializing new elements to nullptr
+        m_array.resize(size, nullptr);
+    }
+
+    void PushBack(_T *ptr)
+    {
+        // AddRef if not null
+        if (ptr)
+        {
+            ptr->AddRef();
+        }
+        m_array.push_back(ptr);
+    }
+
+    CProxyPtr operator[](size_t index)
+    {
+        return CProxyPtr(m_array[index]);
+    }
+};
+#endif
 //------------------------------------------------------------------------------------------------
 inline bool operator==( const D3D12_VIEWPORT& l, const D3D12_VIEWPORT& r ) noexcept
 {
@@ -1446,7 +1566,9 @@ inline bool operator!=( const D3D12_RESOURCE_DESC1& l, const D3D12_RESOURCE_DESC
 // If expansion has occured, returns LclDesc, else returns the original pDesc
 inline const CD3DX12_RESOURCE_DESC1* D3DX12ConditionallyExpandAPIDesc(
     CD3DX12_RESOURCE_DESC1& LclDesc,
-    const CD3DX12_RESOURCE_DESC1* pDesc)
+    const CD3DX12_RESOURCE_DESC1* pDesc,
+    const bool tightAlignmentSupported = false,
+    const bool alignAsCommitted = false)
 {
     // Expand mip levels:
     if (pDesc->MipLevels == 0 || pDesc->Alignment == 0)
@@ -1481,11 +1603,20 @@ inline const CD3DX12_RESOURCE_DESC1* D3DX12ConditionallyExpandAPIDesc(
             {
                 LclDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
             }
+            else if (!(tightAlignmentSupported && (pDesc->Flags & D3D12_RESOURCE_FLAG_USE_TIGHT_ALIGNMENT))
+                    || (pDesc->Flags & D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER))
+            {
+                    LclDesc.Alignment =
+                        (pDesc->SampleDesc.Count > 1 ? D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT : D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT);
+            }
             else
             {
-                LclDesc.Alignment =
-                    (pDesc->SampleDesc.Count > 1 ? D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT : D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT);
-            }
+                // Tight alignment is supported and we aren't a cross adapter resource, now just need to set the alignment field to the minimum alignment for each type
+                if(alignAsCommitted)
+                    LclDesc.Alignment = D3D12_TIGHT_ALIGNMENT_MIN_COMMITTED_RESOURCE_ALIGNMENT;
+                else
+                    LclDesc.Alignment = D3D12_TIGHT_ALIGNMENT_MIN_PLACED_RESOURCE_ALIGNMENT;
+			}
         }
         return &LclDesc;
     }
@@ -1917,4 +2048,25 @@ struct CD3DX12_RT_FORMAT_ARRAY : public D3D12_RT_FORMAT_ARRAY
         // assumes ARRAY_SIZE(pFormats) == ARRAY_SIZE(RTFormats)
     }
 };
+
+//------------------------------------------------------------------------------------------------
+struct CD3DX12_SERIALIZED_ROOT_SIGNATURE_DESC : public D3D12_SERIALIZED_ROOT_SIGNATURE_DESC
+{
+    CD3DX12_SERIALIZED_ROOT_SIGNATURE_DESC() = default;
+    explicit CD3DX12_SERIALIZED_ROOT_SIGNATURE_DESC(const D3D12_SERIALIZED_ROOT_SIGNATURE_DESC& o) noexcept :
+        D3D12_SERIALIZED_ROOT_SIGNATURE_DESC(o)
+    {
+    }
+    explicit CD3DX12_SERIALIZED_ROOT_SIGNATURE_DESC( CD3DX12_DEFAULT ) noexcept
+    {
+        pSerializedBlob = nullptr;
+        SerializedBlobSizeInBytes = 0;
+    }
+    explicit CD3DX12_SERIALIZED_ROOT_SIGNATURE_DESC( const void* pData, SIZE_T size) noexcept
+    {
+        pSerializedBlob = pData;
+        SerializedBlobSizeInBytes = size;
+    }
+};
+
 
