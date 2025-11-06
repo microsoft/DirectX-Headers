@@ -27,7 +27,7 @@
 //------------------------------------------------------------------------------
 #undef INTERFACE
 #define INTERFACE EXPERIMENTAL_IDCompositionDevice6
-DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDevice6, EXPERIMENTAL_IDCompositionDevice5, "4CA97A18-CBFD-4B0D-89E1-F7FA86D8D63E")
+DECLARE_INTERFACE_IID_(EXPERIMENTAL_IDCompositionDevice6, IDCompositionDevice5, "4CA97A18-CBFD-4B0D-89E1-F7FA86D8D63E")
 {
     // Schedules an internal present for composition textures.
     // Each time you use SetVisual or SetTexture with composition texture that has d3d12 as underlying texture
