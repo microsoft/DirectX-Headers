@@ -1888,7 +1888,7 @@ struct CD3DX12_UNORDERED_ACCESS_VIEW_DESC : public D3D12_UNORDERED_ACCESS_VIEW_D
         UINT64 CounterOffsetInBytes = 0) noexcept
     {
         CD3DX12_UNORDERED_ACCESS_VIEW_DESC desc;
-        desc.Format = DXGI_FORMAT_R32_UINT;
+        desc.Format = DXGI_FORMAT_R32_TYPELESS;
         desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
         desc.Buffer.FirstElement = FirstElement;
         desc.Buffer.NumElements = NumElements;
