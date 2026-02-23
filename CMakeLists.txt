@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(DirectX-Headers
     LANGUAGES CXX
-    VERSION 1.618.2
+    VERSION 1.619.0
 )
 include(CTest)
 set(CMAKE_CXX_STANDARD 14) 
