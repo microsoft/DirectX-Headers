@@ -236,7 +236,7 @@ public: // Function declaration
     D3D12_WORK_GRAPHS_TIER WorkGraphsTier() const noexcept;
 #endif
 
-#if defined(D3D12_PREVIEW_SDK_VERSION) && (D3D12_PREVIEW_SDK_VERSION >= 716)
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
     D3D12_TIGHT_ALIGNMENT_TIER TightAlignmentSupportTier() const noexcept;
 #endif
 
@@ -329,7 +329,7 @@ private: // Member data
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
     D3D12_FEATURE_DATA_D3D12_OPTIONS21 m_dOptions21;
 #endif
-#if defined(D3D12_PREVIEW_SDK_VERSION) && (D3D12_PREVIEW_SDK_VERSION >= 716)
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
     D3D12_FEATURE_DATA_TIGHT_ALIGNMENT m_dTightAlignment;
 #endif
 };
@@ -426,7 +426,7 @@ inline CD3DX12FeatureSupport::CD3DX12FeatureSupport() noexcept
 #if defined (D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
 , m_dOptions21{}
 #endif
-#if defined(D3D12_PREVIEW_SDK_VERSION) && (D3D12_PREVIEW_SDK_VERSION >= 716)
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
 , m_dTightAlignment{}
 #endif
 {}
@@ -604,7 +604,7 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
     }
 #endif
 
-#if defined(D3D12_PREVIEW_SDK_VERSION) && (D3D12_PREVIEW_SDK_VERSION >= 716)
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
     if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &m_dTightAlignment, sizeof(m_dTightAlignment))))
     {
         m_dTightAlignment = {};
@@ -989,7 +989,7 @@ FEATURE_SUPPORT_GET(D3D12_EXECUTE_INDIRECT_TIER, m_dOptions21, ExecuteIndirectTi
 FEATURE_SUPPORT_GET(D3D12_WORK_GRAPHS_TIER, m_dOptions21, WorkGraphsTier);
 #endif
 
-#if defined(D3D12_PREVIEW_SDK_VERSION) && (D3D12_PREVIEW_SDK_VERSION >= 716)
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
 // 51: TightAlignment
 FEATURE_SUPPORT_GET_NAME(D3D12_TIGHT_ALIGNMENT_TIER, m_dTightAlignment, SupportTier, TightAlignmentSupportTier);
 #endif

@@ -1401,11 +1401,6 @@ interface ID3D12VideoDecodeCommandList3
         );
 }
 
-[uuid(b17b62d7-930c-4514-9093-2cc81ba15961), object, local, pointer_default(unique)]
-interface ID3D12VideoDecodeCommandListPreview
-    : ID3D12VideoDecodeCommandList3
-{
-}
 
 
 [uuid(db525ae4-6ad6-473c-baa7-59b2e37082e4), object, local, pointer_default(unique)]
@@ -1438,11 +1433,6 @@ interface ID3D12VideoProcessCommandList3
         );
 }
 
-[uuid(04ed2b37-b6af-44c0-a20a-24c0df3d0c4f), object, local, pointer_default(unique)]
-interface ID3D12VideoProcessCommandListPreview
-    : ID3D12VideoProcessCommandList3
-{
-}
 
 
 [uuid(94971eca-2bdb-4769-88cf-3675ea757ebc), object, local, pointer_default(unique)]
@@ -1942,6 +1932,7 @@ typedef enum D3D12_VIDEO_ENCODER_RATE_CONTROL_FLAGS
     D3D12_VIDEO_ENCODER_RATE_CONTROL_FLAG_ENABLE_VBV_SIZES = 0x20,
     D3D12_VIDEO_ENCODER_RATE_CONTROL_FLAG_ENABLE_EXTENSION1_SUPPORT = 0x40,
     D3D12_VIDEO_ENCODER_RATE_CONTROL_FLAG_ENABLE_QUALITY_VS_SPEED = 0x80,
+    D3D12_VIDEO_ENCODER_RATE_CONTROL_FLAG_ENABLE_SPATIAL_ADAPTIVE_QP = 0x100,
 } D3D12_VIDEO_ENCODER_RATE_CONTROL_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_RATE_CONTROL_FLAGS)")
 
@@ -2552,7 +2543,7 @@ typedef enum D3D12_VIDEO_ENCODER_SUPPORT_FLAGS
     D3D12_VIDEO_ENCODER_SUPPORT_FLAG_SUBREGION_NOTIFICATION_SINGLE_BUFFER_AVAILABLE = 0x100000,
     D3D12_VIDEO_ENCODER_SUPPORT_FLAG_FRAME_PSNR_METADATA_AVAILABLE = 0x200000,
     D3D12_VIDEO_ENCODER_SUPPORT_FLAG_SUBREGIONS_PSNR_METADATA_AVAILABLE = 0x400000,
-
+    D3D12_VIDEO_ENCODER_SUPPORT_FLAG_RATE_CONTROL_SPATIAL_ADAPTIVE_QP_AVAILABLE = 0x800000,
 } D3D12_VIDEO_ENCODER_SUPPORT_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_SUPPORT_FLAGS)")
 
@@ -3789,11 +3780,6 @@ interface ID3D12VideoEncodeCommandList4
         [annotation("_In_")] const D3D12_VIDEO_ENCODER_RESOLVE_INPUT_PARAM_LAYOUT_OUTPUT_ARGUMENTS* pOutputArguments);
 }
 
-[uuid(e4da2a33-2e43-43e7-8dd0-3133ad41c13d), object, local, pointer_default(unique)]
-interface ID3D12VideoEncodeCommandListPreview
-    : ID3D12VideoEncodeCommandList4
-{
-}
 
 
 cpp_quote("#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_GAMES) */")
@@ -3832,4 +3818,3 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncodeCommandList3,0x7f027b22,0x1515,0x4e
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncoderHeap1,0xea8f1968,0x4aa0,0x43a4,0x9d,0x30,0xba,0x86,0xec,0x84,0xd4,0xf9);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoDevice4,0xe59ad09e,0xf1ae,0x42bb,0x89,0x83,0x9f,0x6e,0x55,0x86,0xc4,0xeb);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncodeCommandList4,0x69aeb5b7,0x55f2,0x4012,0x8b,0x73,0x3a,0x88,0xd6,0x5a,0x20,0x4c);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncodeCommandListPreview,0xe4da2a33,0x2e43,0x43e7,0x8d,0xd0,0x31,0x33,0xad,0x41,0xc1,0x3d);" )
