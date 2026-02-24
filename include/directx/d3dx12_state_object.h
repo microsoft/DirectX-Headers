@@ -34,6 +34,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 #ifndef D3DX12_USE_ATL
 #include <wrl/client.h>
 #define D3DX12_COM_PTR Microsoft::WRL::ComPtr
@@ -110,8 +111,8 @@ public:
                     for (UINT s = 0; s < originalGenericProgramDesc->NumSubobjects; s++)
                     {
                         auto pWrapper =
-                            static_cast<const SUBOBJECT_WRAPPER*>(originalGenericProgramDesc->ppSubobjects[s]);
-                        repointedGenericProgramSubobjects[s] = pWrapper->pSubobjectArrayLocation;
+                                    static_cast<const SUBOBJECT_WRAPPER*>(originalGenericProgramDesc->ppSubobjects[s]);
+                       repointedGenericProgramSubobjects[s] = pWrapper->pSubobjectArrayLocation;
                     }
                     // Below: using ugly way to get pointer in case .data() is not defined
                     Repointed.ppSubobjects = &repointedGenericProgramSubobjects[0];
@@ -121,6 +122,7 @@ public:
             }
 #endif
         }
+
         // Below: using ugly way to get pointer in case .data() is not defined
         m_Desc.pSubobjects = m_Desc.NumSubobjects ? &m_SubobjectArray[0] : nullptr;
         return m_Desc;
@@ -311,6 +313,11 @@ private:
     friend class CD3DX12_THREAD_LAUNCH_NODE_OVERRIDES;
     friend class CD3DX12_COMMON_COMPUTE_NODE_OVERRIDES;
 #endif // D3D12_SDK_VERSION >= 612
+#if defined(D3D12_PREVIEW_SDK_VERSION) && (D3D12_PREVIEW_SDK_VERSION >= 713)
+    friend class CD3DX12_PROGRAM_NODE;
+    friend class CD3DX12_MESH_LAUNCH_NODE_OVERRIDES;
+    friend class CD3DX12_COMMON_PROGRAM_NODE_OVERRIDES;
+#endif // D3D12_PREVIEW_SDK_VERSION >= 713
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 618)
     friend class CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT;
     friend class CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT;
@@ -832,6 +839,8 @@ private:
     void* Data() noexcept override { return D3DX12_COM_PTR_ADDRESSOF(m_pRootSig); }
     D3DX12_COM_PTR<ID3D12RootSignature> m_pRootSig;
 };
+
+
 
 
 //------------------------------------------------------------------------------------------------
@@ -2198,6 +2207,158 @@ public:
 
 #endif // D3D12_SDK_VERSION >= 612
 
+#if defined(D3D12_PREVIEW_SDK_VERSION) && (D3D12_PREVIEW_SDK_VERSION >= 713)
+
+//------------------------------------------------------------------------------------------------
+// Use this class when defining a dispatch mesh launch node where configuration parameters
+// need to be overridden.  If overrides are not needed, just use CD3DX12_PROGRAM_NODE
+class CD3DX12_MESH_LAUNCH_NODE_OVERRIDES
+    : public CD3DX12_NODE_HELPER_BASE
+{
+public:
+    CD3DX12_MESH_LAUNCH_NODE_OVERRIDES(
+        const Backreference &BackRef,
+        LPCWSTR _Program = nullptr)
+            : CD3DX12_NODE_HELPER_BASE(BackRef)
+    {
+        Overrides = {};
+        D3D12_NODE *pNode = GetNode();
+        pNode->NodeType = D3D12_NODE_TYPE_PROGRAM;
+        pNode->Program.OverridesType = D3D12_PROGRAM_NODE_OVERRIDES_TYPE_MESH_LAUNCH;
+        pNode->Program.pMeshLaunchOverrides = &Overrides;
+        Program(_Program);
+    }
+    void Program(LPCWSTR _Program)
+    {
+        GetNode()->Program.Program = m_Strings.LocalCopy(_Program);
+    }
+    LPCWSTR GetProgramName() const { return GetNode()->Program.Program; }
+    void LocalRootArgumentsTableIndex(UINT index)
+    {
+        m_UINTs.emplace_front(index);
+        Overrides.pLocalRootArgumentsTableIndex = &m_UINTs.front();
+    }
+    void ProgramEntry(BOOL bIsProgramEntry)
+    {
+        m_UINTs.emplace_front(bIsProgramEntry);
+        Overrides.pProgramEntry = (BOOL*)&m_UINTs.front();
+    }
+    void NewName(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pNewName = &m_NodeIDs.front();
+    }
+    void ShareInputOf(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pShareInputOf = &m_NodeIDs.front();
+    }
+    void DispatchGrid(UINT x, UINT y, UINT z)
+    {
+        m_UINT3s.emplace_front(UINT3{ x,y,z });
+        Overrides.pDispatchGrid = (UINT*)&m_UINT3s.front();
+    }
+    void MaxDispatchGrid(UINT x, UINT y, UINT z)
+    {
+        m_UINT3s.emplace_front(UINT3{ x,y,z });
+        Overrides.pMaxDispatchGrid = (UINT*)&m_UINT3s.front();
+    }
+    void MaxInputRecordsPerGraphEntryRecord(UINT recordCount, BOOL bSharedAcrossNodeArray)
+    {
+        m_UINT3s.emplace_front(UINT3{ recordCount,(UINT)bSharedAcrossNodeArray,0 }); // using uint3 even though only 2 values are used
+        Overrides.pMaxInputRecordsPerGraphEntryRecord = (D3D12_MAX_NODE_INPUT_RECORDS_PER_GRAPH_ENTRY_RECORD*)&m_UINT3s.front();
+    }
+    D3D12_MESH_LAUNCH_OVERRIDES Overrides;
+private:
+    // Cached parameters
+    std::forward_list<UINT> m_UINTs;
+    struct UINT3
+    {
+        UINT x;
+        UINT y;
+        UINT z;
+    };
+    std::forward_list<UINT3> m_UINT3s;
+    std::forward_list<D3D12_NODE_ID> m_NodeIDs;
+};
+
+//------------------------------------------------------------------------------------------------
+// Use this class when defining a program node where configuration parameters
+// need to be overridden for parameters that are common to all program node types.
+// This option is a convenience if you don't want to determine what the program launch mode is
+// and just want to override a setting that isn't specific to mode.
+// If overrides are not needed, just use CD3DX12_PROGRAM_NODE
+class CD3DX12_COMMON_PROGRAM_NODE_OVERRIDES
+    : public CD3DX12_NODE_HELPER_BASE
+{
+public:
+    CD3DX12_COMMON_PROGRAM_NODE_OVERRIDES(
+        const Backreference &BackRef,
+        LPCWSTR _Program = nullptr)
+            : CD3DX12_NODE_HELPER_BASE(BackRef)
+    {
+        Overrides = {};
+        D3D12_NODE *pNode = GetNode();
+        pNode->NodeType = D3D12_NODE_TYPE_PROGRAM;
+        pNode->Program.OverridesType = D3D12_PROGRAM_NODE_OVERRIDES_TYPE_COMMON_PROGRAM;
+        pNode->Program.pCommonProgramNodeOverrides = &Overrides;
+        Program(_Program);
+    }
+    void Program(LPCWSTR _Program)
+    {
+        GetNode()->Program.Program = m_Strings.LocalCopy(_Program);
+    }
+    LPCWSTR GetProgramName() const { return GetNode()->Program.Program; }
+    void LocalRootArgumentsTableIndex(UINT index)
+    {
+        m_UINTs.emplace_front(index);
+        Overrides.pLocalRootArgumentsTableIndex = &m_UINTs.front();
+    }
+    void ProgramEntry(BOOL bIsProgramEntry)
+    {
+        m_UINTs.emplace_front(bIsProgramEntry);
+        Overrides.pProgramEntry = (BOOL*)&m_UINTs.front();
+    }
+    void NewName(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pNewName = &m_NodeIDs.front();
+    }
+    void ShareInputOf(D3D12_NODE_ID NodeID)
+    {
+        m_NodeIDs.emplace_front(D3D12_NODE_ID{ m_Strings.LocalCopy(NodeID.Name),NodeID.ArrayIndex });
+        Overrides.pShareInputOf = &m_NodeIDs.front();
+    }
+    D3D12_COMMON_PROGRAM_NODE_OVERRIDES Overrides;
+private:
+    // Cached parameters
+    std::forward_list<UINT> m_UINTs;
+    std::forward_list<D3D12_NODE_ID> m_NodeIDs;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_PROGRAM_NODE // Not specifying launch mode.
+    // Don't need to distinguish if no parameter overriding is happening
+    : public CD3DX12_NODE_HELPER_BASE
+{
+public:
+    CD3DX12_PROGRAM_NODE(
+        const Backreference &BackRef,
+        LPCWSTR _Program = nullptr)
+            : CD3DX12_NODE_HELPER_BASE(BackRef)
+    {
+        D3D12_NODE *pNode = GetNode();
+        pNode->NodeType = D3D12_NODE_TYPE_PROGRAM;
+        Program(_Program);
+    }
+    void Program(LPCWSTR _Program)
+    {
+        GetNode()->Program.Program = m_Strings.LocalCopy(_Program);
+    }
+    LPCWSTR GetProgramName() const { return GetNode()->Program.Program; }
+};
+
+#endif // D3D12_PREVIEW_SDK_VERSION >= 713
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
 
@@ -2479,6 +2640,10 @@ public:
         m_Desc.Flags |= D3D12_WORK_GRAPH_FLAG_INCLUDE_ALL_AVAILABLE_NODES;
     }
 
+    void EntrypointGraphicsNodesRasterizeInOrder()
+    {
+        m_Desc.Flags |= D3D12_WORK_GRAPH_FLAG_ENTRYPOINT_GRAPHICS_NODES_RASTERIZE_IN_ORDER;
+    }
 
     void SetProgramName(LPCWSTR ProgramName)
     {
@@ -2533,6 +2698,26 @@ public:
     }
 #endif // D3D12_SDK_VERSION >= 612
 
+#if defined(D3D12_PREVIEW_SDK_VERSION) && (D3D12_PREVIEW_SDK_VERSION >= 713)
+    CD3DX12_PROGRAM_NODE* CreateProgramNode(LPCWSTR Program = nullptr)
+    {
+        auto pNode = CreateNode<CD3DX12_PROGRAM_NODE>();
+        pNode->Program(Program);
+        return pNode;
+    }
+    CD3DX12_MESH_LAUNCH_NODE_OVERRIDES* CreateMeshLaunchNodeOverrides(LPCWSTR Program = nullptr)
+    {
+        auto pNode = CreateNode<CD3DX12_MESH_LAUNCH_NODE_OVERRIDES>();
+        pNode->Program(Program);
+        return pNode;
+    }
+    CD3DX12_COMMON_PROGRAM_NODE_OVERRIDES* CreateCommonProgramNodeOverrides(LPCWSTR Program = nullptr)
+    {
+        auto pNode = CreateNode<CD3DX12_COMMON_PROGRAM_NODE_OVERRIDES>();
+        pNode->Program(Program);
+        return pNode;
+    }
+#endif // D3D12_PREVIEW_SDK_VERSION >= 713
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
 
@@ -2563,8 +2748,7 @@ inline D3D12_NODE * CD3DX12_NODE_HELPER_BASE::GetNode() const
 }
 #endif // D3D12_SDK_VERSION >= 612
 
+
 #undef D3DX12_COM_PTR
 #undef D3DX12_COM_PTR_GET
 #undef D3DX12_COM_PTR_ADDRESSOF
-
-
