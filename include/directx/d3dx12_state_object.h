@@ -15,6 +15,8 @@
 #include "d3d12.h"
 #include "d3dx12_core.h"
 
+#include "d3d12shader.h"
+
 //================================================================================================
 // D3DX12 State Object Creation Helpers
 //
