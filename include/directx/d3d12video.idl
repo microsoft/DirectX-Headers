@@ -99,11 +99,12 @@ typedef enum D3D12_FEATURE_VIDEO
     D3D12_FEATURE_VIDEO_ENCODER_QPMAP_INPUT = 50,
     D3D12_FEATURE_VIDEO_ENCODER_DIRTY_REGIONS = 51,
     D3D12_FEATURE_VIDEO_ENCODER_MOTION_SEARCH = 52,
-    D3D12_FEATURE_VIDEO_PROCESS_SUPPORT1 = 53, //
-    D3D12_FEATURE_VIDEO_PROCESSOR_SIZE2 = 54, //
+    D3D12_FEATURE_VIDEO_PROCESS_SUPPORT1 = 53,
+    D3D12_FEATURE_VIDEO_PROCESSOR_SIZE2 = 54,
     D3D12_FEATURE_VIDEO_ENCODER_SUPPORT2 = 55,
     D3D12_FEATURE_VIDEO_ENCODER_HEAP_SIZE1 = 56,
     D3D12_FEATURE_VIDEO_ENCODER_RATE_CONTROL_FRAME_ANALYSIS = 57,
+
 
 } D3D12_FEATURE_VIDEO;
 
@@ -1475,13 +1476,6 @@ interface ID3D12VideoProcessCommandList4
         [annotation("_In_")] ID3D12Fence *pFence,
         [annotation("_In_")] UINT64 FenceValue);
 }
-
-[uuid(e1887cb5-d07c-4789-a572-f60b1c48c854), object, local, pointer_default(unique)]
-interface ID3D12VideoProcessCommandListPreview
-    : ID3D12VideoProcessCommandList4
-{
-}
-
 
 [uuid(94971eca-2bdb-4769-88cf-3675ea757ebc), object, local, pointer_default(unique)]
 interface ID3D12VideoEncodeCommandList1
@@ -3875,7 +3869,6 @@ interface ID3D12VideoEncodeCommandListPreview
 // VPBlit 3DLUT begins
 //
 
-
 typedef enum D3D12_VIDEO_PROCESS_LUT_SUPPORT_FLAGS
 {
     D3D12_VIDEO_PROCESS_LUT_SUPPORT_FLAG_NONE = 0x0,
@@ -4010,21 +4003,19 @@ typedef struct D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS2 // extends D3D12_VIDE
     D3D12_VIDEO_PROCESS_TRANSFORM_LUT LUTMode;
 } D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS2;
 
-// Change this interface UUID when changing the base class in the inheritance
-[uuid(e8f885e6-0e57-4954-84d7-38cfb1bc5684), object, local, pointer_default(unique)]
-interface ID3D12VideoProcessor3DLUT
+[uuid(a24fdd6b-a2e2-41e4-9ea7-f435e4b03751), object, local, pointer_default(unique)]
+interface ID3D12VideoProcessor2
     : ID3D12VideoProcessor1
 {
     HRESULT GetInputStreamDescs1(UINT NumInputStreamDescs, [annotation("_Out_writes_(NumInputStreamDescs)")] D3D12_VIDEO_PROCESS_INPUT_STREAM_DESC1* pInputStreamDescs);
 }
 
-// Change this interface UUID when changing the base class in the inheritance
-[uuid(0b725df5-dd55-42ad-bb7b-3a8552194ae9), object, local, pointer_default(unique)]
-interface ID3D12VideoProcessCommandList3DLUT
-    : IUnknown
+[uuid(187116cc-73da-4a7e-b985-4366b4c7a30e), object, local, pointer_default(unique)]
+interface ID3D12VideoProcessCommandList5
+    : ID3D12VideoProcessCommandList4
 {
     void ProcessFrames2(
-        [annotation("_In_")] ID3D12VideoProcessor3DLUT* pVideoProcessor,
+        [annotation("_In_")] ID3D12VideoProcessor2* pVideoProcessor,
         [annotation("_In_")] const D3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS* pOutputArguments,
         UINT NumInputStreams,
         [annotation("_In_reads_(NumInputStreams)")] const D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS2* pInputArguments
@@ -4064,9 +4055,8 @@ typedef struct D3D12_FEATURE_DATA_VIDEO_PROCESSOR_SIZE2 //  extends D3D12_FEATUR
     UINT64 MemoryPoolL1Size;
 } D3D12_FEATURE_DATA_VIDEO_PROCESSOR_SIZE2;
 
-// Change this interface UUID when changing the base class in the inheritance
-[uuid(4694a08b-63c8-45e2-88c8-4986acb13d64), object, local, pointer_default(unique)]
-interface ID3D12VideoDevice3DLUT
+[uuid(abbac731-6f08-4ff9-8c7c-404b4035bc5f), object, local, pointer_default(unique)]
+interface ID3D12VideoDevice5
     : ID3D12VideoDevice4
 {
     HRESULT CreateVideoProcessor2(
@@ -4075,10 +4065,17 @@ interface ID3D12VideoDevice3DLUT
         UINT NumInputStreamDescs,
         [annotation("_In_reads_(NumInputStreamDescs)")]const D3D12_VIDEO_PROCESS_INPUT_STREAM_DESC1* pInputStreamDescs,
         [annotation("_In_opt_")] ID3D12ProtectedResourceSession* pProtectedResourceSession,
-        [annotation("_In_")] REFIID riid, // Expected: ID3D12VideoProcessor3DLUT,
+        [annotation("_In_")] REFIID riid, // Expected: ID3D12VideoProcessor2,
         [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppVideoProcessor
     );
 }
+
+[uuid(e1887cb5-d07c-4789-a572-f60b1c48c854), object, local, pointer_default(unique)]
+interface ID3D12VideoProcessCommandListPreview
+    : ID3D12VideoProcessCommandList5
+{
+}
+
 
 //
 // VPBlit 3DLUT ends
@@ -4111,7 +4108,6 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12VideoDecodeCommandListPreview,0xa5b45105,0x070
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoProcessCommandList2,0xdb525ae4,0x6ad6,0x473c,0xba,0xa7,0x59,0xb2,0xe3,0x70,0x82,0xe4);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoProcessCommandList3,0x1a0a4ca4,0x9f08,0x40ce,0x95,0x58,0xb4,0x11,0xfd,0x26,0x66,0xff);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoProcessCommandList4,0xe7fc6a4b,0x8d2c,0x4e19,0xa5,0xf3,0x7b,0x91,0xd0,0xc2,0x8e,0x56);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12VideoProcessCommandListPreview,0xe1887cb5,0xd07c,0x4789,0xa5,0x72,0xf6,0x0b,0x1c,0x48,0xc8,0x54);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncodeCommandList1,0x94971eca,0x2bdb,0x4769,0x88,0xcf,0x36,0x75,0xea,0x75,0x7e,0xbc);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncoder,0x2E0D212D,0x8DF9,0x44A6,0xA7,0x70,0xBB,0x28,0x9B,0x18,0x27,0x37);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncoderHeap,0x22B35D96,0x876A,0x44C0,0xB2,0x5E,0xFB,0x8C,0x9C,0x7F,0x1C,0x4A);" )
@@ -4123,6 +4119,7 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12VideoDevice4,0xe59ad09e,0xf1ae,0x42bb,0x89,0x8
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncodeCommandList4,0x69aeb5b7,0x55f2,0x4012,0x8b,0x73,0x3a,0x88,0xd6,0x5a,0x20,0x4c);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncodeCommandList5,0x5d1a6fc3,0xb8e7,0x42a0,0x97,0xd5,0x6e,0x4c,0x1f,0x3a,0x9b,0x82);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VideoEncodeCommandListPreview,0xcfa19306,0xb776,0x44e3,0x97,0xa9,0x68,0x59,0xfa,0x9f,0x22,0xd6);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12VideoProcessor3DLUT,0xe8f885e6,0x0e57,0x4954,0x84,0xd7,0x38,0xcf,0xb1,0xbc,0x56,0x84);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12VideoProcessCommandList3DLUT,0x0b725df5,0xdd55,0x42ad,0xbb,0x7b,0x3a,0x85,0x52,0x19,0x4a,0xe9);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12VideoDevice3DLUT,0x4694a08b,0x63c8,0x45e2,0x88,0xc8,0x49,0x86,0xac,0xb1,0x3d,0x64);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12VideoProcessor2,0xa24fdd6b,0xa2e2,0x41e4,0x9e,0xa7,0xf4,0x35,0xe4,0xb0,0x37,0x51);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12VideoProcessCommandList5,0x187116cc,0x73da,0x4a7e,0xb9,0x85,0x43,0x66,0xb4,0xc7,0xa3,0x0e);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12VideoDevice5,0xabbac731,0x6f08,0x4ff9,0x8c,0x7c,0x40,0x4b,0x40,0x35,0xbc,0x5f);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12VideoProcessCommandListPreview,0xe1887cb5,0xd07c,0x4789,0xa5,0x72,0xf6,0x0b,0x1c,0x48,0xc8,0x54);" )

@@ -25,6 +25,10 @@
 #include "d3dx12_state_object.h"
 #endif // !D3DX12_NO_STATE_OBJECT_HELPERS
 
+#ifndef D3DX12_NO_STATE_OBJECT_DATABASE_HELPERS
+#include "d3dx12_state_object_database.h"
+#endif // !D3DX12_NO_STATE_OBJECT_DATABASE_HELPERS
+
 #ifndef D3DX12_NO_CHECK_FEATURE_SUPPORT_CLASS
 #include "d3dx12_check_feature_support.h"
 #endif // !D3DX12_NO_CHECK_FEATURE_SUPPORT_CLASS

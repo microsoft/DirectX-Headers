@@ -285,13 +285,13 @@ struct CD3DX12_PIPELINE_STATE_STREAM6
 };
 #endif
 
-#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 610)
 // Use CD3DX12_PIPELINE_STATE_STREAM5 for D3D12_RASTERIZER_DESC2 when CheckFeatureSupport returns true for Options19::RasterizerDesc2Supported is true
 // Use CD3DX12_PIPELINE_STATE_STREAM4 for D3D12_RASTERIZER_DESC1 when CheckFeatureSupport returns true for Options16::DynamicDepthBiasSupported is true
 // Use CD3DX12_PIPELINE_STATE_STREAM3 for D3D12_DEPTH_STENCIL_DESC2 when CheckFeatureSupport returns true for Options14::IndependentFrontAndBackStencilSupported is true
 // Use CD3DX12_PIPELINE_STATE_STREAM2 for OS Build 19041+ (where there is a new mesh shader pipeline).
 // Use CD3DX12_PIPELINE_STATE_STREAM1 for OS Build 16299+ (where there is a new view instancing subobject).
 // Use CD3DX12_PIPELINE_STATE_STREAM for OS Build 15063+ support.
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 610)
 struct CD3DX12_PIPELINE_STATE_STREAM5
 {
     CD3DX12_PIPELINE_STATE_STREAM5() = default;
@@ -1470,6 +1470,7 @@ private:
     bool SeenTopology;
 };
 #endif // D3D12_SDK_VERSION >= 618
+
 
 struct CD3DX12_PIPELINE_STATE_STREAM_PARSE_HELPER : public ID3DX12PipelineParserCallbacks
 {

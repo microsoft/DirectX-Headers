@@ -36,7 +36,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #ifndef D3DX12_USE_ATL
 #include <wrl/client.h>
 #define D3DX12_COM_PTR Microsoft::WRL::ComPtr
@@ -62,6 +62,12 @@ public:
         Init(Type);
     }
     void SetStateObjectType(D3D12_STATE_OBJECT_TYPE Type) noexcept { m_Desc.Type = Type; }
+
+    // Deep-copy an existing D3D12_STATE_OBJECT_DESC into this builder.
+    // Bytecode pointers (DXIL libraries) are copied by pointer, not deep-copied.
+    HRESULT InitFromDesc(const D3D12_STATE_OBJECT_DESC& desc);
+
+
     CD3DX12_STATE_OBJECT_DESC(const CD3DX12_STATE_OBJECT_DESC& other) = delete;
     CD3DX12_STATE_OBJECT_DESC& operator=(const CD3DX12_STATE_OBJECT_DESC& other) = delete;
     CD3DX12_STATE_OBJECT_DESC(CD3DX12_STATE_OBJECT_DESC&& other) = default;
@@ -72,6 +78,7 @@ public:
         m_RepointedSubobjectVectors.clear();
         m_RepointedPrograms.clear();
 #endif
+        m_RepointedPartialPrograms.clear();
         m_RepointedAssociations.clear();
         m_SubobjectArray.clear();
         m_SubobjectArray.reserve(m_Desc.NumSubobjects);
@@ -83,6 +90,31 @@ public:
             m_SubobjectArray.push_back(*Iter);
             // Store new location in array so we can redirect pointers contained in subobjects
             Iter->pSubobjectArrayLocation = &m_SubobjectArray.back();
+        }
+        for (UINT i = 0; i < m_Desc.NumSubobjects; i++)
+        {
+            if (m_SubobjectArray[i].Type == D3D12_STATE_SUBOBJECT_TYPE_PARTIAL_GRAPHICS_PROGRAM)
+            {
+                auto originalPartialProgramDesc =
+                    static_cast<const D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC*>(m_SubobjectArray[i].pDesc);
+                D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC Repointed = *originalPartialProgramDesc;
+                if (originalPartialProgramDesc->NumSubobjects > 0)
+                {
+                    m_RepointedSubobjectVectors.emplace_back(std::vector<const D3D12_STATE_SUBOBJECT*>());
+                    std::vector<D3D12_STATE_SUBOBJECT const*>& repointedPartialProgramSubobjects = m_RepointedSubobjectVectors.back();
+                    repointedPartialProgramSubobjects.resize(originalPartialProgramDesc->NumSubobjects);
+                    for (UINT s = 0; s < originalPartialProgramDesc->NumSubobjects; s++)
+                    {
+                        auto pWrapper =
+                            static_cast<const SUBOBJECT_WRAPPER*>(originalPartialProgramDesc->ppSubobjects[s]);
+                        repointedPartialProgramSubobjects[s] = pWrapper->pSubobjectArrayLocation;
+                    }
+                    // Below: using ugly way to get pointer in case .data() is not defined
+                    Repointed.ppSubobjects = &repointedPartialProgramSubobjects[0];
+                }
+                m_RepointedPartialPrograms.push_back(Repointed);
+                m_SubobjectArray[i].pDesc = &m_RepointedPartialPrograms.back();
+            }
         }
         // For subobjects with pointer fields, create a new copy of those subobject definitions
         // with fixed pointers
@@ -176,6 +208,20 @@ public:
         return pSubobject;
     }
 
+    // Iterate over all subobjects of a given type, calling a callback with a reference
+    // to the concrete subobject helper.
+    template<typename T, typename Fn>
+    void ForEachSubobject(D3D12_STATE_SUBOBJECT_TYPE type, Fn&& callback)
+    {
+        for (auto& helper : m_OwnedSubobjectHelpers)
+        {
+            if (helper->Type() == type)
+            {
+                callback(static_cast<T&>(*helper));
+            }
+        }
+    }
+
 private:
     D3D12_STATE_SUBOBJECT* TrackSubobject(D3D12_STATE_SUBOBJECT_TYPE Type, void* pDesc)
     {
@@ -199,6 +245,7 @@ private:
         m_RepointedSubobjectVectors.clear();
         m_RepointedPrograms.clear();
 #endif
+        m_RepointedPartialPrograms.clear();
     }
     typedef struct SUBOBJECT_WRAPPER : public D3D12_STATE_SUBOBJECT
     {
@@ -220,6 +267,8 @@ private:
     std::list<D3D12_GENERIC_PROGRAM_DESC>
         m_RepointedPrograms;
 #endif
+std::list<D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC>
+        m_RepointedPartialPrograms;
 
     template<typename CStr, typename StdStr>
     class StringContainer
@@ -284,6 +333,7 @@ private:
     friend class CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT;
     friend class CD3DX12_RAYTRACING_PIPELINE_CONFIG1_SUBOBJECT;
     friend class CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT;
+    friend class CD3DX12_API_EXTENSION_SUBOBJECT;
     friend class CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT;
     friend class CD3DX12_STATE_OBJECT_CONFIG_SUBOBJECT;
     friend class CD3DX12_NODE_MASK_SUBOBJECT;
@@ -326,6 +376,12 @@ private:
     friend class CD3DX12_COMPILER_EXISTING_COLLECTION_SUBOBJECT;
     friend class CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT;
 #endif
+    // todo: add if define checks for sdk version
+    friend class CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT;
+    friend class CD3DX12_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT;
+    friend class CD3DX12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT;
+    friend class CD3DX12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_SUBOBJECT;
+    friend class CD3DX12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_SUBOBJECT;
 };
 
 //------------------------------------------------------------------------------------------------
@@ -843,6 +899,37 @@ private:
 };
 
 
+class CD3DX12_API_EXTENSION_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_API_EXTENSION_SUBOBJECT() noexcept
+    {
+        Init();
+    }
+    CD3DX12_API_EXTENSION_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    void SetApiExtension(ID3D12Extension* pExtension) noexcept
+    {
+        m_pExtension = pExtension;
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_API_EXTENSION;
+    }
+    operator ID3D12Extension*() const noexcept { return D3DX12_COM_PTR_GET(m_pExtension); }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_pExtension = nullptr;
+    }
+    void* Data() noexcept override { return D3DX12_COM_PTR_ADDRESSOF(m_pExtension); }
+    D3DX12_COM_PTR<ID3D12Extension> m_pExtension;
+};
 
 
 //------------------------------------------------------------------------------------------------
@@ -2110,6 +2197,7 @@ private:
     CD3DX12_STATE_OBJECT_DESC::StringContainer<LPCWSTR, std::wstring> m_Strings;
 };
 
+
 //------------------------------------------------------------------------------------------------
 class CD3DX12_NODE_OUTPUT_OVERRIDES
 {
@@ -2651,11 +2739,21 @@ public:
     {
         m_Desc.ProgramName = m_Strings.LocalCopy(ProgramName);
     }
+    void SetFlags(D3D12_WORK_GRAPH_FLAGS Flags)
+    {
+        m_Desc.Flags = Flags;
+    }
     void AddEntrypoint(D3D12_NODE_ID Entrypoint)
     {
         m_Entrypoints.emplace_back(D3D12_NODE_ID{ m_Strings.LocalCopy(Entrypoint.Name),Entrypoint.ArrayIndex });
         m_Desc.NumEntrypoints++;
         m_Desc.pEntrypoints = m_Entrypoints.data();
+    }
+    // Shallow copy of explicitly defined nodes. Caller must keep pNodes alive.
+    void SetExplicitlyDefinedNodes(const D3D12_NODE* pNodes, UINT numNodes)
+    {
+        m_Desc.NumExplicitlyDefinedNodes = numNodes;
+        m_Desc.pExplicitlyDefinedNodes = pNodes;
     }
 
     template<typename T>
@@ -2742,6 +2840,7 @@ private:
     CD3DX12_STATE_OBJECT_DESC::StringContainer<LPCWSTR, std::wstring> m_Strings;
     std::vector<std::unique_ptr<const CD3DX12_NODE_HELPER_BASE>> m_OwnedNodeHelpers;
     friend class CD3DX12_NODE_HELPER_BASE;
+    friend class CD3DX12_STATE_OBJECT_DESC;
 };
 
 inline D3D12_NODE * CD3DX12_NODE_HELPER_BASE::GetNode() const
@@ -2749,6 +2848,808 @@ inline D3D12_NODE * CD3DX12_NODE_HELPER_BASE::GetNode() const
     return &m_BackRef.m_pGraph->m_NodeDescs[m_BackRef.m_NodeIndex];
 }
 #endif // D3D12_SDK_VERSION >= 612
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT()
+    {
+        Init();
+    }
+    CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    void SetProgramName(LPCWSTR ProgramName)
+    {
+        m_Desc.ProgramName = m_Strings.LocalCopy(ProgramName);
+    }
+    void AddExport(LPCWSTR exportName)
+    {
+        m_Exports.emplace_back(m_Strings.LocalCopy(exportName));
+        m_Desc.NumExports++;
+        // Below: using ugly way to get pointer in case .data() is not defined
+        m_Desc.pExports = &m_Exports[0];
+    }
+    void AddSubobject(const D3D12_STATE_SUBOBJECT& subobject)
+    {
+        m_Subobjects.emplace_back(&subobject);
+        m_Desc.NumSubobjects++;
+        // Below: using ugly way to get pointer in case .data() is not defined
+        m_Desc.ppSubobjects = &m_Subobjects[0];
+    }
+    void SetPartialGraphicsProgramType(D3D12_PARTIAL_GRAPHICS_PROGRAM_TYPE type)
+    {
+        m_Desc.ProgramType = type;
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_PARTIAL_GRAPHICS_PROGRAM;
+    }
+    operator const D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC& () const noexcept { return m_Desc; }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+        m_Subobjects.clear();
+        m_Strings.clear();
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC m_Desc;
+    std::vector<LPCWSTR> m_Exports;
+    std::vector<D3D12_STATE_SUBOBJECT const*> m_Subobjects;
+    CD3DX12_STATE_OBJECT_DESC::StringContainer<LPCWSTR, std::wstring> m_Strings;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT() noexcept
+    {
+        Init();
+    }
+    CD3DX12_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    void AddOutputLinkageElementDesc(D3D12_OUTPUT_LINKAGE_ELEMENT_DESC outputLinkageElementDesc)
+    {
+        m_OutputLinkageElements.emplace_back(
+            D3D12_OUTPUT_LINKAGE_ELEMENT_DESC{
+                m_Strings.LocalCopy(outputLinkageElementDesc.SemanticName),
+                outputLinkageElementDesc.SemanticIndex,
+                outputLinkageElementDesc.StartComponent,
+                outputLinkageElementDesc.ComponentCount
+            });
+        ++m_Desc.NumElements;
+        // Below: using ugly way to get pointer in case .data() is not defined
+        m_Desc.pOutputLinkageElementDescs = &m_OutputLinkageElements[0];
+    }
+    // Populate from PS shader reflection, extracting the input parameters.
+    // The output linkage describes what the PS input the prerast stage should expect from the PS stage.
+    HRESULT PopulateFromReflection(ID3D12ShaderReflection* pReflection)
+    {
+        if (!pReflection) return E_INVALIDARG;
+
+        D3D12_SHADER_DESC shaderDesc = {};
+        HRESULT hr = pReflection->GetDesc(&shaderDesc);
+        if (FAILED(hr)) return hr;
+
+        for (UINT i = 0; i < shaderDesc.InputParameters; ++i)
+        {
+            D3D12_SIGNATURE_PARAMETER_DESC paramDesc = {};
+            hr = pReflection->GetInputParameterDesc(i, &paramDesc);
+            if (FAILED(hr)) return hr;
+
+             // For input signatures: ReadWriteMask == components always read
+             if (paramDesc.ReadWriteMask == 0)
+             {
+                 continue; // shader never reads this input, skip it
+             }
+
+            BYTE mask = paramDesc.Mask;
+            BYTE startComponent = 0;
+            while (startComponent < 4 && !(mask & (1 << startComponent)))
+                startComponent++;
+
+            // Component count will include gaps
+            BYTE componentCount = 0;
+            for (BYTE c = startComponent; c < 4; ++c)
+            {
+                if (mask & (1 << c))
+                    componentCount++;
+            }
+
+            AddOutputLinkageElementDesc({
+                paramDesc.SemanticName,
+                paramDesc.SemanticIndex,
+                startComponent,
+                componentCount
+            });
+        }
+
+        return S_OK;
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type()const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_OUTPUT_LINKAGE_SIGNATURE;
+    }
+    operator const D3D12_OUTPUT_LINKAGE_SIGNATURE_DESC&() const noexcept { return m_Desc; }
+    operator D3D12_OUTPUT_LINKAGE_SIGNATURE_DESC&() noexcept { return m_Desc; }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+        m_OutputLinkageElements.clear();
+        m_Strings.clear();
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_OUTPUT_LINKAGE_SIGNATURE_DESC m_Desc;
+    std::vector<D3D12_OUTPUT_LINKAGE_ELEMENT_DESC> m_OutputLinkageElements;
+    CD3DX12_STATE_OBJECT_DESC::StringContainer<LPCSTR, std::string> m_Strings;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT() noexcept
+    {
+        Init();
+    }
+    CD3DX12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    void AddPrerasterizationOutputLinkageElementDesc(D3D12_PRERASTERIZATION_OUTPUT_LINKAGE_ELEMENT_DESC prerasterizationOutputLinkageElementDesc)
+    {
+        m_PrerasterizationOutputLinkageElements.emplace_back(
+            D3D12_PRERASTERIZATION_OUTPUT_LINKAGE_ELEMENT_DESC{
+                m_Strings.LocalCopy(prerasterizationOutputLinkageElementDesc.SemanticName),
+                prerasterizationOutputLinkageElementDesc.SemanticIndex,
+                prerasterizationOutputLinkageElementDesc.StartComponent,
+                prerasterizationOutputLinkageElementDesc.ComponentCount
+            });
+        ++m_Desc.NumElements;
+        // Below: using ugly way to get pointer in case .data() is not defined
+        m_Desc.pOutputLinkageElementDescs = &m_PrerasterizationOutputLinkageElements[0];
+    }
+    // Populate from shader reflection, extracting all the output parameters.
+    // The prerast output linkage describes the prerast output signature the PS stage should expect.
+    HRESULT PopulateFromReflection(ID3D12ShaderReflection* pReflection)
+    {
+        if (!pReflection) return E_INVALIDARG;
+
+        D3D12_SHADER_DESC shaderDesc = {};
+        HRESULT hr = pReflection->GetDesc(&shaderDesc);
+        if (FAILED(hr)) return hr;
+
+        for (UINT i = 0; i < shaderDesc.OutputParameters; ++i)
+        {
+            D3D12_SIGNATURE_PARAMETER_DESC paramDesc = {};
+            hr = pReflection->GetOutputParameterDesc(i, &paramDesc);
+            if (FAILED(hr)) return hr;
+
+            BYTE mask = paramDesc.Mask;
+            BYTE startComponent = 0;
+            while (startComponent < 4 && !(mask & (1 << startComponent)))
+                startComponent++;
+
+            // component count will include gaps
+            BYTE componentCount = 0;
+            for (BYTE c = startComponent; c < 4; ++c)
+            {
+                if (mask & (1 << c))
+                    componentCount++;
+            }
+
+            AddPrerasterizationOutputLinkageElementDesc({
+                paramDesc.SemanticName,
+                paramDesc.SemanticIndex,
+                startComponent,
+                componentCount
+            });
+        }
+
+        return S_OK;
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE;
+    }
+    operator const D3D12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_DESC&() const noexcept { return m_Desc; }
+    operator D3D12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_DESC&() noexcept { return m_Desc; }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+        m_PrerasterizationOutputLinkageElements.clear();
+        m_Strings.clear();
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_DESC m_Desc;
+    std::vector<D3D12_PRERASTERIZATION_OUTPUT_LINKAGE_ELEMENT_DESC> m_PrerasterizationOutputLinkageElements;
+    CD3DX12_STATE_OBJECT_DESC::StringContainer<LPCSTR, std::string> m_Strings;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_SUBOBJECT() noexcept
+    {
+        Init();
+    }
+    CD3DX12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+
+    void SetExcludePS(BOOL excludePS)
+    {
+        m_Desc.ExcludePS = excludePS;
+    }
+
+    void SetLateLinkInputLayoutSubobject(BOOL lateLinkInputLayoutSubobject)
+    {
+        m_Desc.LateLinkInputLayoutSubobject = lateLinkInputLayoutSubobject;
+    }
+
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS;
+    }
+    operator const D3D12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_DESC&() const noexcept { return m_Desc; }
+    operator D3D12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_DESC&() noexcept { return m_Desc; }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_DESC m_Desc;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_SUBOBJECT() noexcept
+    {
+        Init();
+    }
+    CD3DX12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    void SetLineRasterizationMode(D3D12_LINE_RASTERIZATION_MODE mode)
+    {
+        m_Desc.LineRasterizationMode = mode;
+    }
+    void SetForcedSampleCount(UINT sampleCount)
+    {
+        m_Desc.ForcedSampleCount = sampleCount;
+    }
+    void SetAlphaToCoverageEnable(BOOL enable)
+    {
+        m_Desc.AlphaToCoverageEnable = enable;
+    }
+    void SetDualSourceBlendEnable(BOOL enable)
+    {
+        m_Desc.DualSourceBlendEnable = enable;
+    }
+    void SetLateLinkRasterizerSubobject(BOOL lateLinkRasterizerSubobject)
+    {
+        m_Desc.LateLinkRasterizerSubobject = lateLinkRasterizerSubobject;
+    }
+    void SetLateLinkBlendSubobject(BOOL lateLinkBlendSubobject)
+    {
+        m_Desc.LateLinkBlendSubobject = lateLinkBlendSubobject;
+    }
+    void SetLateLinkSampleMaskSubobject(BOOL lateLinkSampleMaskSubobject)
+    {
+        m_Desc.LateLinkSampleMaskSubobject = lateLinkSampleMaskSubobject;
+    }
+    void SetLateLinkSampleDescSubobject(BOOL lateLinkSampleDescSubobject)
+    {
+        m_Desc.LateLinkSampleDescSubobject = lateLinkSampleDescSubobject;
+    }
+    void SetLateLinkDepthStencilFormatSubobject(BOOL lateLinkDepthStencilFormatSubobject)
+    {
+        m_Desc.LateLinkDepthStencilFormatSubobject = lateLinkDepthStencilFormatSubobject;
+    }
+    void SetLateLinkRenderTargetFormatSubobject(BOOL lateLinkRenderTargetFormatSubobject)
+    {
+        m_Desc.LateLinkRenderTargetFormatSubobject = lateLinkRenderTargetFormatSubobject;
+    }
+    void SetLateLinkDepthStencilSubobject(BOOL lateLinkDepthStencilSubobject)
+    {
+        m_Desc.LateLinkDepthStencilSubobject = lateLinkDepthStencilSubobject;
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS;
+    }
+    operator const D3D12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_DESC&() const noexcept { return m_Desc; }
+    operator D3D12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_DESC&() noexcept { return m_Desc; }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_DESC m_Desc;
+};
+
+
+//------------------------------------------------------------------------------------------------
+// Deep-copies a D3D12_STATE_OBJECT_DESC into this builder. Strings and exports are
+// deep-copied and owned by the builder. DXIL library bytecode blobs and work graph
+// explicitly-defined node arrays are shallow-copied; callers must keep them alive.
+inline HRESULT CD3DX12_STATE_OBJECT_DESC::InitFromDesc(const D3D12_STATE_OBJECT_DESC& desc)
+{
+    Init(desc.Type);
+
+    if (!desc.pSubobjects || desc.NumSubobjects == 0)
+    {
+        return S_OK;
+    }
+
+    // Map from original subobject pointers to the new SUBOBJECT_HELPER_BASE pointers,
+    // so we can fix up cross-references (associations, generic programs, etc.).
+    std::unordered_map<const D3D12_STATE_SUBOBJECT*, SUBOBJECT_HELPER_BASE*> subobjectMap;
+
+    // First pass: create all subobjects and populate their data.
+    for (UINT i = 0; i < desc.NumSubobjects; i++)
+    {
+        const D3D12_STATE_SUBOBJECT& src = desc.pSubobjects[i];
+        switch (src.Type)
+        {
+        case D3D12_STATE_SUBOBJECT_TYPE_STATE_OBJECT_CONFIG:
+        {
+            auto pSrc = static_cast<const D3D12_STATE_OBJECT_CONFIG*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_STATE_OBJECT_CONFIG_SUBOBJECT>();
+            pDst->SetFlags(pSrc->Flags);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_GLOBAL_ROOT_SIGNATURE:
+        {
+            auto pRootSig = *static_cast<ID3D12RootSignature* const*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
+            pDst->SetRootSignature(pRootSig);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_LOCAL_ROOT_SIGNATURE:
+        {
+            auto pRootSig = *static_cast<ID3D12RootSignature* const*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+            pDst->SetRootSignature(pRootSig);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_NODE_MASK:
+        {
+            auto pSrc = static_cast<const D3D12_NODE_MASK*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_NODE_MASK_SUBOBJECT>();
+            pDst->SetNodeMask(pSrc->NodeMask);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY:
+        {
+            auto pSrc = static_cast<const D3D12_DXIL_LIBRARY_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
+            pDst->SetDXILLibrary(&pSrc->DXILLibrary);
+            for (UINT e = 0; e < pSrc->NumExports; e++)
+            {
+                pDst->DefineExport(
+                    pSrc->pExports[e].Name,
+                    pSrc->pExports[e].ExportToRename,
+                    pSrc->pExports[e].Flags);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_EXISTING_COLLECTION:
+        {
+            auto pSrc = static_cast<const D3D12_EXISTING_COLLECTION_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_EXISTING_COLLECTION_SUBOBJECT>();
+            pDst->SetExistingCollection(pSrc->pExistingCollection);
+            for (UINT e = 0; e < pSrc->NumExports; e++)
+            {
+                pDst->DefineExport(
+                    pSrc->pExports[e].Name,
+                    pSrc->pExports[e].ExportToRename,
+                    pSrc->pExports[e].Flags);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_SUBOBJECT_TO_EXPORTS_ASSOCIATION:
+        {
+            // Subobject pointer fixup is deferred to second pass.
+            auto pSrc = static_cast<const D3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
+            for (UINT e = 0; e < pSrc->NumExports; e++)
+            {
+                pDst->AddExport(pSrc->pExports[e]);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_DXIL_SUBOBJECT_TO_EXPORTS_ASSOCIATION:
+        {
+            auto pSrc = static_cast<const D3D12_DXIL_SUBOBJECT_TO_EXPORTS_ASSOCIATION*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_DXIL_SUBOBJECT_TO_EXPORTS_ASSOCIATION>();
+            pDst->SetSubobjectNameToAssociate(pSrc->SubobjectToAssociate);
+            for (UINT e = 0; e < pSrc->NumExports; e++)
+            {
+                pDst->AddExport(pSrc->pExports[e]);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_SHADER_CONFIG:
+        {
+            auto pSrc = static_cast<const D3D12_RAYTRACING_SHADER_CONFIG*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
+            pDst->Config(pSrc->MaxPayloadSizeInBytes, pSrc->MaxAttributeSizeInBytes);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_PIPELINE_CONFIG:
+        {
+            auto pSrc = static_cast<const D3D12_RAYTRACING_PIPELINE_CONFIG*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
+            pDst->Config(pSrc->MaxTraceRecursionDepth);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_PIPELINE_CONFIG1:
+        {
+            auto pSrc = static_cast<const D3D12_RAYTRACING_PIPELINE_CONFIG1*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG1_SUBOBJECT>();
+            pDst->Config(pSrc->MaxTraceRecursionDepth, pSrc->Flags);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_HIT_GROUP:
+        {
+            auto pSrc = static_cast<const D3D12_HIT_GROUP_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+            pDst->SetHitGroupExport(pSrc->HitGroupExport);
+            pDst->SetHitGroupType(pSrc->Type);
+            pDst->SetAnyHitShaderImport(pSrc->AnyHitShaderImport);
+            pDst->SetClosestHitShaderImport(pSrc->ClosestHitShaderImport);
+            pDst->SetIntersectionShaderImport(pSrc->IntersectionShaderImport);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
+        case D3D12_STATE_SUBOBJECT_TYPE_GENERIC_PROGRAM:
+        {
+            // Subobject pointer fixup is deferred to second pass.
+            auto pSrc = static_cast<const D3D12_GENERIC_PROGRAM_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_GENERIC_PROGRAM_SUBOBJECT>();
+            pDst->SetProgramName(pSrc->ProgramName);
+            for (UINT e = 0; e < pSrc->NumExports; e++)
+            {
+                pDst->AddExport(pSrc->pExports[e]);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_WORK_GRAPH:
+        {
+            auto pSrc = static_cast<const D3D12_WORK_GRAPH_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_WORK_GRAPH_SUBOBJECT>();
+            pDst->SetProgramName(pSrc->ProgramName);
+            pDst->SetFlags(pSrc->Flags);
+            for (UINT e = 0; e < pSrc->NumEntrypoints; e++)
+            {
+                pDst->AddEntrypoint(pSrc->pEntrypoints[e]);
+            }
+            pDst->SetExplicitlyDefinedNodes(pSrc->pExplicitlyDefinedNodes, pSrc->NumExplicitlyDefinedNodes);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_STREAM_OUTPUT:
+        {
+            auto pSrc = static_cast<const D3D12_STREAM_OUTPUT_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_STREAM_OUTPUT_SUBOBJECT>();
+            pDst->SetSODeclEntries(pSrc->pSODeclaration, pSrc->NumEntries);
+            pDst->SetBufferStrides(pSrc->pBufferStrides, pSrc->NumStrides);
+            pDst->SetRasterizedStream(pSrc->RasterizedStream);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_BLEND:
+        {
+            auto pSrc = static_cast<const D3D12_BLEND_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_BLEND_SUBOBJECT>();
+            pDst->SetAlphaToCoverageEnable(pSrc->AlphaToCoverageEnable);
+            pDst->SetIndependentBlendEnable(pSrc->IndependentBlendEnable);
+            for (UINT rt = 0; rt < 8; rt++)
+            {
+                pDst->SetRenderTarget(rt, pSrc->RenderTarget[rt]);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_RASTERIZER:
+        {
+            auto pSrc = static_cast<const D3D12_RASTERIZER_DESC2*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_RASTERIZER_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL2:
+        {
+            auto pSrc = static_cast<const D3D12_DEPTH_STENCIL_DESC2*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_DEPTH_STENCIL2_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_INPUT_LAYOUT:
+        {
+            auto pSrc = static_cast<const D3D12_INPUT_LAYOUT_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_INPUT_LAYOUT_SUBOBJECT>();
+            for (UINT e = 0; e < pSrc->NumElements; e++)
+            {
+                pDst->AddInputLayoutElementDesc(pSrc->pInputElementDescs[e]);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_IB_STRIP_CUT_VALUE:
+        {
+            auto pSrc = static_cast<const D3D12_INDEX_BUFFER_STRIP_CUT_VALUE*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_IB_STRIP_CUT_VALUE_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_PRIMITIVE_TOPOLOGY:
+        {
+            auto pSrc = static_cast<const D3D12_PRIMITIVE_TOPOLOGY_TYPE*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_PRIMITIVE_TOPOLOGY_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_RENDER_TARGET_FORMATS:
+        {
+            auto pSrc = static_cast<const D3D12_RT_FORMAT_ARRAY*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_RENDER_TARGET_FORMATS_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL_FORMAT:
+        {
+            auto pSrc = static_cast<const DXGI_FORMAT*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_DEPTH_STENCIL_FORMAT_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_SAMPLE_DESC:
+        {
+            auto pSrc = static_cast<const DXGI_SAMPLE_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_SAMPLE_DESC_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_FLAGS:
+        {
+            auto pSrc = static_cast<const D3D12_PIPELINE_STATE_FLAGS*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_FLAGS_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_VIEW_INSTANCING:
+        {
+            auto pSrc = static_cast<const D3D12_VIEW_INSTANCING_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_VIEW_INSTANCING_SUBOBJECT>();
+            for (UINT e = 0; e < pSrc->ViewInstanceCount; e++)
+            {
+                pDst->AddViewInstanceLocation(pSrc->pViewInstanceLocations[e]);
+            }
+            pDst->SetFlags(pSrc->Flags);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL:
+        {
+            auto pSrc = static_cast<const D3D12_DEPTH_STENCIL_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_DEPTH_STENCIL_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL1:
+        {
+            auto pSrc = static_cast<const D3D12_DEPTH_STENCIL_DESC1*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_DEPTH_STENCIL1_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_SAMPLE_MASK:
+        {
+            auto pSrc = static_cast<const UINT*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_SAMPLE_MASK_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+#endif // D3D12_SDK_VERSION >= 612
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 618)
+        case D3D12_STATE_SUBOBJECT_TYPE_GLOBAL_SERIALIZED_ROOT_SIGNATURE:
+        {
+            auto pSrc = static_cast<const D3D12_GLOBAL_SERIALIZED_ROOT_SIGNATURE*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT>();
+            pDst->SetRootSignature(&pSrc->Desc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_LOCAL_SERIALIZED_ROOT_SIGNATURE:
+        {
+            auto pSrc = static_cast<const D3D12_LOCAL_SERIALIZED_ROOT_SIGNATURE*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT>();
+            pDst->SetRootSignature(&pSrc->Desc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_EXISTING_COLLECTION_BY_KEY:
+        {
+            auto pSrc = static_cast<const D3D12_EXISTING_COLLECTION_BY_KEY_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT>();
+            pDst->SetExistingCollection(pSrc->pKey, pSrc->KeySize);
+            for (UINT e = 0; e < pSrc->NumExports; e++)
+            {
+                pDst->DefineExport(
+                    pSrc->pExports[e].Name,
+                    pSrc->pExports[e].ExportToRename,
+                    pSrc->pExports[e].Flags);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+#endif // D3D12_SDK_VERSION >= 618
+        case D3D12_STATE_SUBOBJECT_TYPE_API_EXTENSION:
+        {
+            auto pSrc = static_cast<const D3D12_API_EXTENSION_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_API_EXTENSION_SUBOBJECT>();
+            pDst->SetApiExtension(pSrc->pExtension);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_PARTIAL_GRAPHICS_PROGRAM:
+        {
+            auto pSrc = static_cast<const D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT>();
+            pDst->SetProgramName(pSrc->ProgramName);
+            pDst->SetPartialGraphicsProgramType(pSrc->ProgramType);
+            for (UINT e = 0; e < pSrc->NumExports; e++)
+            {
+                pDst->AddExport(pSrc->pExports[e]);
+            }
+            // Subobject pointer fixup deferred to second pass.
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_OUTPUT_LINKAGE_SIGNATURE:
+        {
+            auto pSrc = static_cast<const D3D12_OUTPUT_LINKAGE_SIGNATURE_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT>();
+            for (UINT e = 0; e < pSrc->NumElements; e++)
+            {
+                pDst->AddOutputLinkageElementDesc(pSrc->pOutputLinkageElementDescs[e]);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE:
+        {
+            auto pSrc = static_cast<const D3D12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT>();
+            for (UINT e = 0; e < pSrc->NumElements; e++)
+            {
+                pDst->AddPrerasterizationOutputLinkageElementDesc(pSrc->pOutputLinkageElementDescs[e]);
+            }
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS:
+        {
+            auto pSrc = static_cast<const D3D12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_SUBOBJECT>();
+            (D3D12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_DESC&)*pDst = *pSrc;
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        case D3D12_STATE_SUBOBJECT_TYPE_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS:
+        {
+            auto pSrc = static_cast<const D3D12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_SUBOBJECT>();
+            (D3D12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_DESC&)*pDst = *pSrc;
+            subobjectMap[&src] = pDst;
+            break;
+        }
+        default:
+            // Unknown subobject type
+            return E_UNEXPECTED;
+        }
+    }
+
+    // Second pass: fix up subobject pointer references for types that
+    // reference other subobjects by pointer.
+    for (UINT i = 0; i < desc.NumSubobjects; i++)
+    {
+        const D3D12_STATE_SUBOBJECT& src = desc.pSubobjects[i];
+        auto it = subobjectMap.find(&src);
+        if (it == subobjectMap.end())
+        {
+            continue;
+        }
+
+        if (src.Type == D3D12_STATE_SUBOBJECT_TYPE_SUBOBJECT_TO_EXPORTS_ASSOCIATION)
+        {
+            auto pSrc = static_cast<const D3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION*>(src.pDesc);
+            auto pDst = static_cast<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT*>(it->second);
+            if (pSrc->pSubobjectToAssociate)
+            {
+                auto targetIt = subobjectMap.find(pSrc->pSubobjectToAssociate);
+                if (targetIt != subobjectMap.end())
+                {
+                    pDst->SetSubobjectToAssociate(*targetIt->second);
+                }
+            }
+        }
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
+        else if (src.Type == D3D12_STATE_SUBOBJECT_TYPE_GENERIC_PROGRAM)
+        {
+            auto pSrc = static_cast<const D3D12_GENERIC_PROGRAM_DESC*>(src.pDesc);
+            auto pDst = static_cast<CD3DX12_GENERIC_PROGRAM_SUBOBJECT*>(it->second);
+            for (UINT s = 0; s < pSrc->NumSubobjects; s++)
+            {
+                auto targetIt = subobjectMap.find(pSrc->ppSubobjects[s]);
+                if (targetIt != subobjectMap.end())
+                {
+                    pDst->AddSubobject(*targetIt->second);
+                }
+            }
+        }
+#endif // D3D12_SDK_VERSION >= 612
+        else if (src.Type == D3D12_STATE_SUBOBJECT_TYPE_PARTIAL_GRAPHICS_PROGRAM)
+        {
+            auto pSrc = static_cast<const D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC*>(src.pDesc);
+            auto pDst = static_cast<CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT*>(it->second);
+            for (UINT s = 0; s < pSrc->NumSubobjects; s++)
+            {
+                auto targetIt = subobjectMap.find(pSrc->ppSubobjects[s]);
+                if (targetIt != subobjectMap.end())
+                {
+                    pDst->AddSubobject(*targetIt->second);
+                }
+            }
+        }
+    }
+    return S_OK;
+}
 
 
 #undef D3DX12_COM_PTR
