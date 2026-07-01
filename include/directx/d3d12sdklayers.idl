@@ -1560,7 +1560,8 @@ typedef enum D3D12_MESSAGE_ID {
     D3D12_MESSAGE_ID_SODB_UNKNOWN_FEATURE_REJECT = 1475,
     D3D12_MESSAGE_ID_SODB_STATE_OBJECT_LOOKUP_FAILED = 1476,
     D3D12_MESSAGE_ID_DEPTH_STENCIL_FORMAT_UNUSED = 1477,
-    D3D12_MESSAGE_ID_D3D12_MESSAGES_END = 1478, // This must be the last entry in the enum, and must be one past the last enumerant.
+    D3D12_MESSAGE_ID_CREATERESOURCE_ALIGNMENT_OVERRIDDEN = 1478,
+    D3D12_MESSAGE_ID_D3D12_MESSAGES_END = 1479, // This must be the last entry in the enum, and must be one past the last enumerant.
 } D3D12_MESSAGE_ID;
 
 typedef struct D3D12_MESSAGE
