@@ -34,6 +34,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 #ifndef D3DX12_USE_ATL
 #include <wrl/client.h>
 #define D3DX12_COM_PTR Microsoft::WRL::ComPtr
@@ -110,8 +111,8 @@ public:
                     for (UINT s = 0; s < originalGenericProgramDesc->NumSubobjects; s++)
                     {
                         auto pWrapper =
-                            static_cast<const SUBOBJECT_WRAPPER*>(originalGenericProgramDesc->ppSubobjects[s]);
-                        repointedGenericProgramSubobjects[s] = pWrapper->pSubobjectArrayLocation;
+                                    static_cast<const SUBOBJECT_WRAPPER*>(originalGenericProgramDesc->ppSubobjects[s]);
+                       repointedGenericProgramSubobjects[s] = pWrapper->pSubobjectArrayLocation;
                     }
                     // Below: using ugly way to get pointer in case .data() is not defined
                     Repointed.ppSubobjects = &repointedGenericProgramSubobjects[0];
@@ -121,6 +122,7 @@ public:
             }
 #endif
         }
+
         // Below: using ugly way to get pointer in case .data() is not defined
         m_Desc.pSubobjects = m_Desc.NumSubobjects ? &m_SubobjectArray[0] : nullptr;
         return m_Desc;
@@ -311,6 +313,12 @@ private:
     friend class CD3DX12_THREAD_LAUNCH_NODE_OVERRIDES;
     friend class CD3DX12_COMMON_COMPUTE_NODE_OVERRIDES;
 #endif // D3D12_SDK_VERSION >= 612
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 618)
+    friend class CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT;
+    friend class CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT;
+    friend class CD3DX12_COMPILER_EXISTING_COLLECTION_SUBOBJECT;
+    friend class CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT;
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -827,6 +835,9 @@ private:
     D3DX12_COM_PTR<ID3D12RootSignature> m_pRootSig;
 };
 
+
+
+
 //------------------------------------------------------------------------------------------------
 class CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT
     : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
@@ -863,6 +874,174 @@ private:
     void* Data() noexcept override { return D3DX12_COM_PTR_ADDRESSOF(m_pRootSig); }
     D3DX12_COM_PTR<ID3D12RootSignature> m_pRootSig;
 };
+
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 618)
+//------------------------------------------------------------------------------------------------
+class CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT() noexcept
+        : m_Desc({})
+    {
+        Init();
+    }
+    CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+        : m_Desc({})
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT(const CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT& other) = delete;
+    CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT& operator=(const CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT& other) = delete;
+    CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT(CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT&& other) = default;
+    CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT& operator=(CD3DX12_GLOBAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT&& other) = default;
+    void SetRootSignature(const D3D12_SERIALIZED_ROOT_SIGNATURE_DESC* pDesc) noexcept
+    {
+        if (pDesc)
+        {
+            m_Desc.Desc = {};
+            m_Desc.Desc.pSerializedBlob = pDesc->pSerializedBlob;
+            m_Desc.Desc.SerializedBlobSizeInBytes = pDesc->SerializedBlobSizeInBytes;
+        }
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_GLOBAL_SERIALIZED_ROOT_SIGNATURE;
+    }
+    operator const D3D12_GLOBAL_SERIALIZED_ROOT_SIGNATURE&() const noexcept { return m_Desc; }
+    operator D3D12_GLOBAL_SERIALIZED_ROOT_SIGNATURE&() noexcept { return m_Desc; }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_GLOBAL_SERIALIZED_ROOT_SIGNATURE m_Desc;
+};
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT() noexcept
+        : m_Desc({})
+    {
+        Init();
+    }
+    CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+        : m_Desc({})
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT(const CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT& other) = delete;
+    CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT& operator=(const CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT& other) = delete;
+    CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT(CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT&& other) = default;
+    CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT& operator=(CD3DX12_LOCAL_SERIALIZED_ROOT_SIGNATURE_SUBOBJECT&& other) = default;
+    void SetRootSignature(const D3D12_SERIALIZED_ROOT_SIGNATURE_DESC* pDesc) noexcept
+    {
+        if (pDesc)
+        {
+            m_Desc.Desc = {};
+            m_Desc.Desc.pSerializedBlob = pDesc->pSerializedBlob;
+            m_Desc.Desc.SerializedBlobSizeInBytes = pDesc->SerializedBlobSizeInBytes;
+        }
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_LOCAL_SERIALIZED_ROOT_SIGNATURE;
+    }
+    operator const D3D12_LOCAL_SERIALIZED_ROOT_SIGNATURE&() const noexcept { return m_Desc; }
+    operator D3D12_LOCAL_SERIALIZED_ROOT_SIGNATURE&() noexcept { return m_Desc; }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_LOCAL_SERIALIZED_ROOT_SIGNATURE m_Desc;
+};
+
+
+//------------------------------------------------------------------------------------------------
+class CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT() noexcept
+    {
+        Init();
+    }
+    CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT(const CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT& other) = delete;
+    CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT& operator=(const CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT& other) = delete;
+    CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT(CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT&& other) = default;
+    CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT& operator=(CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT&& other) = default;
+    void SetExistingCollection(const void* pKey, UINT KeySize) noexcept
+    {
+        const unsigned char* pKeyBytes = static_cast<const unsigned char *>(pKey);
+        m_Key.clear();
+        m_Key.insert(m_Key.begin(), pKeyBytes, pKeyBytes + KeySize);
+        m_Desc.pKey = m_Key.data();
+        m_Desc.KeySize = KeySize;
+    }
+    void DefineExport(
+        LPCWSTR Name,
+        LPCWSTR ExportToRename = nullptr,
+        D3D12_EXPORT_FLAGS Flags = D3D12_EXPORT_FLAG_NONE)
+    {
+        D3D12_EXPORT_DESC Export;
+        Export.Name = m_Strings.LocalCopy(Name);
+        Export.ExportToRename = m_Strings.LocalCopy(ExportToRename);
+        Export.Flags = Flags;
+        m_Exports.push_back(Export);
+        m_Desc.pExports = &m_Exports[0]; // using ugly way to get pointer in case .data() is not defined
+        m_Desc.NumExports = static_cast<UINT>(m_Exports.size());
+    }
+    template<size_t N>
+    void DefineExports(LPCWSTR(&Exports)[N])
+    {
+        for (UINT i = 0; i < N; i++)
+        {
+            DefineExport(Exports[i]);
+        }
+    }
+    void DefineExports(const LPCWSTR* Exports, UINT N)
+    {
+        for (UINT i = 0; i < N; i++)
+        {
+            DefineExport(Exports[i]);
+        }
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_EXISTING_COLLECTION_BY_KEY;
+    }
+    operator const D3D12_EXISTING_COLLECTION_BY_KEY_DESC&() const noexcept { return m_Desc; }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+        m_Strings.clear();
+        m_Exports.clear();
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_EXISTING_COLLECTION_BY_KEY_DESC m_Desc;
+    std::vector<unsigned char> m_Key;
+    CD3DX12_STATE_OBJECT_DESC::StringContainer<LPCWSTR, std::wstring> m_Strings;
+    std::vector<D3D12_EXPORT_DESC> m_Exports;
+};
+
+#endif // defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 618)
 
 //------------------------------------------------------------------------------------------------
 class CD3DX12_STATE_OBJECT_CONFIG_SUBOBJECT
@@ -2021,6 +2200,11 @@ public:
     LPCWSTR GetShaderName() const { return GetNode()->Shader.Shader; }
 };
 
+#endif // D3D12_SDK_VERSION >= 612
+
+
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
+
 //------------------------------------------------------------------------------------------------
 // Use this class when defining a broadcasting launch node where configuration parameters
 // need to be overridden.  If overrides are not needed, just use CD3DX12_COMPUTE_SHADER_NODE
@@ -2298,6 +2482,8 @@ public:
     {
         m_Desc.Flags |= D3D12_WORK_GRAPH_FLAG_INCLUDE_ALL_AVAILABLE_NODES;
     }
+
+
     void SetProgramName(LPCWSTR ProgramName)
     {
         m_Desc.ProgramName = m_Strings.LocalCopy(ProgramName);
@@ -2349,6 +2535,11 @@ public:
         pNode->Shader(Shader);
         return pNode;
     }
+#endif // D3D12_SDK_VERSION >= 612
+
+
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
+
     operator const D3D12_WORK_GRAPH_DESC& () noexcept
     {
         return m_Desc;
@@ -2376,7 +2567,7 @@ inline D3D12_NODE * CD3DX12_NODE_HELPER_BASE::GetNode() const
 }
 #endif // D3D12_SDK_VERSION >= 612
 
+
 #undef D3DX12_COM_PTR
 #undef D3DX12_COM_PTR_GET
 #undef D3DX12_COM_PTR_ADDRESSOF
-
