@@ -28,13 +28,12 @@
 // contents.
 //
 //================================================================================================
-#include <list>
 #include <forward_list>
-#include <vector>
+#include <list>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
-#include <map>
 #ifndef D3DX12_USE_ATL
 #include <wrl/client.h>
 #define D3DX12_COM_PTR Microsoft::WRL::ComPtr
