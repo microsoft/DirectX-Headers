@@ -1128,9 +1128,9 @@ typedef enum D3D12_FEATURE
     D3D12_FEATURE_BARRIER_LAYOUT                        = 64,
     D3D12_FEATURE_D3D12_OPTIONS22                       = 65,
     D3D12_FEATURE_PARTIAL_GRAPHICS_PROGRAMS             = 67,
-    D3D12_FEATURE_D3D12_OPTIONS_MLIR                    = 68,
+    D3D12_FEATURE_MLIR_COMPUTE_GRAPH_SUPPORT            = 68,
     D3D12_FEATURE_MLIR_EXCHANGE                         = 69,
-    D3D12_FEATURE_MLIR_INTERFACE_SUPPORT                = 70,
+    D3D12_FEATURE_MLIR_COMPUTE_GRAPH_VERSION            = 70,
     D3D12_FEATURE_DUMP_FILE                             = 71,
     D3D12_FEATURE_D3D12_OPTIONS_PREVIEW                 = 72,
     D3D12_FEATURE_USER_DEFINED_ANNOTATION               = 73,
@@ -1269,34 +1269,6 @@ typedef enum D3D12_WORK_GRAPHS_TIER {
     D3D12_WORK_GRAPHS_TIER_1_1 = 11,
 } D3D12_WORK_GRAPHS_TIER;
 
-
-typedef enum D3D12_MLIR_PROGRAMS_TIER
-{
-    D3D12_MLIR_PROGRAMS_TIER_NOT_SUPPORTED = 0,
-    D3D12_MLIR_PROGRAMS_TIER_1_0           = 10,
-    D3D12_MLIR_PROGRAMS_TIER_2_0           = 20,
-} D3D12_MLIR_PROGRAMS_TIER;
-
-typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS_MLIR
-{
-    [annotation("_Out_")] D3D12_MLIR_PROGRAMS_TIER MlirProgramsTier;
-} D3D12_FEATURE_DATA_D3D12_OPTIONS_MLIR;
-
-typedef struct D3D12_FEATURE_DATA_MLIR_EXCHANGE
-{
-    GUID MlirInterface;
-    [annotation("_In_reads_bytes_(InputDataSizeInBytes)")] const void* pInputData;
-    [annotation("_In_")] SIZE_T InputDataSizeInBytes;
-    [annotation("_Out_writes_bytes_opt_(*OutputDataSizeInBytes)")] void* pOutputData;
-    [annotation("_Inout_")] SIZE_T* OutputDataSizeInBytes;
-} D3D12_FEATURE_DATA_MLIR_EXCHANGE;
-
-typedef struct D3D12_FEATURE_DATA_MLIR_INTERFACE_SUPPORT
-{
-    [annotation("_In_")] UINT NumMlirInterfaces;
-    [annotation("_In_reads_(NumMlirInterfaces)")] const GUID *pMlirInterfacesRequested;
-    [annotation("_Out_writes_(NumMlirInterfaces)")] BOOL *pMlirInterfacesSupported;
-} D3D12_FEATURE_DATA_MLIR_INTERFACE_SUPPORT;
 
 // D3D12_FEATURE_D3D12_OPTIONS
 typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS
@@ -6139,13 +6111,16 @@ typedef struct D3D12_MULTI_NODE_GPU_INPUT
 
 typedef enum D3D12_MLIR_PROGRAM_BINDING_FLAGS
 {
-    D3D12_MLIR_PROGRAM_BINDING_FLAG_NONE = 0,
+    D3D12_MLIR_PROGRAM_BINDING_FLAG_NONE = 0x0,
+    D3D12_MLIR_PROGRAM_BINDING_FLAG_VOLATILE_DESCRIPTOR = 0x1,
 } D3D12_MLIR_PROGRAM_BINDING_FLAGS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_MLIR_PROGRAM_BINDING_FLAGS )" )
 
 typedef enum D3D12_MLIR_PROGRAM_BINDING_TYPE
 {
-    D3D12_MLIR_PROGRAM_BINDING_TYPE_GPU = 0,
-    D3D12_MLIR_PROGRAM_BINDING_TYPE_CPU = 1,
+    D3D12_MLIR_PROGRAM_BINDING_TYPE_GPU_VIRTUAL_ADDRESS = 0,
+    D3D12_MLIR_PROGRAM_BINDING_TYPE_GPU_DESCRIPTOR = 1,
+    D3D12_MLIR_PROGRAM_BINDING_TYPE_CPU = 2,
 } D3D12_MLIR_PROGRAM_BINDING_TYPE;
 
 typedef struct D3D12_MLIR_PROGRAM_CPU_BINDING
@@ -6161,7 +6136,8 @@ typedef struct D3D12_MLIR_PROGRAM_BINDING
     D3D12_MLIR_PROGRAM_BINDING_TYPE Type;
     union
     {
-        D3D12_GPU_VIRTUAL_ADDRESS_RANGE GpuBinding;
+        D3D12_GPU_VIRTUAL_ADDRESS_RANGE GpuVirtualAddressBinding;
+        D3D12_GPU_DESCRIPTOR_HANDLE GpuDescriptorBinding;
         D3D12_MLIR_PROGRAM_CPU_BINDING CpuBinding;
     };
 } D3D12_MLIR_PROGRAM_BINDING;
@@ -6750,6 +6726,34 @@ typedef struct D3D12_FEATURE_DATA_GUID_TEXTURE_LAYOUT
     [annotation("_Out_")] D3D12_GUID_TEXTURE_LAYOUT_TIER GuidTextureLayoutTier;
     [annotation("_Out_")] BOOL GuidSupported;
 } D3D12_FEATURE_DATA_GUID_TEXTURE_LAYOUT;
+
+typedef struct D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_VERSION
+{
+    [annotation("_Inout_")] D3D12_VERSION_NUMBER HighestVersion;
+} D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_VERSION;
+
+typedef struct D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_SUPPORT
+{
+    [annotation("_Out_")] BOOL MultisubgraphPartitionsSupported;
+    [annotation("_Out_")] BOOL CpuBindingSupported;
+} D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_SUPPORT;
+
+typedef enum D3D12_MLIR_EXCHANGE_TYPE
+{
+    D3D12_MLIR_EXCHANGE_TYPE_COMPUTE_GRAPH_SUBGRAPH_DECLARATION = 0,
+    D3D12_MLIR_EXCHANGE_TYPE_COMPUTE_GRAPH_SUBGRAPH_SPECIALIZATION = 1,
+    D3D12_MLIR_EXCHANGE_TYPE_COMPUTE_GRAPH_TARGET_CONFIG = 2,
+} D3D12_MLIR_EXCHANGE_TYPE;
+
+typedef struct D3D12_FEATURE_DATA_MLIR_EXCHANGE
+{
+    D3D12_MLIR_EXCHANGE_TYPE Type;
+    D3D12_VERSION_NUMBER IRVersion;
+    [annotation("_In_reads_bytes_(InputDataSizeInBytes)")] const void* pInputData;
+    [annotation("_In_")] SIZE_T InputDataSizeInBytes;
+    [annotation("_Out_writes_bytes_opt_(*OutputDataSizeInBytes)")] void* pOutputData;
+    [annotation("_Inout_")] SIZE_T* OutputDataSizeInBytes;
+} D3D12_FEATURE_DATA_MLIR_EXCHANGE;
 
 typedef void(__stdcall* D3D12PipelineStateFunc) (
     [annotation("_In_reads_bytes_(KeySize)")] const void* pKey,

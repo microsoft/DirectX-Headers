@@ -368,7 +368,10 @@ struct DX_DUMP_FILE_D3D_OBJECT_WITH_SUBOBJECTS
     UINT64 Address;                     // Runtime address of the D3D object
     UINT64 NameId;                      // String ID for the name
     UINT64 DdiHandle;                   // Driver handle
-    UINT32 Type;                        // D3D12_STATE_OBJECT_TYPE for SOs, 0 for legacy PSOs which are stored as a different memory type
+    UINT32 Type;                        // D3D12_STATE_OBJECT_TYPE for SOs, 0 for legacy PSOs which are stored as a different memory type.
+                                        // INVALID_VALUE means the state object was being created or modified on another thread while the
+                                        // dump was captured, so its type is unknown and its subobjects are absent. Test for INVALID_VALUE
+                                        // explicitly rather than treating 0 as unset: 0 is a valid D3D12_STATE_OBJECT_TYPE_COLLECTION.
     UINT32 SubobjectsCount;             // Number of subobject entries in the blob
     UINT64 SubobjectsOffset;            // Byte offset into the blob data that follows the object array
     UINT64 SubobjectsSize;              // Size in bytes of the variable-length subobject data
@@ -554,6 +557,9 @@ static_assert(sizeof(DX_DUMP_FILE_CPU_PACKAGE_INFO) == 40, "Size of DX_DUMP_FILE
 // Maximum size of the file header in bytes. The header is always this size (padded with zeros).
 #define DX_DUMP_FILE_HEADER_MAX_SIZE 256
 
+// Current value of DX_DUMP_FILE_HEADER.Fields.Version. Increment on breaking format changes.
+static constexpr UINT32 DX_DUMP_FILE_VERSION = 1;
+
 // The fixed-size file header that starts every .dxdmp file.
 // Always exactly DX_DUMP_FILE_HEADER_MAX_SIZE (256) bytes; unused bytes are zeroed.
 // Parsers should verify Fields.Signature == DX_DUMP_FILE_SIGNATURE before proceeding.
@@ -564,7 +570,7 @@ struct DX_DUMP_FILE_HEADER
         struct
         {
             UINT32 Signature;                                   // Must be DX_DUMP_FILE_SIGNATURE. Identifies a valid .dxdmp file.
-            UINT32 Version;                                     // Header format version (currently 1). Increment on breaking changes.
+            UINT32 Version;                                     // Header format version (DX_DUMP_FILE_VERSION). Increment on breaking changes.
             GUID Guid;                                          // Unique dump identifier; correlates with TDR/Watson reports.
             D3D12_DEVICE_ERROR_CODE DeviceErrorCode;            // The device error code that triggered the dump.
             FILETIME CreationTime;                              // UTC timestamp when the dump was created.
