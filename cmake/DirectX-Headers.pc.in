@@ -7,4 +7,4 @@ Description: Headers for using D3D12
 URL: https://github.com/microsoft/DirectX-Headers
 Version: @PROJECT_VERSION@
 Cflags: -I${includedir}
-Libs: -lDirectX-Headers -lDirectX-Guids
+Libs: -L${libdir} -lDirectX-Headers -lDirectX-Guids
