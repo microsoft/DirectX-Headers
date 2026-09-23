@@ -38,7 +38,7 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v3.29.5
+      uses: github/codeql-action/init@3ea06614dafe36dec890db3446326e0d40ce53d4 # v3.38.1
       with:
         languages: c-cpp
         build-mode: manual
@@ -52,6 +52,6 @@ jobs:
       run: cmake --build out\build\x64-Debug
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v3.29.5
+      uses: github/codeql-action/analyze@3ea06614dafe36dec890db3446326e0d40ce53d4 # v3.38.1
       with:
         category: "/language:c-cpp"
