@@ -449,7 +449,7 @@ inline bool D3DX12GetCopyableFootprints(
         D3DX12_ASSERT(resourceDesc.MipLevels != 0);
         UINT subresourceCount = resourceDesc.MipLevels * resourceDesc.ArraySize() * D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneCount(resourceDesc.Format);
 
-        if (Subresource > subresourceCount)
+        if (Subresource >= subresourceCount)
         {
             break;
         }
