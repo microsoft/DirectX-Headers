@@ -403,11 +403,45 @@ inline const CD3DX12_RESOURCE_DESC1* D3DX12ConditionallyExpandAPIDesc(
 }
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
+
+//------------------------------------------------------------------------------------------------
+inline D3D12_RESOURCE_DESC1 D3DX12ResourceDesc0ToDesc1(D3D12_RESOURCE_DESC const& desc0)
+{
+    D3D12_RESOURCE_DESC1       desc1;
+    desc1.Dimension          = desc0.Dimension;
+    desc1.Alignment          = desc0.Alignment;
+    desc1.Width              = desc0.Width;
+    desc1.Height             = desc0.Height;
+    desc1.DepthOrArraySize   = desc0.DepthOrArraySize;
+    desc1.MipLevels          = desc0.MipLevels;
+    desc1.Format             = desc0.Format;
+    desc1.SampleDesc.Count   = desc0.SampleDesc.Count;
+    desc1.SampleDesc.Quality = desc0.SampleDesc.Quality;
+    desc1.Layout             = desc0.Layout;
+    desc1.Flags              = desc0.Flags;
+    desc1.SamplerFeedbackMipRegion.Width = 0;
+    desc1.SamplerFeedbackMipRegion.Height = 0;
+    desc1.SamplerFeedbackMipRegion.Depth = 0;
+    return desc1;
+}
+
+
+#endif // D3D12_SDK_VERSION >= 606
+
+inline const CD3DX12_RESOURCE_DESC2* D3DX12ConditionallyExpandAPIDesc(
+    D3D12_RESOURCE_DESC2& LclDesc,
+    const D3D12_RESOURCE_DESC2* pDesc,
+    const bool tightAlignmentSupported = false,
+    const bool alignAsCommitted = false)
+{
+    return D3DX12ConditionallyExpandAPIDesc(static_cast<CD3DX12_RESOURCE_DESC2&>(LclDesc), static_cast<const CD3DX12_RESOURCE_DESC2*>(pDesc), tightAlignmentSupported, alignAsCommitted);
+}
+
 //------------------------------------------------------------------------------------------------
 // The difference between D3DX12GetCopyableFootprints and ID3D12Device::GetCopyableFootprints
 // is that this one loses a lot of error checking by assuming the arguments are correct
 inline bool D3DX12GetCopyableFootprints(
-    _In_  const D3D12_RESOURCE_DESC1& ResourceDesc,
+    _In_  const D3D12_RESOURCE_DESC2& ResourceDesc,
     _In_range_(0, D3D12_REQ_SUBRESOURCES) UINT FirstSubresource,
     _In_range_(0, D3D12_REQ_SUBRESOURCES - FirstSubresource) UINT NumSubresources,
     UINT64 BaseOffset,
@@ -425,8 +459,8 @@ inline bool D3DX12GetCopyableFootprints(
 
     const DXGI_FORMAT Format = ResourceDesc.Format;
 
-    CD3DX12_RESOURCE_DESC1 LresourceDesc;
-    const CD3DX12_RESOURCE_DESC1& resourceDesc = *D3DX12ConditionallyExpandAPIDesc(LresourceDesc, &ResourceDesc);
+    CD3DX12_RESOURCE_DESC2 LresourceDesc;
+    const CD3DX12_RESOURCE_DESC2& resourceDesc = *D3DX12ConditionallyExpandAPIDesc(LresourceDesc, &ResourceDesc);
 
     // Check if its a valid format
     D3DX12_ASSERT(D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FormatExists(Format));
@@ -468,7 +502,7 @@ inline bool D3DX12GetCopyableFootprints(
         UINT32 MinPlanePitchWidth, PlaneWidth, PlaneHeight;
         D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::GetPlaneSubsampledSizeAndFormatForCopyableLayout(PlaneSlice, Format, (UINT)Width, Height, /*_Out_*/ PlaneFormat, /*_Out_*/ MinPlanePitchWidth, /* _Out_ */ PlaneWidth, /*_Out_*/ PlaneHeight);
 
-        D3D12_SUBRESOURCE_FOOTPRINT LocalPlacement = {};
+        D3D12_SUBRESOURCE_FOOTPRINT LocalPlacement;
         auto& Placement = pLayouts ? pLayouts[uSubRes].Footprint : LocalPlacement;
         Placement.Format = PlaneFormat;
         Placement.Width = PlaneWidth;
@@ -563,24 +597,47 @@ inline bool D3DX12GetCopyableFootprints(
 }
 
 //------------------------------------------------------------------------------------------------
-inline D3D12_RESOURCE_DESC1 D3DX12ResourceDesc0ToDesc1(D3D12_RESOURCE_DESC const& desc0)
+inline D3D12_RESOURCE_DESC2 D3DX12ResourceDesc0ToDesc2(D3D12_RESOURCE_DESC const& desc0)
 {
-    D3D12_RESOURCE_DESC1       desc1;
-    desc1.Dimension          = desc0.Dimension;
-    desc1.Alignment          = desc0.Alignment;
-    desc1.Width              = desc0.Width;
-    desc1.Height             = desc0.Height;
-    desc1.DepthOrArraySize   = desc0.DepthOrArraySize;
-    desc1.MipLevels          = desc0.MipLevels;
-    desc1.Format             = desc0.Format;
-    desc1.SampleDesc.Count   = desc0.SampleDesc.Count;
-    desc1.SampleDesc.Quality = desc0.SampleDesc.Quality;
-    desc1.Layout             = desc0.Layout;
-    desc1.Flags              = desc0.Flags;
-    desc1.SamplerFeedbackMipRegion.Width = 0;
-    desc1.SamplerFeedbackMipRegion.Height = 0;
-    desc1.SamplerFeedbackMipRegion.Depth = 0;
-    return desc1;
+    D3D12_RESOURCE_DESC2       desc2;
+    desc2.Dimension          = desc0.Dimension;
+    desc2.Alignment          = desc0.Alignment;
+    desc2.Width              = desc0.Width;
+    desc2.Height             = desc0.Height;
+    desc2.DepthOrArraySize   = desc0.DepthOrArraySize;
+    desc2.MipLevels          = desc0.MipLevels;
+    desc2.Format             = desc0.Format;
+    desc2.SampleDesc.Count   = desc0.SampleDesc.Count;
+    desc2.SampleDesc.Quality = desc0.SampleDesc.Quality;
+    desc2.Layout             = desc0.Layout;
+    desc2.Flags              = desc0.Flags;
+    desc2.SamplerFeedbackMipRegion.Width = 0;
+    desc2.SamplerFeedbackMipRegion.Height = 0;
+    desc2.SamplerFeedbackMipRegion.Depth = 0;
+    desc2.LayoutGuid         = { 0 };
+    return desc2;
+}
+
+//------------------------------------------------------------------------------------------------
+inline D3D12_RESOURCE_DESC2 D3DX12ResourceDesc1ToDesc2(D3D12_RESOURCE_DESC1 const& desc1)
+{
+    D3D12_RESOURCE_DESC2       desc2;
+    desc2.Dimension = desc1.Dimension;
+    desc2.Alignment = desc1.Alignment;
+    desc2.Width = desc1.Width;
+    desc2.Height = desc1.Height;
+    desc2.DepthOrArraySize = desc1.DepthOrArraySize;
+    desc2.MipLevels = desc1.MipLevels;
+    desc2.Format = desc1.Format;
+    desc2.SampleDesc.Count = desc1.SampleDesc.Count;
+    desc2.SampleDesc.Quality = desc1.SampleDesc.Quality;
+    desc2.Layout = desc1.Layout;
+    desc2.Flags = desc1.Flags;
+    desc2.SamplerFeedbackMipRegion.Width = desc1.SamplerFeedbackMipRegion.Width;
+    desc2.SamplerFeedbackMipRegion.Height = desc1.SamplerFeedbackMipRegion.Height;
+    desc2.SamplerFeedbackMipRegion.Depth = desc1.SamplerFeedbackMipRegion.Depth;
+    desc2.LayoutGuid = { 0 };
+    return desc2;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -594,10 +651,9 @@ inline bool D3DX12GetCopyableFootprints(
 	_Out_writes_opt_(NumSubresources) UINT64* pRowSizeInBytes,
 	_Out_opt_ UINT64* pTotalBytes)
 {
-    // From D3D12_RESOURCE_DESC to D3D12_RESOURCE_DESC1
-    D3D12_RESOURCE_DESC1 desc = D3DX12ResourceDesc0ToDesc1(pResourceDesc);
+    // From D3D12_RESOURCE_DESC to D3D12_RESOURCE_DESC2
 	return D3DX12GetCopyableFootprints(
-		*static_cast<CD3DX12_RESOURCE_DESC1*>(&desc),// From D3D12_RESOURCE_DESC1 to CD3DX12_RESOURCE_DESC1
+        D3DX12ResourceDesc0ToDesc2(pResourceDesc),
 		FirstSubresource,
 		NumSubresources,
 		BaseOffset,
@@ -607,5 +663,25 @@ inline bool D3DX12GetCopyableFootprints(
 		pTotalBytes);
 }
 
-#endif // D3D12_SDK_VERSION >= 606
-
+//------------------------------------------------------------------------------------------------
+inline bool D3DX12GetCopyableFootprints(
+    _In_  const D3D12_RESOURCE_DESC1& pResourceDesc,
+    _In_range_(0, D3D12_REQ_SUBRESOURCES) UINT FirstSubresource,
+    _In_range_(0, D3D12_REQ_SUBRESOURCES - FirstSubresource) UINT NumSubresources,
+    UINT64 BaseOffset,
+    _Out_writes_opt_(NumSubresources) D3D12_PLACED_SUBRESOURCE_FOOTPRINT* pLayouts,
+    _Out_writes_opt_(NumSubresources) UINT* pNumRows,
+    _Out_writes_opt_(NumSubresources) UINT64* pRowSizeInBytes,
+    _Out_opt_ UINT64* pTotalBytes)
+{
+    // From D3D12_RESOURCE_DESC to D3D12_RESOURCE_DESC2
+    return D3DX12GetCopyableFootprints(
+        D3DX12ResourceDesc1ToDesc2(pResourceDesc),
+        FirstSubresource,
+        NumSubresources,
+        BaseOffset,
+        pLayouts,
+        pNumRows,
+        pRowSizeInBytes,
+        pTotalBytes);
+}

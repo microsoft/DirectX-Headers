@@ -1295,7 +1295,34 @@ inline UINT8 D3D12GetFormatPlaneCount(
     ) noexcept
 {
     D3D12_FEATURE_DATA_FORMAT_INFO formatInfo = { Format, 0 };
-    if (FAILED(pDevice->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &formatInfo, sizeof(formatInfo))))
+
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+    ID3D12Device16* pDevice16 = nullptr;
+#if defined(_MSC_VER)
+    auto const& device16IID = __uuidof(ID3D12Device16);
+#else
+    auto const& device16IID = IID_ID3D12Device16;
+#endif
+    if (SUCCEEDED(pDevice->QueryInterface(device16IID, reinterpret_cast<void**>(&pDevice16))))
+    {
+        const HRESULT hr = pDevice16->CheckFeatureSupport1(
+            D3D12_FEATURE_FORMAT_INFO,
+            &formatInfo,
+            sizeof(formatInfo),
+            D3D12_SDK_VERSION);
+        pDevice16->Release();
+        if (FAILED(hr))
+        {
+            return 0;
+        }
+        return formatInfo.PlaneCount;
+    }
+#endif
+
+    if (FAILED(pDevice->CheckFeatureSupport(
+        D3D12_FEATURE_FORMAT_INFO,
+        &formatInfo,
+        sizeof(formatInfo))))
     {
         return 0;
     }
@@ -1633,6 +1660,255 @@ inline const CD3DX12_RESOURCE_DESC1* D3DX12ConditionallyExpandAPIDesc(
     }
 }
 
+//------------------------------------------------------------------------------------------------
+struct CD3DX12_RESOURCE_DESC2 : public D3D12_RESOURCE_DESC2
+{
+    CD3DX12_RESOURCE_DESC2() = default;
+    explicit CD3DX12_RESOURCE_DESC2(const D3D12_RESOURCE_DESC2& o) noexcept :
+        D3D12_RESOURCE_DESC2(o)
+    {}
+    explicit CD3DX12_RESOURCE_DESC2(const D3D12_RESOURCE_DESC1& o) noexcept
+    {
+        Dimension = o.Dimension;
+        Alignment = o.Alignment;
+        Width = o.Width;
+        Height = o.Height;
+        DepthOrArraySize = o.DepthOrArraySize;
+        MipLevels = o.MipLevels;
+        Format = o.Format;
+        SampleDesc = o.SampleDesc;
+        Layout = o.Layout;
+        Flags = o.Flags;
+        SamplerFeedbackMipRegion.Width = o.SamplerFeedbackMipRegion.Width;
+        SamplerFeedbackMipRegion.Height = o.SamplerFeedbackMipRegion.Height;
+        SamplerFeedbackMipRegion.Depth = o.SamplerFeedbackMipRegion.Depth;
+        LayoutGuid = { 0 };
+    }
+    explicit CD3DX12_RESOURCE_DESC2(const D3D12_RESOURCE_DESC& o) noexcept
+    {
+        Dimension = o.Dimension;
+        Alignment = o.Alignment;
+        Width = o.Width;
+        Height = o.Height;
+        DepthOrArraySize = o.DepthOrArraySize;
+        MipLevels = o.MipLevels;
+        Format = o.Format;
+        SampleDesc = o.SampleDesc;
+        Layout = o.Layout;
+        Flags = o.Flags;
+        SamplerFeedbackMipRegion = {};
+        LayoutGuid = { 0 };
+    }
+    CD3DX12_RESOURCE_DESC2(
+        D3D12_RESOURCE_DIMENSION dimension,
+        UINT64 alignment,
+        UINT64 width,
+        UINT height,
+        UINT16 depthOrArraySize,
+        UINT16 mipLevels,
+        DXGI_FORMAT format,
+        UINT sampleCount,
+        UINT sampleQuality,
+        D3D12_TEXTURE_LAYOUT layout,
+        D3D12_RESOURCE_FLAGS flags,
+        UINT samplerFeedbackMipRegionWidth = 0,
+        UINT samplerFeedbackMipRegionHeight = 0,
+        UINT samplerFeedbackMipRegionDepth = 0,
+        GUID layoutGuid = { 0 }) noexcept
+    {
+        Dimension = dimension;
+        Alignment = alignment;
+        Width = width;
+        Height = height;
+        DepthOrArraySize = depthOrArraySize;
+        MipLevels = mipLevels;
+        Format = format;
+        SampleDesc.Count = sampleCount;
+        SampleDesc.Quality = sampleQuality;
+        Layout = layout;
+        Flags = flags;
+        SamplerFeedbackMipRegion.Width = samplerFeedbackMipRegionWidth;
+        SamplerFeedbackMipRegion.Height = samplerFeedbackMipRegionHeight;
+        SamplerFeedbackMipRegion.Depth = samplerFeedbackMipRegionDepth;
+        LayoutGuid = layoutGuid;
+    }
+
+    static inline CD3DX12_RESOURCE_DESC2 Buffer(
+        const D3D12_RESOURCE_ALLOCATION_INFO& resAllocInfo,
+        D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE) noexcept
+    {
+        return CD3DX12_RESOURCE_DESC2(D3D12_RESOURCE_DIMENSION_BUFFER, resAllocInfo.Alignment, resAllocInfo.SizeInBytes,
+            1, 1, 1, DXGI_FORMAT_UNKNOWN, 1, 0, D3D12_TEXTURE_LAYOUT_ROW_MAJOR, flags, 0, 0, 0);
+    }
+    static inline CD3DX12_RESOURCE_DESC2 Buffer(
+        UINT64 width,
+        D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE,
+        UINT64 alignment = 0) noexcept
+    {
+        return CD3DX12_RESOURCE_DESC2(D3D12_RESOURCE_DIMENSION_BUFFER, alignment, width, 1, 1, 1,
+            DXGI_FORMAT_UNKNOWN, 1, 0, D3D12_TEXTURE_LAYOUT_ROW_MAJOR, flags, 0, 0, 0);
+    }
+    static inline CD3DX12_RESOURCE_DESC2 Tex1D(
+        DXGI_FORMAT format,
+        UINT64 width,
+        UINT16 arraySize = 1,
+        UINT16 mipLevels = 0,
+        D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE,
+        D3D12_TEXTURE_LAYOUT layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
+        UINT64 alignment = 0) noexcept
+    {
+        return CD3DX12_RESOURCE_DESC2(D3D12_RESOURCE_DIMENSION_TEXTURE1D, alignment, width, 1, arraySize,
+            mipLevels, format, 1, 0, layout, flags, 0, 0, 0);
+    }
+    static inline CD3DX12_RESOURCE_DESC2 Tex2D(
+        DXGI_FORMAT format,
+        UINT64 width,
+        UINT height,
+        UINT16 arraySize = 1,
+        UINT16 mipLevels = 0,
+        UINT sampleCount = 1,
+        UINT sampleQuality = 0,
+        D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE,
+        D3D12_TEXTURE_LAYOUT layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
+        UINT64 alignment = 0,
+        UINT samplerFeedbackMipRegionWidth = 0,
+        UINT samplerFeedbackMipRegionHeight = 0,
+        UINT samplerFeedbackMipRegionDepth = 0,
+        GUID layoutGuid = D3D12_GUID_TEXTURE_LAYOUT_NULL) noexcept
+    {
+        return CD3DX12_RESOURCE_DESC2(D3D12_RESOURCE_DIMENSION_TEXTURE2D, alignment, width, height, arraySize,
+            mipLevels, format, sampleCount, sampleQuality, layout, flags, samplerFeedbackMipRegionWidth,
+            samplerFeedbackMipRegionHeight, samplerFeedbackMipRegionDepth, layoutGuid);
+    }
+    static inline CD3DX12_RESOURCE_DESC2 Tex3D(
+        DXGI_FORMAT format,
+        UINT64 width,
+        UINT height,
+        UINT16 depth,
+        UINT16 mipLevels = 0,
+        D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE,
+        D3D12_TEXTURE_LAYOUT layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
+        UINT64 alignment = 0) noexcept
+    {
+        return CD3DX12_RESOURCE_DESC2(D3D12_RESOURCE_DIMENSION_TEXTURE3D, alignment, width, height, depth,
+            mipLevels, format, 1, 0, layout, flags, 0, 0, 0);
+    }
+    inline UINT16 Depth() const noexcept
+    {
+        return (Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1u);
+    }
+    inline UINT16 ArraySize() const noexcept
+    {
+        return (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D ? DepthOrArraySize : 1u);
+    }
+    inline UINT8 PlaneCount(_In_ ID3D12Device* pDevice) const noexcept
+    {
+        return D3D12GetFormatPlaneCount(pDevice, Format);
+    }
+    inline UINT Subresources(_In_ ID3D12Device* pDevice) const noexcept
+    {
+        return static_cast<UINT>(MipLevels) * ArraySize() * PlaneCount(pDevice);
+    }
+    inline UINT CalcSubresource(UINT MipSlice, UINT ArraySlice, UINT PlaneSlice) noexcept
+    {
+        return D3D12CalcSubresource(MipSlice, ArraySlice, PlaneSlice, MipLevels, ArraySize());
+    }
+};
+inline bool operator==(const D3D12_RESOURCE_DESC2& l, const D3D12_RESOURCE_DESC2& r) noexcept
+{
+    return l.Dimension == r.Dimension &&
+        l.Alignment == r.Alignment &&
+        l.Width == r.Width &&
+        l.Height == r.Height &&
+        l.DepthOrArraySize == r.DepthOrArraySize &&
+        l.MipLevels == r.MipLevels &&
+        l.Format == r.Format &&
+        l.SampleDesc.Count == r.SampleDesc.Count &&
+        l.SampleDesc.Quality == r.SampleDesc.Quality &&
+        l.Layout == r.Layout &&
+        l.Flags == r.Flags &&
+        l.SamplerFeedbackMipRegion.Width == r.SamplerFeedbackMipRegion.Width &&
+        l.SamplerFeedbackMipRegion.Height == r.SamplerFeedbackMipRegion.Height &&
+        l.SamplerFeedbackMipRegion.Depth == r.SamplerFeedbackMipRegion.Depth &&
+        l.LayoutGuid == r.LayoutGuid;
+}
+inline bool operator!=(const D3D12_RESOURCE_DESC2& l, const D3D12_RESOURCE_DESC2& r) noexcept
+{
+    return !(l == r);
+}
+
+//------------------------------------------------------------------------------------------------
+// Fills in the mipmap and alignment values of pDesc when either members are zero or the
+// flag D3D12_RESOURCE_FLAG_USE_TIGHT_ALIGNMENT is set
+// Used to replace an implicit field to an explicit (0 mip map = max mip map level)
+// If expansion has occured, returns LclDesc, else returns the original pDesc
+inline const CD3DX12_RESOURCE_DESC2* D3DX12ConditionallyExpandAPIDesc(
+    CD3DX12_RESOURCE_DESC2& LclDesc,
+    const CD3DX12_RESOURCE_DESC2* pDesc,
+    const bool tightAlignmentSupported = false,
+    const bool alignAsCommitted = false)
+{
+    const bool bRecomputeAlignment = (pDesc->Alignment == 0)
+        || (tightAlignmentSupported && (pDesc->Flags & D3D12_RESOURCE_FLAG_USE_TIGHT_ALIGNMENT));
+    // Expand mip levels:
+    if (pDesc->MipLevels == 0 || bRecomputeAlignment)
+    {
+        LclDesc = *pDesc;
+        if (pDesc->MipLevels == 0)
+        {
+            auto MaxMipLevels = [](UINT64 uiMaxDimension) -> UINT16
+            {
+                UINT16 uiRet = 0;
+                while (uiMaxDimension > 0)
+                {
+                    uiRet++;
+                    uiMaxDimension >>= 1;
+                }
+                return uiRet;
+            };
+            auto Max = [](UINT64 const& a, UINT64 const& b)
+            {
+                return (a < b) ? b : a;
+            };
+
+            LclDesc.MipLevels = MaxMipLevels(
+                Max(LclDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? LclDesc.DepthOrArraySize : 1,
+                    Max(LclDesc.Width, LclDesc.Height)));
+        }
+        if (bRecomputeAlignment)
+        {
+            if (pDesc->Layout == D3D12_TEXTURE_LAYOUT_64KB_UNDEFINED_SWIZZLE
+                || pDesc->Layout == D3D12_TEXTURE_LAYOUT_64KB_STANDARD_SWIZZLE
+                )
+            {
+                LclDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+            }
+            else if (!(tightAlignmentSupported && (pDesc->Flags & D3D12_RESOURCE_FLAG_USE_TIGHT_ALIGNMENT))
+                    || (pDesc->Flags & D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER))
+            {
+                    LclDesc.Alignment =
+                        (pDesc->SampleDesc.Count > 1 ? D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT : D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT);
+            }
+            else
+            {
+                // Clamp valid tight alignment values to be >= spec minimums.
+                // Valid means pow2 and <= spec maximums. Invalid alignments flush to minimum.
+                const UINT64 runtimeMin = alignAsCommitted ? D3D12_TIGHT_ALIGNMENT_MIN_COMMITTED_RESOURCE_ALIGNMENT : D3D12_TIGHT_ALIGNMENT_MIN_PLACED_RESOURCE_ALIGNMENT;
+                const UINT64 specMax = (pDesc->Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
+                    ? (alignAsCommitted ? D3D12_TIGHT_ALIGNMENT_MAX_COMMITTED_BUFFER_ALIGNMENT : D3D12_TIGHT_ALIGNMENT_MAX_PLACED_BUFFER_ALIGNMENT)
+                    : (pDesc->SampleDesc.Count > 1 ? D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT : D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT);
+                const UINT64 appAlignment = pDesc->Alignment;
+                const bool appAlignmentIsValidFloor = appAlignment != 0 && (appAlignment & (appAlignment - 1)) == 0 && appAlignment <= specMax;
+                LclDesc.Alignment = appAlignmentIsValidFloor ? (appAlignment > runtimeMin ? appAlignment : runtimeMin) : runtimeMin;
+            }
+        }
+        return &LclDesc;
+    }
+    else
+    {
+        return pDesc;
+    }
+}
 
 
 //------------------------------------------------------------------------------------------------
@@ -2076,5 +2352,160 @@ struct CD3DX12_SERIALIZED_ROOT_SIGNATURE_DESC : public D3D12_SERIALIZED_ROOT_SIG
         pSerializedBlob = pData;
         SerializedBlobSizeInBytes = size;
     }
+};
+#endif
+
+//------------------------------------------------------------------------------------------------
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+struct CD3DX12_SHADER_CACHE_SESSION_DESC1 : D3D12_SHADER_CACHE_SESSION_DESC1
+{
+    // These descs are a union, so every constructor starts from a zeroed base rather than writing
+    // only its own mode's fields.
+    CD3DX12_SHADER_CACHE_SESSION_DESC1() noexcept : D3D12_SHADER_CACHE_SESSION_DESC1{} {}
+
+    // SetFile points File.pDescs at this object's own storage, so copying has to re-point at the
+    // copy's storage. Without this a copy keeps referring to the source and dangles as soon as the
+    // source goes out of scope.
+    CD3DX12_SHADER_CACHE_SESSION_DESC1(const CD3DX12_SHADER_CACHE_SESSION_DESC1& o) noexcept
+        : D3D12_SHADER_CACHE_SESSION_DESC1(o), m_SingleDesc(o.m_SingleDesc)
+    {
+        RebindOwnedFileDesc(o);
+    }
+    CD3DX12_SHADER_CACHE_SESSION_DESC1& operator=(const CD3DX12_SHADER_CACHE_SESSION_DESC1& o) noexcept
+    {
+        static_cast<D3D12_SHADER_CACHE_SESSION_DESC1&>(*this) = o;
+        m_SingleDesc = o.m_SingleDesc;
+        RebindOwnedFileDesc(o);
+        return *this;
+    }
+    CD3DX12_SHADER_CACHE_SESSION_DESC1(const D3D12_SHADER_CACHE_SESSION_DESC1 &o) noexcept : D3D12_SHADER_CACHE_SESSION_DESC1(o){}
+    explicit CD3DX12_SHADER_CACHE_SESSION_DESC1(const D3D12_SHADER_CACHE_SESSION_DESC& o) noexcept : D3D12_SHADER_CACHE_SESSION_DESC1{}
+    {
+        Mode = o.Mode;
+        if (o.Mode == D3D12_SHADER_CACHE_MODE_MEMORY)
+        {
+            Memory.Identifier = o.Identifier;
+            Memory.Flags = o.Flags;
+            Memory.MaximumInMemoryCacheSizeBytes = o.MaximumInMemoryCacheSizeBytes;
+            Memory.MaximumInMemoryCacheEntries = o.MaximumInMemoryCacheEntries;
+            Memory.Version = o.Version;
+        }
+        else
+        {
+            Disk.Identifier = o.Identifier;
+            Disk.Flags = o.Flags;
+            // The legacy desc has no location of its own, so the OS-managed one is kept.
+            Disk.pDirectory = nullptr;
+            Disk.MaximumInMemoryCacheSizeBytes = o.MaximumInMemoryCacheSizeBytes;
+            Disk.MaximumInMemoryCacheEntries = o.MaximumInMemoryCacheEntries;
+            Disk.MaximumValueFileSizeBytes = o.MaximumValueFileSizeBytes;
+            Disk.Version = o.Version;
+        }
+    }
+
+    CD3DX12_SHADER_CACHE_SESSION_DESC1(const D3D12_SHADER_CACHE_SESSION_MEMORY_DESC& o) noexcept : D3D12_SHADER_CACHE_SESSION_DESC1{}
+    {
+        Mode = D3D12_SHADER_CACHE_MODE_MEMORY;
+        Memory = o;
+    }
+
+    CD3DX12_SHADER_CACHE_SESSION_DESC1(const D3D12_SHADER_CACHE_SESSION_DISK_DESC& o) noexcept : D3D12_SHADER_CACHE_SESSION_DESC1{}
+    {
+        Mode = D3D12_SHADER_CACHE_MODE_DISK;
+        Disk = o;
+    }
+
+    CD3DX12_SHADER_CACHE_SESSION_DESC1(const D3D12_SHADER_CACHE_SESSION_REGISTERED_DESC& o) noexcept : D3D12_SHADER_CACHE_SESSION_DESC1{}
+    {
+        Mode = D3D12_SHADER_CACHE_MODE_REGISTERED;
+        Registered = o;
+    }
+
+    CD3DX12_SHADER_CACHE_SESSION_DESC1(const D3D12_SHADER_CACHE_SESSION_FILE_DESC& o) noexcept : D3D12_SHADER_CACHE_SESSION_DESC1{}
+    {
+        Mode = D3D12_SHADER_CACHE_MODE_FILE;
+        File = o;
+    }
+
+    CD3DX12_SHADER_CACHE_SESSION_DESC1(
+        LPCWSTR pPath,
+        D3D12_CACHE_VALUE_TYPE_FLAGS types = D3D12_CACHE_VALUE_TYPE_FLAGS_OBJECT_CODE | D3D12_CACHE_VALUE_TYPE_FLAGS_METADATA,
+        D3D12_SHADER_CACHE_SESSION_FILE_FLAGS flags = D3D12_SHADER_CACHE_SESSION_FILE_FLAG_NONE) noexcept : D3D12_SHADER_CACHE_SESSION_DESC1{}
+    {
+        SetFile(pPath, types, flags);
+    }
+
+    static inline CD3DX12_SHADER_CACHE_SESSION_DESC1 MemorySession(
+        const GUID& identifier,
+        UINT64 version = 0,
+        D3D12_SHADER_CACHE_FLAGS flags = D3D12_SHADER_CACHE_FLAG_NONE,
+        UINT maximumInMemoryCacheSizeBytes = 0,
+        UINT maximumInMemoryCacheEntries = 0) noexcept
+    {
+        D3D12_SHADER_CACHE_SESSION_MEMORY_DESC desc = { identifier, flags, maximumInMemoryCacheSizeBytes, maximumInMemoryCacheEntries, version };
+        return CD3DX12_SHADER_CACHE_SESSION_DESC1(desc);
+    }
+
+    static inline CD3DX12_SHADER_CACHE_SESSION_DESC1 DiskSession(
+        const GUID& identifier,
+        UINT64 version = 0,
+        D3D12_SHADER_CACHE_FLAGS flags = D3D12_SHADER_CACHE_FLAG_NONE,
+        UINT maximumInMemoryCacheSizeBytes = 0,
+        UINT maximumInMemoryCacheEntries = 0,
+        UINT64 maximumValueFileSizeBytes = 0,
+        LPCWSTR pDirectory = nullptr) noexcept
+    {
+        D3D12_SHADER_CACHE_SESSION_DISK_DESC desc = {};
+        desc.Identifier = identifier;
+        desc.Flags = flags;
+        desc.pDirectory = pDirectory;
+        desc.MaximumInMemoryCacheSizeBytes = maximumInMemoryCacheSizeBytes;
+        desc.MaximumInMemoryCacheEntries = maximumInMemoryCacheEntries;
+        desc.MaximumValueFileSizeBytes = maximumValueFileSizeBytes;
+        desc.Version = version;
+        return CD3DX12_SHADER_CACHE_SESSION_DESC1(desc);
+    }
+
+    static inline CD3DX12_SHADER_CACHE_SESSION_DESC1 RegisteredSession(
+        LPCWSTR pComponentName,
+        D3D12_SHADER_CACHE_SESSION_REGISTERED_FLAGS flags = D3D12_SHADER_CACHE_SESSION_REGISTERED_FLAG_NONE) noexcept
+    {
+        D3D12_SHADER_CACHE_SESSION_REGISTERED_DESC desc = { pComponentName, flags };
+        return CD3DX12_SHADER_CACHE_SESSION_DESC1(desc);
+    }
+
+    static inline CD3DX12_SHADER_CACHE_SESSION_DESC1 FileSession(
+        const D3D12_CACHE_FILE_DESC* pDescs,
+        UINT numDescs,
+        D3D12_SHADER_CACHE_SESSION_FILE_FLAGS flags = D3D12_SHADER_CACHE_SESSION_FILE_FLAG_NONE) noexcept
+    {
+        D3D12_SHADER_CACHE_SESSION_FILE_DESC desc = { pDescs, numDescs, flags };
+        return CD3DX12_SHADER_CACHE_SESSION_DESC1(desc);
+    }
+
+    inline CD3DX12_SHADER_CACHE_SESSION_DESC1& SetFile(
+        LPCWSTR pPath,
+        D3D12_CACHE_VALUE_TYPE_FLAGS types = D3D12_CACHE_VALUE_TYPE_FLAGS_OBJECT_CODE | D3D12_CACHE_VALUE_TYPE_FLAGS_METADATA,
+        D3D12_SHADER_CACHE_SESSION_FILE_FLAGS flags = D3D12_SHADER_CACHE_SESSION_FILE_FLAG_NONE,
+        UINT64 maxSize = 0) noexcept
+    {
+        Mode = D3D12_SHADER_CACHE_MODE_FILE;
+        m_SingleDesc = { types, maxSize, pPath };
+        File.pDescs = &m_SingleDesc;
+        File.NumDescs = 1;
+        File.Flags = flags;
+        return *this;
+    }
+
+private:
+    void RebindOwnedFileDesc(const CD3DX12_SHADER_CACHE_SESSION_DESC1& o) noexcept
+    {
+        if (Mode == D3D12_SHADER_CACHE_MODE_FILE && File.pDescs == &o.m_SingleDesc)
+        {
+            File.pDescs = &m_SingleDesc;
+        }
+    }
+
+    D3D12_CACHE_FILE_DESC m_SingleDesc = {};
 };
 #endif
