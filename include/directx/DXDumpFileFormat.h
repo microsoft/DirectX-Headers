@@ -266,17 +266,31 @@ enum DX_DUMP_FILE_D3D_OBJECT_TYPE : UINT32
 
     DX_DUMP_FILE_D3D_OBJECT_TYPE_EXTENSION                  = 35,
 
+
+    DX_DUMP_FILE_D3D_OBJECT_TYPE_TILE_MAPPING_QUEUE         = 39,
+
     // Must be last external object representation:
     DX_DUMP_FILE_D3D_OBJECT_TYPE_COUNT,
 };
 
 // Snapshot of a D3D12 device object.
 // Found in DX_DUMP_FILE_MEM_TYPE_D3D_OBJECT_DEVICE memory sections.
+// Superseded by DX_DUMP_FILE_D3D_OBJECT_DEVICE1; retained for reading older dumps.
 struct DX_DUMP_FILE_D3D_OBJECT_DEVICE
 {
     D3D_FEATURE_LEVEL MinimumFeatureLevel; // The minimum feature level used to create the device
 };
 static_assert(sizeof(DX_DUMP_FILE_D3D_OBJECT_DEVICE) == 4, "Size of DX_DUMP_FILE_D3D_OBJECT_DEVICE must be 4 bytes.");
+
+// Snapshot of a D3D12 device object, including its name.
+// Found in DX_DUMP_FILE_MEM_TYPE_D3D_OBJECT_DEVICE1 memory sections.
+struct DX_DUMP_FILE_D3D_OBJECT_DEVICE1
+{
+    D3D_FEATURE_LEVEL MinimumFeatureLevel; // The minimum feature level used to create the device
+    UINT32 Reserved;                       // Padding for alignment
+    UINT64 NameId;                         // String ID for the name
+};
+static_assert(sizeof(DX_DUMP_FILE_D3D_OBJECT_DEVICE1) == 16, "Size of DX_DUMP_FILE_D3D_OBJECT_DEVICE1 must be 16 bytes.");
 
 // Describes how a resource relates to its backing memory heap.
 enum DX_DUMP_FILE_D3D_RESOURCE_HEAP_TYPE : UINT32
@@ -509,6 +523,35 @@ struct DX_DUMP_FILE_OS_INFO
 };
 static_assert(sizeof(DX_DUMP_FILE_OS_INFO) == 40, "Size of DX_DUMP_FILE_OS_INFO must be 40 bytes.");
 
+// Extended operating system information.
+// Found as the payload of a DX_DUMP_FILE_SECTION_OS_INFO1 section.
+struct DX_DUMP_FILE_OS_INFO1
+{
+    UINT32 MajorVersion;        // OS major version (e.g. 10)
+    UINT32 MinorVersion;        // OS minor version (e.g. 0)
+    UINT32 BuildNumber;         // OS build number (e.g. 22621; >=22000 indicates Windows 11)
+    UINT32 PlatformId;          // VER_PLATFORM_WIN32_NT
+    UINT16 ServicePackMajor;    // Major version of the latest installed service pack (0 if none)
+    UINT16 ServicePackMinor;    // Minor version of the latest installed service pack (0 if none)
+    UINT16 SuiteMask;           // Bitmask of installed product suites (VER_SUITE_* flags)
+    UINT8  ProductType;         // VER_NT_WORKSTATION, VER_NT_DOMAIN_CONTROLLER, VER_NT_SERVER
+    UINT8  Reserved;
+    UINT32 ProductEdition;      // PRODUCT_* from GetProductInfo() (e.g. PRODUCT_PROFESSIONAL, PRODUCT_ENTERPRISE)
+    union
+    {
+        struct
+        {
+            UINT32 DeveloperModeEnabled : 1;
+            UINT32 Unused               : 31;
+        } Flags;
+        UINT32 FlagBits;
+    };
+    UINT64 OSDescriptionId;     // Interned string: full build string (e.g. from BuildLabEx registry value)
+    UINT32 UpdateBuildRevision; // Windows update build revision (UBR), e.g. 9711 in 26200.9711
+    UINT32 Reserved2;
+};
+static_assert(sizeof(DX_DUMP_FILE_OS_INFO1) == 48, "Size of DX_DUMP_FILE_OS_INFO1 must be 48 bytes.");
+
 // System memory (RAM) information at the time of the dump.
 // Found as the payload of a DX_DUMP_FILE_SECTION_SYSTEM_MEMORY_INFO section.
 struct DX_DUMP_FILE_SYSTEM_MEMORY_INFO
@@ -621,6 +664,7 @@ static constexpr UINT32 DX_DUMP_FILE_SECTION_DEVICE_CONFIGURATION_DESC  = FourCC
 static constexpr UINT32 DX_DUMP_FILE_SECTION_DUMP_CAPS_AND_CONFIG       = FourCC<'D', 'C', 'A', 'C'>::value;  // Payload: DX_DUMP_FILE_CAPS_AND_CONFIG
 static constexpr UINT32 DX_DUMP_FILE_SECTION_ADAPTER_INFO               = FourCC<'A', 'd', 'I', 'n'>::value;  // Payload: DX_DUMP_FILE_ADAPTER_INFO
 static constexpr UINT32 DX_DUMP_FILE_SECTION_OS_INFO                    = FourCC<'O', 'S', 'I', '0'>::value;  // Payload: DX_DUMP_FILE_OS_INFO
+static constexpr UINT32 DX_DUMP_FILE_SECTION_OS_INFO1                   = FourCC<'O', 'S', 'I', '1'>::value;  // Payload: DX_DUMP_FILE_OS_INFO1
 static constexpr UINT32 DX_DUMP_FILE_SECTION_SYSTEM_MEMORY_INFO         = FourCC<'S', 'M', 'I', '0'>::value;  // Payload: DX_DUMP_FILE_SYSTEM_MEMORY_INFO
 static constexpr UINT32 DX_DUMP_FILE_SECTION_CPU_INFO                   = FourCC<'C', 'P', 'I', '0'>::value;  // Payload: DX_DUMP_FILE_CPU_INFO + DX_DUMP_FILE_CPU_PACKAGE_INFO[]
 static constexpr UINT32 DX_DUMP_FILE_SECTION_MEMORY_BUFFER              = FourCC<'M', 'e', 'm', 'r'>::value;  // Payload: DX_DUMP_FILE_MEM_HEADER + typed data (see MEM_TYPE constants below)
@@ -642,6 +686,7 @@ static constexpr UINT32 DX_DUMP_FILE_MEM_TYPE_DRED_CMD_HSTR                     
 static constexpr UINT32 DX_DUMP_FILE_MEM_TYPE_DRED_BRDC_CTX                             = FourCC<'D', 'B', 'C', 'C'>::value;    // DRED breadcrumb context: array of DX_DUMP_FILE_DRED_BREADCRUMB_CONTEXT (Key = original pointer)
 static constexpr UINT32 DX_DUMP_FILE_MEM_TYPE_D3D_JOURNAL                               = FourCC<'D', '3', 'J', 'R'>::value;    // D3D journal: array of DX_DUMP_FILE_D3D_JOURNAL_ENTRY (Key = count)
 static constexpr UINT32 DX_DUMP_FILE_MEM_TYPE_D3D_OBJECT_DEVICE                         = FourCC<'D', 'D', 'v', '0'>::value;    // DX_DUMP_FILE_D3D_OBJECT_DEVICE (single instance)
+static constexpr UINT32 DX_DUMP_FILE_MEM_TYPE_D3D_OBJECT_DEVICE1                        = FourCC<'D', 'D', 'v', '1'>::value;    // DX_DUMP_FILE_D3D_OBJECT_DEVICE1 (single instance)
 static constexpr UINT32 DX_DUMP_FILE_MEM_TYPE_D3D_OBJECT_RESOURCES                      = FourCC<'D', 'R', 's', '0'>::value;    // Array of DX_DUMP_FILE_D3D_OBJECT_RESOURCE (Key = count)
 static constexpr UINT32 DX_DUMP_FILE_MEM_TYPE_D3D_OBJECT_ROOT_SIGNATURE_BLOBS           = FourCC<'D', 'R', 'S', '0'>::value;    // Index table + blob: DX_DUMP_FILE_D3D_OBJECT_ROOT_SIGNATURE[] + serialized blobs (Key = entry count)
 static constexpr UINT32 DX_DUMP_FILE_MEM_TYPE_D3D_OBJECT_DESCRIPTOR_HEAPS               = FourCC<'D', 'D', 'H', '0'>::value;    // Array of DX_DUMP_FILE_D3D_OBJECT_DESCRIPTOR_HEAP (Key = count)

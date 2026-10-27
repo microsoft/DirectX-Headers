@@ -252,12 +252,55 @@ struct CD3DX12_STATE_OBJECT_DATABASE_ENUMERATE_CONTEXT
             }, &ctx);
     }
 
+    typedef void(__stdcall* D3DX12StateObjectDependenciesFunc)(
+        _In_opt_ const D3D12_DATABASE_STATE_OBJECT_KEY* pParentStateObjectKey,
+        UINT NumExistingCollections,
+        _In_reads_(NumExistingCollections) const D3D12_DATABASE_STATE_OBJECT_KEY* pExistingCollections,
+        _In_ CD3DX12_STATE_OBJECT_DATABASE_ENUMERATE_CONTEXT* pContext,
+        _Inout_opt_ void* pUserContext);
+
+    HRESULT GetStateObjectDependencies(
+        _In_opt_ const D3D12_DATABASE_GROUP_KEY* pGroupKey,
+        _In_opt_ const D3D12_DATABASE_STATE_OBJECT_KEY* pStateObjectKey,
+        _In_ D3DX12StateObjectDependenciesFunc pfnCallback,
+        _Inout_opt_ void* pUserContext)
+    {
+        if (!pfnCallback)
+        {
+            return E_INVALIDARG;
+        }
+
+        struct Ctx
+        {
+            CD3DX12_STATE_OBJECT_DATABASE_ENUMERATE_CONTEXT* pThis;
+            D3DX12StateObjectDependenciesFunc pfnCallback;
+            void* pUserContext;
+        } ctx = { this, pfnCallback, pUserContext };
+
+        return GetDatabase()->GetStateObjectDependencies(
+            pGroupKey,
+            pStateObjectKey,
+            [](const D3D12_DATABASE_STATE_OBJECT_KEY* pParentStateObjectKey,
+               UINT NumExistingCollections,
+               const D3D12_DATABASE_STATE_OBJECT_KEY* pExistingCollections,
+               void* pCtx)
+            {
+                auto* p = static_cast<Ctx*>(pCtx);
+                p->pfnCallback(
+                    pParentStateObjectKey,
+                    NumExistingCollections,
+                    pExistingCollections,
+                    p->pThis,
+                    p->pUserContext);
+            }, &ctx);
+    }
+
     typedef BOOL(__stdcall* D3DX12PipelineStateDescFunc) (
         _In_reads_(NumGroupKeys) const D3D12_DATABASE_GROUP_KEY* pGroupKeys,
         _In_reads_(NumGroupKeys) const UINT* pVersions,
         UINT NumGroupKeys,
         _In_ const D3D12_DATABASE_PIPELINE_STATE_KEY* pPipelineStateKey,
-        _In_ const D3D12_PIPELINE_STATE_STREAM_DESC* pDesc,
+        _In_opt_ const D3D12_PIPELINE_STATE_STREAM_DESC* pDesc,
         _Inout_opt_ void* pUserContext
         );
 
@@ -279,7 +322,7 @@ struct CD3DX12_STATE_OBJECT_DATABASE_ENUMERATE_CONTEXT
         _In_reads_(NumGroupKeys) const UINT* pVersions,
         UINT NumGroupKeys,
         _In_ const D3D12_DATABASE_STATE_OBJECT_KEY* pStateObjectKey,
-        _In_ const D3D12_STATE_OBJECT_DESC* pDesc,
+        _In_opt_ const D3D12_STATE_OBJECT_DESC* pDesc,
         _In_opt_ const D3D12_DATABASE_STATE_OBJECT_KEY* pParentKey,
         _In_opt_ const D3D12_DATABASE_GROUP_KEY* pParentGroupKey,
         _COM_Outptr_opt_ IUnknown** ppCreatedObject,
@@ -337,8 +380,8 @@ struct CD3DX12_STATE_OBJECT_DATABASE_ENUMERATE_CONTEXT
         {
             return E_INVALIDARG;
         }
-        FindStateObjectContext ctx = { this, pfnCallback, pUserContext, pEnumGroupKeys, pEnumVersions, NumEnumGroupKeys, TRUE };
-        return m_pDatabase->FindStateObjectDesc1(
+        FindStateObjectContext ctx = { this, pfnCallback, pUserContext, pEnumGroupKeys, pEnumVersions, NumEnumGroupKeys, TRUE, S_OK };
+        HRESULT hrEnum = m_pDatabase->FindStateObjectDesc1(
             pGroupKey, pStateObjectKey,
             Flags,
             FindStateObjectFunc,
@@ -346,6 +389,7 @@ struct CD3DX12_STATE_OBJECT_DATABASE_ENUMERATE_CONTEXT
             m_pDevice ? CreateRootSignature : nullptr,
             m_pDevice ? LookupRootSignature : nullptr,
             &ctx);
+        return FAILED(ctx.hrResult) ? ctx.hrResult : hrEnum;
     }
 
     HRESULT FindStateObject(
@@ -395,6 +439,7 @@ private:
         const UINT* pEnumVersions;
         UINT NumEnumGroupKeys;
         BOOL bContinue;
+        HRESULT hrResult;
     };
 
     // Context structs for Enumerate callbacks (receive key only)
@@ -443,11 +488,32 @@ private:
 
     static HRESULT __stdcall LookupStateObject(
         _In_ const D3D12_DATABASE_STATE_OBJECT_KEY* pStateObjectKey,
-        _In_ const D3D12_DATABASE_GROUP_KEY* /*pGroupKey*/,
+        _In_ const D3D12_DATABASE_GROUP_KEY* pGroupKey,
         _COM_Outptr_ IUnknown** ppStateObject,
         _Inout_opt_ void* pContext)
     {
-        auto* pThis = static_cast<FindStateObjectContext*>(pContext)->pThis;
+        auto* pCtx = static_cast<FindStateObjectContext*>(pContext);
+        auto* pThis = pCtx->pThis;
+
+        // Try the cache first.
+        if (SUCCEEDED(pThis->m_stateObjects.Find(pStateObjectKey, ppStateObject)))
+        {
+            return S_OK;
+        }
+
+        // Cache miss: Recurse using the caller's pfnCallback.
+        HRESULT hr = pThis->FindStateObjectDesc1(
+            pGroupKey, nullptr,
+            pCtx->pfnCallback,
+            pCtx->pUserContext,
+            D3D12_FIND_STATE_OBJECT_DESC_FLAG_NONE);
+        if (FAILED(hr))
+        {
+            *ppStateObject = nullptr;
+            return hr;
+        }
+
+        // The recursive call added the state object to m_stateObjects. Retry the lookup.
         return pThis->m_stateObjects.Find(pStateObjectKey, ppStateObject);
     }
 
@@ -483,6 +549,22 @@ private:
     {
         auto* pCtx = static_cast<FindStateObjectContext*>(pContext);
         auto* pThis = pCtx->pThis;
+
+        // Ensure any AddToStateObject parent is compiled and cached before invoking the callback.
+        if (pParentKey && pParentGroupKey)
+        {
+            D3DX12_COM_PTR<IUnknown> spParent;
+            HRESULT hr = LookupStateObject(pParentKey, pParentGroupKey,
+                                           D3DX12_COM_PTR_ADDRESSOF(spParent), pCtx);
+            if (FAILED(hr))
+            {
+                // Stop the iteration.
+                pCtx->hrResult = hr;
+                pCtx->bContinue = FALSE;
+                return;
+            }
+        }
+
         const D3D12_DATABASE_GROUP_KEY* pGroups = pCtx->NumEnumGroupKeys > 0 ? pCtx->pEnumGroupKeys : pGroupKeys;
         const UINT* pVers = pCtx->NumEnumGroupKeys > 0 ? pCtx->pEnumVersions : pVersions;
         UINT numGroups = pCtx->NumEnumGroupKeys > 0 ? pCtx->NumEnumGroupKeys : NumGroupKeys;
@@ -529,8 +611,8 @@ private:
     {
         auto* pCtx = static_cast<EnumerateStateObjectContext*>(pContext);
         FindStateObjectContext findCtx = { pCtx->pThis, pCtx->pfnCallback, pCtx->pUserContext,
-                                  pGroupKeys, pVersions, NumGroupKeys, TRUE };
-        pCtx->hrResult = pCtx->pThis->m_pDatabase->FindStateObjectDesc1(
+                                  pGroupKeys, pVersions, NumGroupKeys, TRUE, S_OK };
+        HRESULT hrEnum = pCtx->pThis->m_pDatabase->FindStateObjectDesc1(
             nullptr, pStateObjectKey,
             D3D12_FIND_STATE_OBJECT_DESC_FLAG_NO_GROUPS,
             FindStateObjectFunc,
@@ -538,6 +620,7 @@ private:
             pCtx->pThis->m_pDevice ? CreateRootSignature : nullptr,
             pCtx->pThis->m_pDevice ? LookupRootSignature : nullptr,
             &findCtx);
+        pCtx->hrResult = FAILED(findCtx.hrResult) ? findCtx.hrResult : hrEnum;
         return SUCCEEDED(pCtx->hrResult) && findCtx.bContinue;
     }
 };

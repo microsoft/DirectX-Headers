@@ -73,7 +73,7 @@ extern "C" {
 //
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Provider "Microsoft-Windows-Direct3D12" event count 146
+// Provider "Microsoft-Windows-Direct3D12" event count 155
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // Provider GUID = 5d8087dd-3a9b-4f56-90df-49196cdc4f11
@@ -153,6 +153,9 @@ EXTERN_C __declspec(selectany) const GUID Direct3D12EtwProviderGuid = {0x5d8087d
 #define Direct3D12EtwProviderGuid_TASK_VideoEncodeFrame 0x46
 #define Direct3D12EtwProviderGuid_TASK_VideoDecodeFrame 0x47
 #define Direct3D12EtwProviderGuid_TASK_VideoProcessFrame 0x48
+#define Direct3D12EtwProviderGuid_TASK_ProgramCommandSignature 0x49
+#define Direct3D12EtwProviderGuid_TASK_WorkListSignature 0x4a
+#define Direct3D12EtwProviderGuid_TASK_WorkListSignatureArray 0x4b
 
 //
 // Keyword
@@ -273,6 +276,24 @@ EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12DestroyCommandSi
 #define EventD3D12DestroyCommandSignature_value 0x4f
 EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12ReportCommandSignature = {0x50, 0x0, 0x10, 0x0, 0x3, 0x22, 0x8000000000000084};
 #define EventD3D12ReportCommandSignature_value 0x50
+EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12CreateProgramCommandSignature = {0xb2, 0x0, 0x10, 0x0, 0x1, 0x49, 0x8000000000000084};
+#define EventD3D12CreateProgramCommandSignature_value 0xb2
+EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12DestroyProgramCommandSignature = {0xb3, 0x0, 0x10, 0x0, 0x2, 0x49, 0x8000000000000084};
+#define EventD3D12DestroyProgramCommandSignature_value 0xb3
+EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12ReportProgramCommandSignature = {0xb4, 0x0, 0x10, 0x0, 0x3, 0x49, 0x8000000000000084};
+#define EventD3D12ReportProgramCommandSignature_value 0xb4
+EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12CreateWorkListSignature = {0xb5, 0x0, 0x10, 0x0, 0x1, 0x4a, 0x8000000000000084};
+#define EventD3D12CreateWorkListSignature_value 0xb5
+EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12DestroyWorkListSignature = {0xb6, 0x0, 0x10, 0x0, 0x2, 0x4a, 0x8000000000000084};
+#define EventD3D12DestroyWorkListSignature_value 0xb6
+EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12ReportWorkListSignature = {0xb7, 0x0, 0x10, 0x0, 0x3, 0x4a, 0x8000000000000084};
+#define EventD3D12ReportWorkListSignature_value 0xb7
+EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12CreateWorkListSignatureArray = {0xb8, 0x0, 0x10, 0x0, 0x1, 0x4b, 0x8000000000000084};
+#define EventD3D12CreateWorkListSignatureArray_value 0xb8
+EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12DestroyWorkListSignatureArray = {0xb9, 0x0, 0x10, 0x0, 0x2, 0x4b, 0x8000000000000084};
+#define EventD3D12DestroyWorkListSignatureArray_value 0xb9
+EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12ReportWorkListSignatureArray = {0xba, 0x0, 0x10, 0x0, 0x3, 0x4b, 0x8000000000000084};
+#define EventD3D12ReportWorkListSignatureArray_value 0xba
 EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12CreatePipelineLibrary = {0x51, 0x0, 0x10, 0x0, 0x1, 0x23, 0x8000000000000084};
 #define EventD3D12CreatePipelineLibrary_value 0x51
 EXTERN_C __declspec(selectany) const EVENT_DESCRIPTOR EventD3D12DestroyPipelineLibrary = {0x52, 0x0, 0x10, 0x0, 0x2, 0x23, 0x8000000000000084};

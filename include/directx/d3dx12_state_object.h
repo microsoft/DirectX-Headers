@@ -30,13 +30,14 @@
 // contents.
 //
 //================================================================================================
-#include <list>
 #include <forward_list>
-#include <vector>
+#include <list>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #ifndef D3DX12_USE_ATL
 #include <wrl/client.h>
 #define D3DX12_COM_PTR Microsoft::WRL::ComPtr
@@ -68,6 +69,8 @@ public:
     HRESULT InitFromDesc(const D3D12_STATE_OBJECT_DESC& desc);
 
 
+    void RemoveSubobjectsByType(D3D12_STATE_SUBOBJECT_TYPE type);
+
     CD3DX12_STATE_OBJECT_DESC(const CD3DX12_STATE_OBJECT_DESC& other) = delete;
     CD3DX12_STATE_OBJECT_DESC& operator=(const CD3DX12_STATE_OBJECT_DESC& other) = delete;
     CD3DX12_STATE_OBJECT_DESC(CD3DX12_STATE_OBJECT_DESC&& other) = default;
@@ -78,7 +81,9 @@ public:
         m_RepointedSubobjectVectors.clear();
         m_RepointedPrograms.clear();
 #endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
         m_RepointedPartialPrograms.clear();
+#endif
         m_RepointedAssociations.clear();
         m_SubobjectArray.clear();
         m_SubobjectArray.reserve(m_Desc.NumSubobjects);
@@ -91,6 +96,7 @@ public:
             // Store new location in array so we can redirect pointers contained in subobjects
             Iter->pSubobjectArrayLocation = &m_SubobjectArray.back();
         }
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
         for (UINT i = 0; i < m_Desc.NumSubobjects; i++)
         {
             if (m_SubobjectArray[i].Type == D3D12_STATE_SUBOBJECT_TYPE_PARTIAL_GRAPHICS_PROGRAM)
@@ -116,6 +122,7 @@ public:
                 m_SubobjectArray[i].pDesc = &m_RepointedPartialPrograms.back();
             }
         }
+#endif
         // For subobjects with pointer fields, create a new copy of those subobject definitions
         // with fixed pointers
         for (UINT i = 0; i < m_Desc.NumSubobjects; i++)
@@ -245,7 +252,9 @@ private:
         m_RepointedSubobjectVectors.clear();
         m_RepointedPrograms.clear();
 #endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
         m_RepointedPartialPrograms.clear();
+#endif
     }
     typedef struct SUBOBJECT_WRAPPER : public D3D12_STATE_SUBOBJECT
     {
@@ -267,8 +276,10 @@ private:
     std::list<D3D12_GENERIC_PROGRAM_DESC>
         m_RepointedPrograms;
 #endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
 std::list<D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC>
         m_RepointedPartialPrograms;
+#endif
 
     template<typename CStr, typename StdStr>
     class StringContainer
@@ -376,12 +387,17 @@ private:
     friend class CD3DX12_COMPILER_EXISTING_COLLECTION_SUBOBJECT;
     friend class CD3DX12_EXISTING_COLLECTION_BY_KEY_SUBOBJECT;
 #endif
-    // todo: add if define checks for sdk version
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
     friend class CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT;
     friend class CD3DX12_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT;
     friend class CD3DX12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_SUBOBJECT;
     friend class CD3DX12_PRERASTERIZATION_SHADERS_PARTIAL_PROGRAM_FIELDS_SUBOBJECT;
     friend class CD3DX12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_SUBOBJECT;
+#endif
+    friend class CD3DX12_PSDB_SUBOBJECT;
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+    friend class CD3DX12_MLIR_PROGRAM_SUBOBJECT;
+#endif // D3D12_SDK_VERSION >= 620
 };
 
 //------------------------------------------------------------------------------------------------
@@ -2179,6 +2195,20 @@ public:
         // Below: using ugly way to get pointer in case .data() is not defined
         m_Desc.ppSubobjects = &m_Subobjects[0];
     }
+    void RemoveSubobjectReferences(const std::unordered_set<const D3D12_STATE_SUBOBJECT*>& subobjects)
+    {
+        std::vector<D3D12_STATE_SUBOBJECT const*> retainedSubobjects;
+        for (const auto* subobject : m_Subobjects)
+        {
+            if (!subobjects.count(subobject))
+            {
+                retainedSubobjects.push_back(subobject);
+            }
+        }
+        m_Subobjects = std::move(retainedSubobjects);
+        m_Desc.NumSubobjects = static_cast<UINT>(m_Subobjects.size());
+        m_Desc.ppSubobjects = m_Subobjects.empty() ? nullptr : &m_Subobjects[0];
+    }
     D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
     {
         return D3D12_STATE_SUBOBJECT_TYPE_GENERIC_PROGRAM;
@@ -2197,6 +2227,50 @@ private:
     CD3DX12_STATE_OBJECT_DESC::StringContainer<LPCWSTR, std::wstring> m_Strings;
 };
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+//------------------------------------------------------------------------------------------------
+class CD3DX12_MLIR_PROGRAM_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_MLIR_PROGRAM_SUBOBJECT() noexcept
+    {
+        Init();
+    }
+    CD3DX12_MLIR_PROGRAM_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    CD3DX12_MLIR_PROGRAM_SUBOBJECT(const CD3DX12_MLIR_PROGRAM_SUBOBJECT& other) = delete;
+    CD3DX12_MLIR_PROGRAM_SUBOBJECT& operator=(const CD3DX12_MLIR_PROGRAM_SUBOBJECT& other) = delete;
+    CD3DX12_MLIR_PROGRAM_SUBOBJECT(CD3DX12_MLIR_PROGRAM_SUBOBJECT&& other) = default;
+    CD3DX12_MLIR_PROGRAM_SUBOBJECT& operator=(CD3DX12_MLIR_PROGRAM_SUBOBJECT&& other) = default;
+    void SetProgramName(LPCWSTR ProgramName)
+    {
+        m_Desc.ProgramName = m_Strings.LocalCopy(ProgramName);
+    }
+    void SetBytecode(const void* pBytecode, SIZE_T SizeInBytes) noexcept
+    {
+        m_Desc.pBytecode = pBytecode;
+        m_Desc.BytecodeSizeInBytes = SizeInBytes;
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_MLIR_PROGRAM;
+    }
+    operator const D3D12_MLIR_PROGRAM_DESC& () const noexcept { return m_Desc; }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+        m_Desc = {};
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_MLIR_PROGRAM_DESC m_Desc;
+    CD3DX12_STATE_OBJECT_DESC::StringContainer<LPCWSTR, std::wstring> m_Strings;
+};
+#endif // D3D12_SDK_VERSION >= 620
 
 //------------------------------------------------------------------------------------------------
 class CD3DX12_NODE_OUTPUT_OVERRIDES
@@ -2849,6 +2923,7 @@ inline D3D12_NODE * CD3DX12_NODE_HELPER_BASE::GetNode() const
 }
 #endif // D3D12_SDK_VERSION >= 612
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
 //------------------------------------------------------------------------------------------------
 class CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT
     : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
@@ -2880,6 +2955,20 @@ public:
         m_Desc.NumSubobjects++;
         // Below: using ugly way to get pointer in case .data() is not defined
         m_Desc.ppSubobjects = &m_Subobjects[0];
+    }
+    void RemoveSubobjectReferences(const std::unordered_set<const D3D12_STATE_SUBOBJECT*>& subobjects)
+    {
+        std::vector<D3D12_STATE_SUBOBJECT const*> retainedSubobjects;
+        for (const auto* subobject : m_Subobjects)
+        {
+            if (!subobjects.count(subobject))
+            {
+                retainedSubobjects.push_back(subobject);
+            }
+        }
+        m_Subobjects = std::move(retainedSubobjects);
+        m_Desc.NumSubobjects = static_cast<UINT>(m_Subobjects.size());
+        m_Desc.ppSubobjects = m_Subobjects.empty() ? nullptr : &m_Subobjects[0];
     }
     void SetPartialGraphicsProgramType(D3D12_PARTIAL_GRAPHICS_PROGRAM_TYPE type)
     {
@@ -3197,7 +3286,137 @@ private:
     void* Data() noexcept override { return &m_Desc; }
     D3D12_PIXEL_SHADER_PARTIAL_PROGRAM_FIELDS_DESC m_Desc;
 };
+#endif // D3D12_SDK_VERSION >= 620
 
+//------------------------------------------------------------------------------------------------
+class CD3DX12_PSDB_SUBOBJECT
+    : public CD3DX12_STATE_OBJECT_DESC::SUBOBJECT_HELPER_BASE
+{
+public:
+    CD3DX12_PSDB_SUBOBJECT() noexcept
+        : m_Desc{}
+    {
+        Init();
+    }
+    CD3DX12_PSDB_SUBOBJECT(CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+        : m_Desc{}
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    CD3DX12_PSDB_SUBOBJECT(const D3D12_SHADER_CACHE_SESSION_SUBOBJECT_DESC& Desc)
+        : m_Desc(Desc)
+    {
+        Init();
+    }
+    CD3DX12_PSDB_SUBOBJECT(
+        const D3D12_SHADER_CACHE_SESSION_SUBOBJECT_DESC& Desc,
+        CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+        : m_Desc(Desc)
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    CD3DX12_PSDB_SUBOBJECT(ID3D12ShaderCacheSession1* pSession)
+        : CD3DX12_PSDB_SUBOBJECT(pSession, D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAG_NONE)
+    {
+    }
+    CD3DX12_PSDB_SUBOBJECT(
+        ID3D12ShaderCacheSession1* pSession,
+        CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+        : CD3DX12_PSDB_SUBOBJECT(
+            pSession,
+            D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAG_NONE,
+            ContainingStateObject)
+    {
+    }
+    CD3DX12_PSDB_SUBOBJECT(
+        ID3D12ShaderCacheSession1* pSession,
+        D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAGS Flags)
+        : m_Desc{ pSession, Flags }
+    {
+        Init();
+    }
+    CD3DX12_PSDB_SUBOBJECT(
+        ID3D12ShaderCacheSession1* pSession,
+        D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAGS Flags,
+        CD3DX12_STATE_OBJECT_DESC& ContainingStateObject)
+        : m_Desc{ pSession, Flags }
+    {
+        Init();
+        AddToStateObject(ContainingStateObject);
+    }
+    void SetShaderCacheSession(ID3D12ShaderCacheSession1* pSession) noexcept
+    {
+        SetShaderCacheSession(pSession, D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAG_NONE);
+    }
+    void SetShaderCacheSession(
+        ID3D12ShaderCacheSession1* pSession,
+        D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAGS Flags) noexcept
+    {
+        m_Desc = { pSession, Flags };
+    }
+    D3D12_STATE_SUBOBJECT_TYPE Type() const noexcept override
+    {
+        return D3D12_STATE_SUBOBJECT_TYPE_PSDB;
+    }
+private:
+    void Init() noexcept
+    {
+        SUBOBJECT_HELPER_BASE::Init();
+    }
+    void* Data() noexcept override { return &m_Desc; }
+    D3D12_SHADER_CACHE_SESSION_SUBOBJECT_DESC m_Desc;
+};
+
+inline void CD3DX12_STATE_OBJECT_DESC::RemoveSubobjectsByType(D3D12_STATE_SUBOBJECT_TYPE type)
+{
+    std::unordered_set<const D3D12_STATE_SUBOBJECT*> removedSubobjects;
+    for (const auto& subobject : m_SubobjectList)
+    {
+        if (subobject.Type == type)
+        {
+            removedSubobjects.insert(&subobject);
+        }
+    }
+    for (const auto& helper : m_OwnedSubobjectHelpers)
+    {
+        if (helper->Type() == D3D12_STATE_SUBOBJECT_TYPE_SUBOBJECT_TO_EXPORTS_ASSOCIATION)
+        {
+            const D3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION& association =
+                static_cast<const CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT&>(*helper);
+            if (removedSubobjects.count(association.pSubobjectToAssociate))
+            {
+                removedSubobjects.insert(&static_cast<const D3D12_STATE_SUBOBJECT&>(*helper));
+            }
+        }
+    }
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
+    ForEachSubobject<CD3DX12_GENERIC_PROGRAM_SUBOBJECT>(
+        D3D12_STATE_SUBOBJECT_TYPE_GENERIC_PROGRAM,
+        [&](CD3DX12_GENERIC_PROGRAM_SUBOBJECT& program)
+        {
+            program.RemoveSubobjectReferences(removedSubobjects);
+        });
+#endif
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+    ForEachSubobject<CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT>(
+        D3D12_STATE_SUBOBJECT_TYPE_PARTIAL_GRAPHICS_PROGRAM,
+        [&](CD3DX12_PARTIAL_GRAPHICS_PROGRAM_SUBOBJECT& program)
+        {
+            program.RemoveSubobjectReferences(removedSubobjects);
+        });
+#endif
+    m_SubobjectList.remove_if([&](const SUBOBJECT_WRAPPER& subobject)
+    {
+        return removedSubobjects.count(&subobject) != 0;
+    });
+    m_OwnedSubobjectHelpers.remove_if([&](const std::unique_ptr<SUBOBJECT_HELPER_BASE>& helper)
+    {
+        return removedSubobjects.count(&static_cast<const D3D12_STATE_SUBOBJECT&>(*helper)) != 0;
+    });
+    m_Desc.NumSubobjects = static_cast<UINT>(m_SubobjectList.size());
+}
 
 //------------------------------------------------------------------------------------------------
 // Deep-copies a D3D12_STATE_OBJECT_DESC into this builder. Strings and exports are
@@ -3537,6 +3756,7 @@ inline HRESULT CD3DX12_STATE_OBJECT_DESC::InitFromDesc(const D3D12_STATE_OBJECT_
             subobjectMap[&src] = pDst;
             break;
         }
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
         case D3D12_STATE_SUBOBJECT_TYPE_PARTIAL_GRAPHICS_PROGRAM:
         {
             auto pSrc = static_cast<const D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC*>(src.pDesc);
@@ -3589,6 +3809,25 @@ inline HRESULT CD3DX12_STATE_OBJECT_DESC::InitFromDesc(const D3D12_STATE_OBJECT_
             subobjectMap[&src] = pDst;
             break;
         }
+#endif // D3D12_SDK_VERSION >= 620
+        case D3D12_STATE_SUBOBJECT_TYPE_PSDB:
+        {
+            auto pSrc = static_cast<const D3D12_SHADER_CACHE_SESSION_SUBOBJECT_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_PSDB_SUBOBJECT>(*pSrc);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+        case D3D12_STATE_SUBOBJECT_TYPE_MLIR_PROGRAM:
+        {
+            auto pSrc = static_cast<const D3D12_MLIR_PROGRAM_DESC*>(src.pDesc);
+            auto pDst = CreateSubobject<CD3DX12_MLIR_PROGRAM_SUBOBJECT>();
+            pDst->SetProgramName(pSrc->ProgramName);
+            pDst->SetBytecode(pSrc->pBytecode, pSrc->BytecodeSizeInBytes);
+            subobjectMap[&src] = pDst;
+            break;
+        }
+#endif // D3D12_SDK_VERSION >= 620
         default:
             // Unknown subobject type
             return E_UNEXPECTED;
@@ -3634,6 +3873,7 @@ inline HRESULT CD3DX12_STATE_OBJECT_DESC::InitFromDesc(const D3D12_STATE_OBJECT_
             }
         }
 #endif // D3D12_SDK_VERSION >= 612
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
         else if (src.Type == D3D12_STATE_SUBOBJECT_TYPE_PARTIAL_GRAPHICS_PROGRAM)
         {
             auto pSrc = static_cast<const D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC*>(src.pDesc);
@@ -3647,6 +3887,7 @@ inline HRESULT CD3DX12_STATE_OBJECT_DESC::InitFromDesc(const D3D12_STATE_OBJECT_
                 }
             }
         }
+#endif // D3D12_SDK_VERSION >= 620
     }
     return S_OK;
 }

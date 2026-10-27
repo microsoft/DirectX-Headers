@@ -28,6 +28,10 @@ public: // Function declaration
     // Initialize data from the given device
     HRESULT Init(ID3D12Device* pDevice);
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+    HRESULT Init(ID3D12Device* pDevice, UINT SDKVersion);
+#endif
+
     // Retreives the status of the object. If an error occurred in the initialization process, the function returns the error code.
     HRESULT GetStatus() const noexcept { return m_hStatus; }
 
@@ -273,9 +277,21 @@ private: // Private structs and helpers declaration
     // Helper function to initialize local protected resource session types structs
     HRESULT QueryProtectedResourceSessionTypes(UINT NodeIndex, UINT Count);
 
+    HRESULT QueryFeatureSupport(
+        D3D12_FEATURE Feature,
+        void* pFeatureSupportData,
+        UINT FeatureSupportDataSize) const;
+
+    HRESULT InitInternal(ID3D12Device* pDevice, UINT SDKVersion);
+
 private: // Member data
     // Pointer to the underlying device
     ID3D12Device* m_pDevice;
+
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+    ID3D12Device16* m_pDevice16;
+    UINT m_SDKVersion;
+#endif
 
     // Stores the error code from initialization
     HRESULT m_hStatus;
@@ -387,6 +403,10 @@ inline RETTYPE CD3DX12FeatureSupport::NAME(UINT NodeIndex) const \
 
 inline CD3DX12FeatureSupport::CD3DX12FeatureSupport() noexcept
 : m_pDevice(nullptr)
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+, m_pDevice16(nullptr)
+, m_SDKVersion(0)
+#endif
 , m_hStatus(E_INVALIDARG)
 , m_dOptions{}
 , m_eMaxFeatureLevel{}
@@ -455,6 +475,22 @@ inline CD3DX12FeatureSupport::CD3DX12FeatureSupport() noexcept
 
 inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
 {
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+    return InitInternal(pDevice, D3D12_SDK_VERSION);
+#else
+    return InitInternal(pDevice, 0);
+#endif
+}
+
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice, UINT SDKVersion)
+{
+    return InitInternal(pDevice, SDKVersion);
+}
+#endif
+
+inline HRESULT CD3DX12FeatureSupport::InitInternal(ID3D12Device* pDevice, UINT SDKVersion)
+{
     if (!pDevice)
     {
         m_hStatus = E_INVALIDARG;
@@ -463,100 +499,116 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
 
     m_pDevice = pDevice;
 
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+    m_pDevice16 = nullptr;
+    m_SDKVersion = SDKVersion;
+#if defined(_MSC_VER)
+    auto const& device16IID = __uuidof(ID3D12Device16);
+#else
+    auto const& device16IID = IID_ID3D12Device16;
+#endif
+    if (SUCCEEDED(m_pDevice->QueryInterface(device16IID, reinterpret_cast<void**>(&m_pDevice16))))
+    {
+        m_pDevice16->Release();
+    }
+#else
+    UNREFERENCED_PARAMETER(SDKVersion);
+#endif
+
     // Initialize static feature support data structures
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &m_dOptions, sizeof(m_dOptions))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &m_dOptions, sizeof(m_dOptions))))
     {
         m_dOptions = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &m_dGPUVASupport, sizeof(m_dGPUVASupport))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &m_dGPUVASupport, sizeof(m_dGPUVASupport))))
     {
         m_dGPUVASupport = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &m_dOptions1, sizeof(m_dOptions1))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &m_dOptions1, sizeof(m_dOptions1))))
     {
         m_dOptions1 = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &m_dOptions2, sizeof(m_dOptions2))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &m_dOptions2, sizeof(m_dOptions2))))
     {
         m_dOptions2 = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &m_dShaderCache, sizeof(m_dShaderCache))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &m_dShaderCache, sizeof(m_dShaderCache))))
     {
         m_dShaderCache = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &m_dOptions3, sizeof(m_dOptions3))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &m_dOptions3, sizeof(m_dOptions3))))
     {
         m_dOptions3 = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &m_dExistingHeaps, sizeof(m_dExistingHeaps))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &m_dExistingHeaps, sizeof(m_dExistingHeaps))))
     {
         m_dExistingHeaps = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &m_dOptions4, sizeof(m_dOptions4))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &m_dOptions4, sizeof(m_dOptions4))))
     {
         m_dOptions4 = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_CROSS_NODE, &m_dCrossNode, sizeof(m_dCrossNode))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_CROSS_NODE, &m_dCrossNode, sizeof(m_dCrossNode))))
     {
         m_dCrossNode = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &m_dOptions5, sizeof(m_dOptions5))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &m_dOptions5, sizeof(m_dOptions5))))
     {
         m_dOptions5 = {};
     }
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 4)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_DISPLAYABLE, &m_dDisplayable, sizeof(m_dDisplayable))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_DISPLAYABLE, &m_dDisplayable, sizeof(m_dDisplayable))))
     {
         m_dDisplayable = {};
     }
 #endif
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &m_dOptions6, sizeof(m_dOptions6))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &m_dOptions6, sizeof(m_dOptions6))))
     {
         m_dOptions6 = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &m_dOptions7, sizeof(m_dOptions7))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &m_dOptions7, sizeof(m_dOptions7))))
     {
         m_dOptions7 = {};
     }
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 3)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &m_dOptions8, sizeof(m_dOptions8))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &m_dOptions8, sizeof(m_dOptions8))))
     {
         m_dOptions8 = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &m_dOptions9, sizeof(m_dOptions9))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &m_dOptions9, sizeof(m_dOptions9))))
     {
         m_dOptions9 = {};
     }
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 4)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &m_dOptions10, sizeof(m_dOptions10))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &m_dOptions10, sizeof(m_dOptions10))))
     {
         m_dOptions10 = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &m_dOptions11, sizeof(m_dOptions11))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &m_dOptions11, sizeof(m_dOptions11))))
     {
         m_dOptions11 = {};
     }
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 600)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &m_dOptions12, sizeof(m_dOptions12))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &m_dOptions12, sizeof(m_dOptions12))))
     {
         m_dOptions12 = {};
         m_dOptions12.MSPrimitivesPipelineStatisticIncludesCulledPrimitives = D3D12_TRI_STATE::D3D12_TRI_STATE_UNKNOWN;
@@ -564,45 +616,45 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 602)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &m_dOptions13, sizeof(m_dOptions13))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &m_dOptions13, sizeof(m_dOptions13))))
     {
         m_dOptions13 = {};
     }
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS14, &m_dOptions14, sizeof(m_dOptions14))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS14, &m_dOptions14, sizeof(m_dOptions14))))
     {
         m_dOptions14 = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS15, &m_dOptions15, sizeof(m_dOptions15))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS15, &m_dOptions15, sizeof(m_dOptions15))))
     {
         m_dOptions15 = {};
     }
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 608)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &m_dOptions16, sizeof(m_dOptions16))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &m_dOptions16, sizeof(m_dOptions16))))
     {
         m_dOptions16 = {};
     }
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 609)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS17, &m_dOptions17, sizeof(m_dOptions17))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS17, &m_dOptions17, sizeof(m_dOptions17))))
     {
         m_dOptions17 = {};
     }
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS18, &m_dOptions18, sizeof(m_dOptions18))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS18, &m_dOptions18, sizeof(m_dOptions18))))
     {
         m_dOptions18.RenderPassesValid = false;
     }
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 610)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS19, &m_dOptions19, sizeof(m_dOptions19))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS19, &m_dOptions19, sizeof(m_dOptions19))))
     {
         m_dOptions19 = {};
         m_dOptions19.SupportedSampleCountsWithNoOutputs = 1;
@@ -613,27 +665,27 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 611)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS20, &m_dOptions20, sizeof(m_dOptions20))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS20, &m_dOptions20, sizeof(m_dOptions20))))
     {
         m_dOptions20 = {};
     }
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 612)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &m_dOptions21, sizeof(m_dOptions21))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &m_dOptions21, sizeof(m_dOptions21))))
     {
         m_dOptions21 = {};
     }
 #endif
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 619)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS22, &m_dOptions22, sizeof(m_dOptions22))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS22, &m_dOptions22, sizeof(m_dOptions22))))
     {
         m_dOptions22 = {};
     }
 #endif
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &m_dOptionsPreview, sizeof(m_dOptionsPreview))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &m_dOptionsPreview, sizeof(m_dOptionsPreview))))
     {
         m_dOptionsPreview.MaxGroupSharedMemoryPerGroupCS = D3D12_CS_TGSM_BYTES_MINIMUM_SUPPORT;
         m_dOptionsPreview.MaxGroupSharedMemoryPerGroupAS = D3D12_AS_TGSM_BYTES_MINIMUM_SUPPORT;
@@ -641,7 +693,7 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
     }
 
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 617)
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &m_dTightAlignment, sizeof(m_dTightAlignment))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &m_dTightAlignment, sizeof(m_dTightAlignment))))
     {
         m_dTightAlignment = {};
     }
@@ -657,17 +709,17 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
     for (UINT NodeIndex = 0; NodeIndex < uNodeCount; NodeIndex++)
     {
         m_dProtectedResourceSessionSupport[NodeIndex].NodeIndex = NodeIndex;
-        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_SUPPORT, &m_dProtectedResourceSessionSupport[NodeIndex], sizeof(m_dProtectedResourceSessionSupport[NodeIndex]))))
+        if (FAILED(QueryFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_SUPPORT, &m_dProtectedResourceSessionSupport[NodeIndex], sizeof(m_dProtectedResourceSessionSupport[NodeIndex]))))
         {
             m_dProtectedResourceSessionSupport[NodeIndex].Support = D3D12_PROTECTED_RESOURCE_SESSION_SUPPORT_FLAG_NONE;
         }
 
         m_dArchitecture1[NodeIndex].NodeIndex = NodeIndex;
-        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &m_dArchitecture1[NodeIndex], sizeof(m_dArchitecture1[NodeIndex]))))
+        if (FAILED(QueryFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &m_dArchitecture1[NodeIndex], sizeof(m_dArchitecture1[NodeIndex]))))
         {
             D3D12_FEATURE_DATA_ARCHITECTURE dArchLocal = {};
             dArchLocal.NodeIndex = NodeIndex;
-            if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &dArchLocal, sizeof(dArchLocal))))
+            if (FAILED(QueryFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &dArchLocal, sizeof(dArchLocal))))
             {
                 dArchLocal.TileBasedRenderer = false;
                 dArchLocal.UMA = false;
@@ -681,13 +733,13 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
         }
 
         m_dSerialization[NodeIndex].NodeIndex = NodeIndex;
-        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SERIALIZATION, &m_dSerialization[NodeIndex], sizeof(m_dSerialization[NodeIndex]))))
+        if (FAILED(QueryFeatureSupport(D3D12_FEATURE_SERIALIZATION, &m_dSerialization[NodeIndex], sizeof(m_dSerialization[NodeIndex]))))
         {
             m_dSerialization[NodeIndex].HeapSerializationTier = D3D12_HEAP_SERIALIZATION_TIER_0;
         }
 
         m_dProtectedResourceSessionTypeCount[NodeIndex].NodeIndex = NodeIndex;
-        if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPE_COUNT, &m_dProtectedResourceSessionTypeCount[NodeIndex], sizeof(m_dProtectedResourceSessionTypeCount[NodeIndex]))))
+        if (FAILED(QueryFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPE_COUNT, &m_dProtectedResourceSessionTypeCount[NodeIndex], sizeof(m_dProtectedResourceSessionTypeCount[NodeIndex]))))
         {
             m_dProtectedResourceSessionTypeCount[NodeIndex].Count = 0;
         }
@@ -715,6 +767,28 @@ inline HRESULT CD3DX12FeatureSupport::Init(ID3D12Device* pDevice)
     }
 
     return m_hStatus;
+}
+
+inline HRESULT CD3DX12FeatureSupport::QueryFeatureSupport(
+    D3D12_FEATURE Feature,
+    void* pFeatureSupportData,
+    UINT FeatureSupportDataSize) const
+{
+#if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 620)
+    if (m_pDevice16)
+    {
+        return m_pDevice16->CheckFeatureSupport1(
+            Feature,
+            pFeatureSupportData,
+            FeatureSupportDataSize,
+            m_SDKVersion);
+    }
+#endif
+
+    return m_pDevice->CheckFeatureSupport(
+        Feature,
+        pFeatureSupportData,
+        FeatureSupportDataSize);
 }
 
 // 0: D3D12_OPTIONS
@@ -774,7 +848,7 @@ inline HRESULT CD3DX12FeatureSupport::FormatSupport(DXGI_FORMAT Format, D3D12_FO
     dFormatSupport.Format = Format;
 
     // It is possible that the function call returns an error
-    HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &dFormatSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT));
+    HRESULT result = QueryFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &dFormatSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT));
 
     Support1 = dFormatSupport.Support1;
     Support2 = dFormatSupport.Support2; // Two outputs. Probably better just to take in the struct as an argument?
@@ -790,7 +864,7 @@ inline HRESULT CD3DX12FeatureSupport::MultisampleQualityLevels(DXGI_FORMAT Forma
     dMultisampleQualityLevels.SampleCount = SampleCount;
     dMultisampleQualityLevels.Flags = Flags;
 
-    HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &dMultisampleQualityLevels, sizeof(D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS));
+    HRESULT result = QueryFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &dMultisampleQualityLevels, sizeof(D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS));
 
     if (SUCCEEDED(result))
     {
@@ -810,7 +884,7 @@ inline HRESULT CD3DX12FeatureSupport::FormatInfo(DXGI_FORMAT Format, UINT8& Plan
     D3D12_FEATURE_DATA_FORMAT_INFO dFormatInfo;
     dFormatInfo.Format = Format;
 
-    HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &dFormatInfo, sizeof(D3D12_FEATURE_DATA_FORMAT_INFO));
+    HRESULT result = QueryFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &dFormatInfo, sizeof(D3D12_FEATURE_DATA_FORMAT_INFO));
     if (FAILED(result))
     {
         PlaneCount = 0;
@@ -872,7 +946,7 @@ inline BOOL CD3DX12FeatureSupport::CommandQueuePrioritySupported(D3D12_COMMAND_L
     m_dCommandQueuePriority.CommandListType = CommandListType;
     m_dCommandQueuePriority.Priority = Priority;
 
-    if (FAILED(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &m_dCommandQueuePriority, sizeof(D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY))))
+    if (FAILED(QueryFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &m_dCommandQueuePriority, sizeof(D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY))))
     {
         return false;
     }
@@ -924,7 +998,7 @@ FEATURE_SUPPORT_GET(BOOL, m_dOptions6, BackgroundProcessingSupported);
 // Keep the original call routine
 inline HRESULT CD3DX12FeatureSupport::QueryMetaCommand(D3D12_FEATURE_DATA_QUERY_META_COMMAND& dQueryMetaCommand) const
 {
-    return m_pDevice->CheckFeatureSupport(D3D12_FEATURE_QUERY_META_COMMAND, &dQueryMetaCommand, sizeof(D3D12_FEATURE_DATA_QUERY_META_COMMAND));
+    return QueryFeatureSupport(D3D12_FEATURE_QUERY_META_COMMAND, &dQueryMetaCommand, sizeof(D3D12_FEATURE_DATA_QUERY_META_COMMAND));
 }
 
 // 32: D3D12 Options7
@@ -1075,7 +1149,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestShaderModel()
     for (size_t i = 0; i < numModelVersions; i++)
     {
         m_dShaderModel.HighestShaderModel = allModelVersions[i];
-        result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &m_dShaderModel, sizeof(D3D12_FEATURE_DATA_SHADER_MODEL));
+        result = QueryFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &m_dShaderModel, sizeof(D3D12_FEATURE_DATA_SHADER_MODEL));
         if (result != E_INVALIDARG)
         {
             // Indicates that the version is recognizable by the runtime and stored in the struct
@@ -1113,7 +1187,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestRootSignatureVersion()
     for (size_t i = 0; i < numRootSignatureVersions; i++)
     {
         m_dRootSignature.HighestVersion = allRootSignatureVersions[i];
-        result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &m_dRootSignature, sizeof(D3D12_FEATURE_DATA_ROOT_SIGNATURE));
+        result = QueryFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &m_dRootSignature, sizeof(D3D12_FEATURE_DATA_ROOT_SIGNATURE));
         if (result != E_INVALIDARG)
         {
             if (FAILED(result))
@@ -1163,7 +1237,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryHighestFeatureLevel()
     dFeatureLevel.NumFeatureLevels = static_cast<UINT>(sizeof(allLevels) / sizeof(D3D_FEATURE_LEVEL));
     dFeatureLevel.pFeatureLevelsRequested = allLevels;
 
-    result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &dFeatureLevel, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
+    result = QueryFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &dFeatureLevel, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
     if (SUCCEEDED(result))
     {
         m_eMaxFeatureLevel = dFeatureLevel.MaxSupportedFeatureLevel;
@@ -1190,7 +1264,7 @@ inline HRESULT CD3DX12FeatureSupport::QueryProtectedResourceSessionTypes(UINT No
     CurrentPRSTypes.TypeVec.resize(CurrentPRSTypes.Count);
     CurrentPRSTypes.pTypes = CurrentPRSTypes.TypeVec.data();
 
-    HRESULT result = m_pDevice->CheckFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPES, &m_dProtectedResourceSessionTypes[NodeIndex], sizeof(D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES));
+    HRESULT result = QueryFeatureSupport(D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPES, &m_dProtectedResourceSessionTypes[NodeIndex], sizeof(D3D12_FEATURE_DATA_PROTECTED_RESOURCE_SESSION_TYPES));
     if (FAILED(result))
     {
         // Resize TypeVec to empty

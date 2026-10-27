@@ -301,7 +301,7 @@ const UINT D3D12_OS_RESERVED_REGISTER_SPACE_VALUES_END = 0xffffffff;
 const UINT D3D12_OS_RESERVED_REGISTER_SPACE_VALUES_START = 0xfffffff8;
 const UINT D3D12_PACKED_TILE = 0xffffffff;
 const UINT D3D12_PIXEL_ADDRESS_RANGE_BIT_COUNT = 15;
-const UINT D3D12_PREVIEW_SDK_VERSION = 721;
+const UINT D3D12_PREVIEW_SDK_VERSION = 722;
 const UINT D3D12_PRE_SCISSOR_PIXEL_ADDRESS_RANGE_BIT_COUNT = 16;
 const UINT D3D12_PS_CS_UAV_REGISTER_COMPONENTS = 1;
 const UINT D3D12_PS_CS_UAV_REGISTER_COUNT = 8;
@@ -329,7 +329,11 @@ cpp_quote("#define D3D12_PS_PIXEL_CENTER_FRACTIONAL_COMPONENT	( 0.5f )")
 const UINT D3D12_RAW_UAV_SRV_BYTE_ALIGNMENT = 16;
 const UINT D3D12_RAYTRACING_AABB_BYTE_ALIGNMENT = 8;
 const UINT D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BYTE_ALIGNMENT = 256;
+const UINT D3D12_RAYTRACING_CLAS_BYTE_ALIGNMENT = 128;
+const UINT D3D12_RAYTRACING_CLUSTER_TEMPLATE_BOUNDS_BYTE_ALIGNMENT = 32;
+const UINT D3D12_RAYTRACING_CLUSTER_TEMPLATE_BYTE_ALIGNMENT = 32;
 const UINT D3D12_RAYTRACING_INSTANCE_DESCS_BYTE_ALIGNMENT = 16;
+const UINT D3D12_RAYTRACING_MAXIMUM_GEOMETRY_INDEX = 16777215;
 const UINT D3D12_RAYTRACING_MAX_ATTRIBUTE_SIZE_IN_BYTES = 32;
 const UINT D3D12_RAYTRACING_MAX_DECLARABLE_TRACE_RECURSION_DEPTH = 31;
 const UINT D3D12_RAYTRACING_MAX_GEOMETRIES_PER_BOTTOM_LEVEL_ACCELERATION_STRUCTURE = 16777216;
@@ -338,6 +342,7 @@ const UINT D3D12_RAYTRACING_MAX_PRIMITIVES_PER_BOTTOM_LEVEL_ACCELERATION_STRUCTU
 const UINT D3D12_RAYTRACING_MAX_RAY_GENERATION_SHADER_THREADS = 1073741824;
 const UINT D3D12_RAYTRACING_MAX_SHADER_RECORD_STRIDE = 4096;
 const UINT D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_BYTE_ALIGNMENT = 128;
+const UINT D3D12_RAYTRACING_OPACITY_MICROMAP_DESCS_BYTE_ALIGNMENT = 4;
 const UINT D3D12_RAYTRACING_OPACITY_MICROMAP_OC1_MAX_SUBDIVISION_LEVEL = 12;
 const UINT D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT = 32;
 const UINT D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT = 64;
@@ -370,7 +375,7 @@ const UINT D3D12_REQ_TEXTURE3D_U_V_OR_W_DIMENSION = 2048;
 const UINT D3D12_REQ_TEXTURECUBE_DIMENSION = 16384;
 const UINT D3D12_RESINFO_INSTRUCTION_MISSING_COMPONENT_RETVAL = 0;
 const UINT D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES = 0xffffffff;
-const UINT D3D12_RETAIN_DUMP_FILE_DEFAULT = 1;
+const UINT D3D12_RETAIN_DUMP_FILE_DEFAULT = 0;
 const UINT D3D12_RS_SET_SHADING_RATE_COMBINER_COUNT = 2;
 const UINT D3D12_SDK_VERSION = 620;
 const UINT D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES = 32;
@@ -465,23 +470,23 @@ const UINT D3D12_WORK_GRAPHS_BACKING_MEMORY_ALIGNMENT_IN_BYTES = 8;
 const UINT D3D12_WORK_GRAPHS_DISPATCH_MAX_THREAD_GROUPS_PER_GRID = 16777215;
 const UINT D3D12_WORK_GRAPHS_MAX_NODE_DEPTH = 32;
 const UINT DIRECT3D_API_EXTENSIONS = 1;
-const UINT DIRECT3D_ASYNC_COMMANDS = 1;
 const UINT DIRECT3D_DEBUG_BREAK = 1;
-const UINT DIRECT3D_DUMP_FILES = 1;
-const UINT DIRECT3D_FENCE_BARRIERS_PREVIEW_COMPAT = 1;
-const UINT DIRECT3D_GUID_TEXTURE_LAYOUT = 1;
+const UINT DIRECT3D_EXECUTE_TILE_MAPPINGS = 1;
+const UINT DIRECT3D_GPU_COPY_DESCRIPTORS = 1;
 const UINT DIRECT3D_LINEAR_ALGEBRA = 1;
-const UINT DIRECT3D_MLIR_PROGRAMS = 1;
-const UINT DIRECT3D_PARTIAL_PROGRAMS = 1;
-const UINT DIRECT3D_PIX_MARKERS = 1;
+const UINT DIRECT3D_LINEAR_ALGEBRA_V1_COMPAT = 1;
 const UINT DIRECT3D_PREVIEW_BUILD = 1;
+const UINT DIRECT3D_RAYTRACING2 = 1;
 const UINT DIRECT3D_UAV_OF_DEPTH_STENCIL = 1;
 const UINT DIRECT3D_VARIABLE_GROUP_SHARED_MEMORY = 1;
+const UINT DIRECT3D_VIDEO_HWDRM = 1;
 cpp_quote("#endif")
+
 
 
 // Forward declarations
 interface ID3D12CommandQueue;
+interface ID3D12ShaderCacheSession1;
 
 
 typedef UINT64 D3D12_GPU_VIRTUAL_ADDRESS;
@@ -941,8 +946,10 @@ typedef enum D3D12_PIPELINE_STATE_FLAGS
     D3D12_PIPELINE_STATE_FLAG_DYNAMIC_DEPTH_BIAS = 0x4,
     D3D12_PIPELINE_STATE_FLAG_DYNAMIC_INDEX_BUFFER_STRIP_CUT = 0x8,
     D3D12_PIPELINE_STATE_FLAG_DISABLE_CACHED_BLOB = 0x10,
-    D3D12_PIPELINE_STATE_FLAG_DEBUG_BREAK_ALWAYS_HALT = 0x20,
+    D3D12_PIPELINE_STATE_FLAG_DEBUG_BREAK_ALWAYS_BREAK = 0x20,
     D3D12_PIPELINE_STATE_FLAG_DEBUG_BREAK_FORCE_NOP = 0x40,
+    D3D12_PIPELINE_STATE_FLAG_RAYQUERY_ALLOW_OPACITY_MICROMAPS_ON_PRE_SM69_SHADERS = 0x80,
+    D3D12_PIPELINE_STATE_FLAG_RAYQUERY_ALLOW_CLUSTERED_GEOMETRY_ON_PRE_SM69_SHADERS = 0x100,
 
 } D3D12_PIPELINE_STATE_FLAGS;
 cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_PIPELINE_STATE_FLAGS )" )
@@ -1016,11 +1023,11 @@ typedef struct D3D12_LOCAL_SERIALIZED_ROOT_SIGNATURE
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct D3D12_RT_FORMAT_ARRAY
+typedef struct D3D12_RT_FORMAT_ARRAY
 {
     DXGI_FORMAT RTFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
     UINT NumRenderTargets;
-};
+} D3D12_RT_FORMAT_ARRAY;
 
 typedef struct D3D12_PIPELINE_STATE_STREAM_DESC
 {
@@ -1059,8 +1066,22 @@ typedef enum D3D12_PIPELINE_STATE_SUBOBJECT_TYPE
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER1 = 27, // D3D12_RASTERIZER_DESC1
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER2 = 28, // D3D12_RASTERIZER_DESC2
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SERIALIZED_ROOT_SIGNATURE = 29, // D3D12_SERIALIZED_ROOT_SIGNATURE_DESC
+    D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PSDB = 30, // D3D12_SHADER_CACHE_SESSION_SUBOBJECT_DESC
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MAX_VALID,
 } D3D12_PIPELINE_STATE_SUBOBJECT_TYPE;
+
+typedef enum D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAGS
+{
+    D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAG_NONE = 0x0,
+    D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAG_CREATE_ONLY = 0x1,
+} D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAGS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAGS )" )
+
+typedef struct D3D12_SHADER_CACHE_SESSION_SUBOBJECT_DESC
+{
+    ID3D12ShaderCacheSession1* pSession;
+    D3D12_SHADER_CACHE_SESSION_SUBOBJECT_FLAGS Flags;
+} D3D12_SHADER_CACHE_SESSION_SUBOBJECT_DESC;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1079,7 +1100,6 @@ typedef enum D3D12_FEATURE
     D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT           =  6,
     D3D12_FEATURE_SHADER_MODEL                          =  7,
     D3D12_FEATURE_D3D12_OPTIONS1                        =  8,
-    D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL            =  9,
     D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_SUPPORT    = 10,
     D3D12_FEATURE_ROOT_SIGNATURE                        = 12,
     D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL1           = 13,
@@ -1135,8 +1155,11 @@ typedef enum D3D12_FEATURE
     D3D12_FEATURE_D3D12_OPTIONS_PREVIEW                 = 72,
     D3D12_FEATURE_USER_DEFINED_ANNOTATION               = 73,
     D3D12_FEATURE_DEBUG_BREAK                           = 74,
+    D3D12_FEATURE_D3D12_OPTIONS_RAYTRACING2                = 75,
     D3D12_FEATURE_LINEAR_ALGEBRA_SUPPORT = 77,
-    D3D12_FEATURE_LINEAR_ALGEBRA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT = 78,
+    D3D12_FEATURE_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT = 78,
+    D3D12_FEATURE_EXPLICIT_PSDBS = 79,
+    D3D12_FEATURE_LINEAR_ALGEBRA_OPERATION_ENUMERATION = 80,
 } D3D12_FEATURE;
 
 typedef enum D3D12_SHADER_MIN_PRECISION_SUPPORT
@@ -1154,6 +1177,7 @@ typedef enum D3D12_TILED_RESOURCES_TIER
     D3D12_TILED_RESOURCES_TIER_2        = 2,
     D3D12_TILED_RESOURCES_TIER_3        = 3,
     D3D12_TILED_RESOURCES_TIER_4        = 4,
+    D3D12_TILED_RESOURCES_TIER_5        = 5,
 } D3D12_TILED_RESOURCES_TIER;
 
 typedef enum D3D12_RESOURCE_BINDING_TIER
@@ -1161,6 +1185,7 @@ typedef enum D3D12_RESOURCE_BINDING_TIER
     D3D12_RESOURCE_BINDING_TIER_1 = 1,
     D3D12_RESOURCE_BINDING_TIER_2 = 2,
     D3D12_RESOURCE_BINDING_TIER_3 = 3,
+    D3D12_RESOURCE_BINDING_TIER_4 = 4,
 } D3D12_RESOURCE_BINDING_TIER;
 
 typedef enum D3D12_CONSERVATIVE_RASTERIZATION_TIER {
@@ -1406,7 +1431,16 @@ typedef enum D3D12_SHADER_CACHE_SUPPORT_FLAGS
     D3D12_SHADER_CACHE_SUPPORT_AUTOMATIC_DISK_CACHE     = 0x8,
     D3D12_SHADER_CACHE_SUPPORT_DRIVER_MANAGED_CACHE     = 0x10,
     D3D12_SHADER_CACHE_SUPPORT_SHADER_CONTROL_CLEAR     = 0x20,
-    D3D12_SHADER_CACHE_SUPPORT_SHADER_SESSION_DELETE    = 0x40
+    D3D12_SHADER_CACHE_SUPPORT_SHADER_SESSION_DELETE    = 0x40,
+    D3D12_SHADER_CACHE_SUPPORT_EXPLICIT_DRIVER_CACHE    = 0x80,
+    D3D12_SHADER_CACHE_SUPPORT_TRIM_WHEN_FULL           = 0x100,
+    D3D12_SHADER_CACHE_SUPPORT_RESERVE_MAXIMUM_SIZE     = 0x200,
+    D3D12_SHADER_CACHE_SUPPORT_STORE_OVERWRITE          = 0x400,
+    D3D12_SHADER_CACHE_SUPPORT_DELETE_BY_DESC           = 0x800,
+    D3D12_SHADER_CACHE_SUPPORT_STORE_DO_NOT_EVICT       = 0x1000,
+    D3D12_SHADER_CACHE_SUPPORT_SESSION_INFO             = 0x2000,
+    D3D12_SHADER_CACHE_SUPPORT_TRIM_TO                  = 0x4000,
+    D3D12_SHADER_CACHE_SUPPORT_SESSION_DESC1            = 0x8000,
 } D3D12_SHADER_CACHE_SUPPORT_FLAGS;
 cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_SHADER_CACHE_SUPPORT_FLAGS )" )
 
@@ -1511,7 +1545,9 @@ typedef enum D3D12_RAYTRACING_TIER
     D3D12_RAYTRACING_TIER_1_0 = 10,
     D3D12_RAYTRACING_TIER_1_1 = 11,
     D3D12_RAYTRACING_TIER_1_2 = 12,
+    D3D12_RAYTRACING_TIER_2_0 = 20,  //
 } D3D12_RAYTRACING_TIER;
+
 
 // D3D12_FEATURE_D3D12_OPTIONS5
 typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS5
@@ -1548,7 +1584,7 @@ typedef enum D3D12_SAMPLER_FEEDBACK_TIER
 {
     D3D12_SAMPLER_FEEDBACK_TIER_NOT_SUPPORTED = 0,
     D3D12_SAMPLER_FEEDBACK_TIER_0_9 = 90,
-    D3D12_SAMPLER_FEEDBACK_TIER_1_0 = 100
+    D3D12_SAMPLER_FEEDBACK_TIER_1_0 = 100,
 } D3D12_SAMPLER_FEEDBACK_TIER;
 
 // D3D12_FEATURE_D3D12_OPTIONS7
@@ -1724,12 +1760,17 @@ typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS22
     [annotation("_Out_")] UINT Max1DDispatchMeshSize;
 } D3D12_FEATURE_DATA_D3D12_OPTIONS22;
 
+// D3D12_FEATURE_EXPLICIT_PSDBS
+typedef struct D3D12_FEATURE_DATA_EXPLICIT_PSDBS
+{
+    [annotation("_Out_")] BOOL ExplicitPsdbsSupported;
+} D3D12_FEATURE_DATA_EXPLICIT_PSDBS;
 
 
 typedef enum D3D12_TIGHT_ALIGNMENT_TIER
 {
     D3D12_TIGHT_ALIGNMENT_TIER_NOT_SUPPORTED,
-    D3D12_TIGHT_ALIGNMENT_TIER_1                // Tight alignment of buffers supported
+    D3D12_TIGHT_ALIGNMENT_TIER_1,               // Tight alignment of buffers supported
 } D3D12_TIGHT_ALIGNMENT_TIER;
 
 typedef struct D3D12_FEATURE_DATA_TIGHT_ALIGNMENT
@@ -1820,6 +1861,7 @@ typedef enum D3D12_HEAP_FLAGS
     D3D12_HEAP_FLAG_CREATE_NOT_ZEROED = 0x1000,
     D3D12_HEAP_FLAG_TOOLS_USE_MANUAL_WRITE_TRACKING = 0x2000,
     D3D12_HEAP_FLAG_TOOLS_ENABLE_MEMORY_TRACKING = 0x4000,  //
+    D3D12_HEAP_FLAG_ALLOW_EXECUTE_TILE_MAPPINGS = 0x8000,
 
     // These are convenience aliases to manage resource heap tier restrictions. They cannot be bitwise OR'ed together cleanly.
     D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES = 0x0,
@@ -1880,6 +1922,7 @@ typedef enum D3D12_RESOURCE_FLAGS
     D3D12_RESOURCE_FLAG_VIDEO_PROCESS_3DLUT_ONLY = 0x200,
     D3D12_RESOURCE_FLAG_VIDEO_PROCESS_1DLUT_ONLY = 0x800,
     D3D12_RESOURCE_FLAG_USE_TIGHT_ALIGNMENT = 0x400,
+    D3D12_RESOURCE_FLAG_ALLOW_EXECUTE_TILE_MAPPINGS = 0x1000,
 
 } D3D12_RESOURCE_FLAGS;
 cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_RESOURCE_FLAGS )" )
@@ -3178,6 +3221,12 @@ typedef struct D3D12_GPU_DESCRIPTOR_HANDLE
     UINT64 ptr;
 } D3D12_GPU_DESCRIPTOR_HANDLE;
 
+typedef struct D3D12_COPY_DESCRIPTORS_RANGE
+{
+    UINT NumDescriptors;
+    D3D12_GPU_DESCRIPTOR_HANDLE DestRangeStart;
+    D3D12_GPU_DESCRIPTOR_HANDLE SrcRangeStart;
+} D3D12_COPY_DESCRIPTORS_RANGE;
 
 cpp_quote( "// If rects are supplied in D3D12_DISCARD_REGION, below, the resource " )
 cpp_quote( "// must have 2D subresources with all specified subresources the same dimension." )
@@ -3380,6 +3429,27 @@ typedef struct D3D12_COMMAND_SIGNATURE_DESC
     UINT NodeMask;
 } D3D12_COMMAND_SIGNATURE_DESC;
 
+// GPU-address meta-types used by Work Lists and raytracing.
+typedef struct D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE
+{
+    D3D12_GPU_VIRTUAL_ADDRESS StartAddress;
+    UINT64                    StrideInBytes;
+} D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE;
+
+typedef struct D3D12_GPU_VIRTUAL_ADDRESS_RANGE
+{
+    D3D12_GPU_VIRTUAL_ADDRESS StartAddress;
+    UINT64                    SizeInBytes;
+} D3D12_GPU_VIRTUAL_ADDRESS_RANGE;
+
+typedef struct D3D12_GPU_VIRTUAL_ADDRESS_RANGE_AND_STRIDE
+{
+    D3D12_GPU_VIRTUAL_ADDRESS StartAddress;
+    UINT64                    SizeInBytes;
+    UINT64                    StrideInBytes;
+} D3D12_GPU_VIRTUAL_ADDRESS_RANGE_AND_STRIDE;
+
+
 interface ID3D12Device;
 
 [ uuid( c4fec28f-7966-4e95-9f94-f431cb56c3b8 ), object, local, pointer_default( unique ) ]
@@ -3495,9 +3565,10 @@ interface ID3D12PipelineState1
     : ID3D12PipelineState
 {
     HRESULT GetRootSignature(
-        [in] REFIID riid, // Expected ID3D12RootSignature
+        [in] REFIID riid,
         [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppvRootSignature);
 }
+
 
 [ uuid( 8efb471d-616c-4f49-90f7-127bb763fa51 ), object, local, pointer_default( unique ) ]
 interface ID3D12DescriptorHeap
@@ -4607,13 +4678,14 @@ interface ID3D12StateObjectProperties2
     HRESULT GetGlobalRootSignatureForProgram(
         [in] LPCWSTR pProgramName,
         [in] REFIID riid, // Expected ID3D12RootSignature
-        [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppvRootSignature);
+        [out, iid_is(riid), annotation("_COM_Outptr_result_maybenull_")] void** ppvRootSignature);
 
     HRESULT GetGlobalRootSignatureForShader(
         [in] LPCWSTR pExportName,
         [in] REFIID riid, // Expected ID3D12RootSignature
-        [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppvRootSignature);
+        [out, iid_is(riid), annotation("_COM_Outptr_result_maybenull_")] void** ppvRootSignature);
 }
+
 
 typedef struct D3D12_NODE_ID
 {
@@ -4697,7 +4769,6 @@ typedef enum D3D12_STATE_SUBOBJECT_TYPE
     D3D12_STATE_SUBOBJECT_TYPE_COMPILER_EXISTING_COLLECTION = 33, // D3D12_COMPILER_EXISTING_COLLECTION_DESC
     D3D12_STATE_SUBOBJECT_TYPE_API_EXTENSION = 35, // D3D12_API_EXTENSION_DESC
     D3D12_STATE_SUBOBJECT_TYPE_EXISTING_COLLECTION_BY_KEY = 36, // D3D12_EXISTING_COLLECTION_BY_KEY_DESC
-
     D3D12_STATE_SUBOBJECT_TYPE_PARTIAL_GRAPHICS_PROGRAM = 37, // D3D12_PARTIAL_GRAPHICS_PROGRAM_DESC
     D3D12_STATE_SUBOBJECT_TYPE_OUTPUT_LINKAGE_SIGNATURE = 38, // D3D12_OUTPUT_LINKAGE_SIGNATURE_DESC
     D3D12_STATE_SUBOBJECT_TYPE_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE = 39, // D3D12_PRERASTERIZATION_OUTPUT_LINKAGE_SIGNATURE_DESC
@@ -4706,6 +4777,7 @@ typedef enum D3D12_STATE_SUBOBJECT_TYPE
 
     D3D12_STATE_SUBOBJECT_TYPE_MLIR_PROGRAM = 42, // D3D12_MLIR_PROGRAM_DESC
 
+    D3D12_STATE_SUBOBJECT_TYPE_PSDB = 43, // D3D12_SHADER_CACHE_SESSION_SUBOBJECT_DESC
 
 } D3D12_STATE_SUBOBJECT_TYPE;
 
@@ -4724,10 +4796,12 @@ typedef enum D3D12_STATE_OBJECT_FLAGS
     D3D12_STATE_OBJECT_FLAG_WORK_GRAPHS_USE_GRAPHICS_STATE_FOR_GLOBAL_ROOT_SIGNATURE = 0x40,
     D3D12_STATE_OBJECT_FLAG_FULL_SPECIALIZATION = 0x8,
 
-    D3D12_STATE_OBJECT_FLAG_DEBUG_BREAK_ALWAYS_HALT = 0x80,
+    D3D12_STATE_OBJECT_FLAG_DEBUG_BREAK_ALWAYS_BREAK = 0x80,
     D3D12_STATE_OBJECT_FLAG_DEBUG_BREAK_FORCE_NOP = 0x100,
     D3D12_STATE_OBJECT_FLAG_PREFER_MINIMAL_LINK = 0x200,
     D3D12_STATE_OBJECT_FLAG_PREFER_MINIMAL_LINK_BACKGROUND_SPECIALIZE = 0x400,
+    D3D12_STATE_OBJECT_FLAG_RAYQUERY_ALLOW_OPACITY_MICROMAPS_ON_PRE_SM69_SHADERS = 0x800,
+    D3D12_STATE_OBJECT_FLAG_RAYQUERY_ALLOW_CLUSTERED_GEOMETRY_ON_PRE_SM69_SHADERS = 0x1000,
 } D3D12_STATE_OBJECT_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_STATE_OBJECT_FLAGS )")
 
@@ -4845,6 +4919,7 @@ typedef enum D3D12_RAYTRACING_PIPELINE_FLAGS
     D3D12_RAYTRACING_PIPELINE_FLAG_SKIP_TRIANGLES = 0x100,
     D3D12_RAYTRACING_PIPELINE_FLAG_SKIP_PROCEDURAL_PRIMITIVES = 0x200,
     D3D12_RAYTRACING_PIPELINE_FLAG_ALLOW_OPACITY_MICROMAPS = 0x400,
+    D3D12_RAYTRACING_PIPELINE_FLAG_ALLOW_CLUSTERED_GEOMETRY = 0x800,
 } D3D12_RAYTRACING_PIPELINE_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_RAYTRACING_PIPELINE_FLAGS )")
 
@@ -4952,7 +5027,6 @@ typedef struct D3D12_COMMON_PROGRAM_NODE_OVERRIDES
     [annotation("_In_opt_ ")] const D3D12_NODE_ID* pShareInputOf;
 } D3D12_COMMON_PROGRAM_NODE_OVERRIDES;
 
-
 typedef enum D3D12_PROGRAM_NODE_OVERRIDES_TYPE
 {
     D3D12_PROGRAM_NODE_OVERRIDES_TYPE_NONE = 0,
@@ -5056,25 +5130,6 @@ typedef enum D3D12_RAYTRACING_INSTANCE_FLAGS
 } D3D12_RAYTRACING_INSTANCE_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_RAYTRACING_INSTANCE_FLAGS )")
 
-typedef struct D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE
-{
-    D3D12_GPU_VIRTUAL_ADDRESS   StartAddress;
-    UINT64                      StrideInBytes;
-} D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE;
-
-typedef struct D3D12_GPU_VIRTUAL_ADDRESS_RANGE
-{
-    D3D12_GPU_VIRTUAL_ADDRESS   StartAddress;
-    UINT64                      SizeInBytes;
-} D3D12_GPU_VIRTUAL_ADDRESS_RANGE;
-
-typedef struct D3D12_GPU_VIRTUAL_ADDRESS_RANGE_AND_STRIDE
-{
-    D3D12_GPU_VIRTUAL_ADDRESS   StartAddress;
-    UINT64                      SizeInBytes;
-    UINT64                      StrideInBytes;
-} D3D12_GPU_VIRTUAL_ADDRESS_RANGE_AND_STRIDE;
-
 typedef struct D3D12_RAYTRACING_GEOMETRY_TRIANGLES_DESC
 {
     D3D12_GPU_VIRTUAL_ADDRESS               Transform3x4;
@@ -5108,6 +5163,7 @@ typedef enum D3D12_RAYTRACING_OPACITY_MICROMAP_SPECIAL_INDEX
     D3D12_RAYTRACING_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_OPAQUE = -2,
     D3D12_RAYTRACING_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_TRANSPARENT = -3,
     D3D12_RAYTRACING_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_OPAQUE = -4,
+    D3D12_RAYTRACING_OPACITY_MICROMAP_SPECIAL_INDEX_CLUSTER_SKIP_OMM = -5,
 } D3D12_RAYTRACING_OPACITY_MICROMAP_SPECIAL_INDEX;
 
 typedef enum D3D12_RAYTRACING_OPACITY_MICROMAP_STATE
@@ -5175,6 +5231,10 @@ typedef enum D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE
     D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL = 0x0,
     D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL = 0x1,
     D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_OPACITY_MICROMAP_ARRAY = 0x2,
+    D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_CLUSTER_LEVEL = 0x3, //
+    D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_CLUSTER_TEMPLATE = 0x4, //
+    D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_CLUSTERED_BOTTOM_LEVEL = 0x5, //
+    D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_PARTITIONED_TOP_LEVEL = 0x6, //
 } D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE;
 
 typedef enum D3D12_ELEMENTS_LAYOUT
@@ -5212,6 +5272,14 @@ typedef struct D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_TOOLS_VISUALIZATION
     D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE Type;
     UINT NumDescs;
 } D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_TOOLS_VISUALIZATION_HEADER;
+cpp_quote("// Depending on Type field, NumDescs above is followed by either:")
+cpp_quote("// D3D12_RAYTRACING_INSTANCE_DESC InstanceDescs[NumDescs]")
+cpp_quote("// or D3D12_RAYTRACING_GEOMETRY_DESC GeometryDescs[NumDescs]")
+cpp_quote("// or D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_DESC (NumDescs == 1 in this case)")
+cpp_quote("// or Raytracing2 tools visualization data, beginning with D3D12_RTAS_TOOLS_VISUALIZATION_BUILD_INPUTS_HEADER")
+cpp_quote("// For D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_DESC, the pOmmHistogram pointer becomes a GPUVA instead of CPU pointer")
+cpp_quote("//  OLD comment below (to be removed when the above ships)")
+cpp_quote("//  ")
 cpp_quote("// Regarding D3D12_BUILD_RAY_TRACING_ACCELERATION_STRUCTURE_TOOLS_VISUALIZATION_HEADER above,")
 cpp_quote("// depending on Type field, NumDescs above is followed by either:")
 cpp_quote("//       D3D12_RAY_TRACING_INSTANCE_DESC InstanceDescs[NumDescs]")
@@ -5285,6 +5353,8 @@ typedef struct D3D12_SERIALIZED_RAYTRACING_ACCELERATION_STRUCTURE_HEADER1
 typedef enum D3D12_SERIALIZED_BLOCK_TYPE
 {
     D3D12_RAYTRACING_SERIALIZED_BLOCK_TYPE_OPACITY_MICROMAPS = 0x0,
+    D3D12_RAYTRACING_SERIALIZED_BLOCK_TYPE_BOTTOM_LEVEL_ACCELERATION_STRUCTURE = 0x1, //
+    D3D12_RAYTRACING_SERIALIZED_BLOCK_TYPE_CLUSTER_LEVEL_ACCELERATION_STRUCTURE = 0x2, //
 } D3D12_RAYTRACING_SERIALIZED_BLOCK_TYPE;
 
 typedef struct D3D12_RAYTRACING_SERIALIZED_BLOCK
@@ -5846,6 +5916,14 @@ interface ID3D12Resource2
     D3D12_RESOURCE_DESC1 GetDesc1();
 }
 
+[uuid(b5e58a68-46f3-4ece-a278-2246c1eb4093), object, local, pointer_default(unique)]
+interface ID3D12Resource3
+    : ID3D12Resource2
+{
+    D3D12_RESOURCE_DESC2 GetDesc2();
+    UINT32 GetCastableFormatsCount();
+    HRESULT GetCastableFormats([annotation("_Inout_")] DXGI_FORMAT* pCastableFormats);
+}
 
 
 [uuid(572F7389-2168-49E3-9693-D6DF5871BF6D), object, local, pointer_default(unique)]
@@ -6060,6 +6138,7 @@ typedef struct D3D12_SET_MLIR_PROGRAM_DESC
     D3D12_SET_MLIR_PROGRAM_FLAGS Flags;
 } D3D12_SET_MLIR_PROGRAM_DESC;
 
+
 typedef struct D3D12_SET_PROGRAM_DESC
 {
     D3D12_PROGRAM_TYPE Type;
@@ -6212,6 +6291,8 @@ typedef enum D3D12_SHADER_CACHE_MODE
 {
     D3D12_SHADER_CACHE_MODE_MEMORY,
     D3D12_SHADER_CACHE_MODE_DISK,
+    D3D12_SHADER_CACHE_MODE_FILE,
+    D3D12_SHADER_CACHE_MODE_REGISTERED,
 } D3D12_SHADER_CACHE_MODE;
 
 typedef enum D3D12_SHADER_CACHE_FLAGS
@@ -6219,6 +6300,10 @@ typedef enum D3D12_SHADER_CACHE_FLAGS
     D3D12_SHADER_CACHE_FLAG_NONE = 0x0,
     D3D12_SHADER_CACHE_FLAG_DRIVER_VERSIONED = 0x1,
     D3D12_SHADER_CACHE_FLAG_USE_WORKING_DIR = 0x2,
+    D3D12_SHADER_CACHE_FLAG_RESERVE_MAXIMUM_SIZE = 0x4,
+    D3D12_SHADER_CACHE_FLAG_TRIM_WHEN_FULL = 0x8,
+    D3D12_SHADER_CACHE_FLAG_READ_ONLY = 0x10,
+    D3D12_SHADER_CACHE_FLAG_OPEN_EXISTING_ONLY = 0x20,
 } D3D12_SHADER_CACHE_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_SHADER_CACHE_FLAGS )")
 
@@ -6348,6 +6433,7 @@ typedef enum D3D12_BARRIER_TYPE
     D3D12_BARRIER_TYPE_GLOBAL,
     D3D12_BARRIER_TYPE_TEXTURE,
     D3D12_BARRIER_TYPE_BUFFER,
+    D3D12_BARRIER_TYPE_DESCRIPTOR_HEAP = 3,
 } D3D12_BARRIER_TYPE;
 
 typedef enum D3D12_TEXTURE_BARRIER_FLAGS
@@ -6399,6 +6485,16 @@ typedef struct D3D12_BUFFER_BARRIER
     UINT64 Size;
 } D3D12_BUFFER_BARRIER;
 
+typedef struct D3D12_DESCRIPTOR_HEAP_BARRIER
+{
+    D3D12_BARRIER_SYNC SyncBefore;
+    D3D12_BARRIER_SYNC SyncAfter;
+    D3D12_BARRIER_ACCESS AccessBefore;
+    D3D12_BARRIER_ACCESS AccessAfter;
+    D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor;
+    UINT NumDescriptors;
+} D3D12_DESCRIPTOR_HEAP_BARRIER;
+
 typedef struct D3D12_BARRIER_GROUP
 {
     D3D12_BARRIER_TYPE Type;
@@ -6408,6 +6504,7 @@ typedef struct D3D12_BARRIER_GROUP
         [annotation("_In_reads_(NumBarriers)")] const D3D12_GLOBAL_BARRIER *pGlobalBarriers;
         [annotation("_In_reads_(NumBarriers)")] const D3D12_TEXTURE_BARRIER *pTextureBarriers;
         [annotation("_In_reads_(NumBarriers)")] const D3D12_BUFFER_BARRIER *pBufferBarriers;
+        [annotation("_In_reads_(NumBarriers)")] const D3D12_DESCRIPTOR_HEAP_BARRIER *pDescriptorHeapBarriers;
     };
 } D3D12_BARRIER_GROUP;
 
@@ -6430,12 +6527,14 @@ interface ID3D12ShaderCacheSession
     D3D12_SHADER_CACHE_SESSION_DESC GetDesc();
 };
 
+
 typedef enum D3D12_SHADER_CACHE_KIND_FLAGS
 {
     D3D12_SHADER_CACHE_KIND_FLAG_IMPLICIT_D3D_CACHE_FOR_DRIVER = 0x1,
     D3D12_SHADER_CACHE_KIND_FLAG_IMPLICIT_D3D_CONVERSIONS = 0x2,
     D3D12_SHADER_CACHE_KIND_FLAG_IMPLICIT_DRIVER_MANAGED = 0x4,
     D3D12_SHADER_CACHE_KIND_FLAG_APPLICATION_MANAGED = 0x8,
+    D3D12_SHADER_CACHE_KIND_FLAG_PSDB = 0x10,
 } D3D12_SHADER_CACHE_KIND_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_SHADER_CACHE_KIND_FLAGS )")
 
@@ -6652,7 +6751,134 @@ interface ID3D12Device15 : ID3D12Device14
         [annotation("_Inout_")] void* pResolvedQueryData);
 };
 
+typedef enum D3D12_CACHE_VALUE_TYPE
+{
+    D3D12_CACHE_VALUE_TYPE_OBJECT_CODE       = 0,
+    D3D12_CACHE_VALUE_TYPE_METADATA          = 1,
+    D3D12_CACHE_VALUE_TYPE_DEBUG_PDB         = 2,
+    D3D12_CACHE_VALUE_TYPE_PERFORMANCE_DATA  = 3,
 
+} D3D12_CACHE_VALUE_TYPE;
+
+typedef enum D3D12_CACHE_VALUE_TYPE_FLAGS
+{
+    D3D12_CACHE_VALUE_TYPE_FLAGS_NONE                = 0x00000000,
+    D3D12_CACHE_VALUE_TYPE_FLAGS_OBJECT_CODE         = (1 << D3D12_CACHE_VALUE_TYPE_OBJECT_CODE),
+    D3D12_CACHE_VALUE_TYPE_FLAGS_METADATA            = (1 << D3D12_CACHE_VALUE_TYPE_METADATA),
+    D3D12_CACHE_VALUE_TYPE_FLAGS_DEBUG_PDB           = (1 << D3D12_CACHE_VALUE_TYPE_DEBUG_PDB),
+    D3D12_CACHE_VALUE_TYPE_FLAGS_PERFORMANCE_DATA    = (1 << D3D12_CACHE_VALUE_TYPE_PERFORMANCE_DATA),
+} D3D12_CACHE_VALUE_TYPE_FLAGS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_CACHE_VALUE_TYPE_FLAGS )" )
+
+typedef struct D3D12_CACHE_VALUE_KEY
+{
+    [annotation("_Field_size_bytes_full_(KeySize)")] const void* pKey;
+    UINT KeySize;
+} D3D12_CACHE_VALUE_KEY;
+
+typedef struct D3D12_CACHE_VALUE
+{
+    [size_is(ValueSize)] void* pValue;
+    UINT ValueSize;
+} D3D12_CACHE_VALUE;
+
+typedef struct D3D12_CACHE_TYPED_VALUE
+{
+    D3D12_CACHE_VALUE_TYPE  Type;
+    D3D12_CACHE_VALUE       Value;
+} D3D12_CACHE_TYPED_VALUE;
+
+typedef struct D3D12_CACHE_CONST_VALUE
+{
+    [annotation("_Field_size_bytes_opt_(ValueSize)")] const void* pValue;
+    SIZE_T ValueSize;
+} D3D12_CACHE_CONST_VALUE;
+
+typedef struct D3D12_CACHE_TYPED_CONST_VALUE
+{
+    D3D12_CACHE_VALUE_TYPE  Type;
+    D3D12_CACHE_CONST_VALUE Value;
+} D3D12_CACHE_TYPED_CONST_VALUE;
+
+typedef struct D3D12_SHADER_CACHE_SESSION_MEMORY_DESC
+{
+    GUID Identifier;
+    D3D12_SHADER_CACHE_FLAGS Flags;
+    UINT MaximumInMemoryCacheSizeBytes;
+    UINT MaximumInMemoryCacheEntries;
+    UINT64 Version;
+} D3D12_SHADER_CACHE_SESSION_MEMORY_DESC;
+
+typedef struct D3D12_SHADER_CACHE_SESSION_DISK_DESC
+{
+    GUID Identifier;
+    D3D12_SHADER_CACHE_FLAGS Flags;
+    LPCWSTR pDirectory;
+    UINT MaximumInMemoryCacheSizeBytes;
+    UINT MaximumInMemoryCacheEntries;
+    UINT64 MaximumValueFileSizeBytes;
+    UINT64 Version;
+} D3D12_SHADER_CACHE_SESSION_DISK_DESC;
+
+typedef enum D3D12_SHADER_CACHE_SESSION_REGISTERED_FLAGS
+{
+    D3D12_SHADER_CACHE_SESSION_REGISTERED_FLAG_NONE = 0x0,
+} D3D12_SHADER_CACHE_SESSION_REGISTERED_FLAGS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_SHADER_CACHE_SESSION_REGISTERED_FLAGS )" )
+
+typedef struct D3D12_SHADER_CACHE_SESSION_REGISTERED_DESC
+{
+    LPCWSTR pComponentName;
+    D3D12_SHADER_CACHE_SESSION_REGISTERED_FLAGS Flags;
+} D3D12_SHADER_CACHE_SESSION_REGISTERED_DESC;
+
+typedef struct D3D12_CACHE_FILE_DESC
+{
+    D3D12_CACHE_VALUE_TYPE_FLAGS Types;
+    UINT64 MaximumSizeBytes;
+    LPCWSTR pPath;
+} D3D12_CACHE_FILE_DESC;
+
+typedef enum D3D12_SHADER_CACHE_SESSION_FILE_FLAGS
+{
+    D3D12_SHADER_CACHE_SESSION_FILE_FLAG_NONE = 0x0,
+    D3D12_SHADER_CACHE_SESSION_FILE_FLAG_READ_ONLY = 0x1,
+    D3D12_SHADER_CACHE_SESSION_FILE_FLAG_TRIM_WHEN_FULL = 0x2,
+    D3D12_SHADER_CACHE_SESSION_FILE_FLAG_RESERVE_MAXIMUM_SIZE = 0x4,
+    D3D12_SHADER_CACHE_SESSION_FILE_FLAG_OPEN_EXISTING_ONLY = 0x8,
+    D3D12_SHADER_CACHE_SESSION_FILE_FLAG_ALLOW_CACHE_RESET = 0x10,
+} D3D12_SHADER_CACHE_SESSION_FILE_FLAGS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_SHADER_CACHE_SESSION_FILE_FLAGS )" )
+
+typedef struct D3D12_SHADER_CACHE_SESSION_FILE_DESC
+{
+    [annotation("_Field_size_full_(NumDescs)")] const D3D12_CACHE_FILE_DESC * pDescs;
+    UINT NumDescs;
+    D3D12_SHADER_CACHE_SESSION_FILE_FLAGS Flags;
+} D3D12_SHADER_CACHE_SESSION_FILE_DESC;
+
+typedef struct D3D12_SHADER_CACHE_SESSION_DESC1
+{
+    D3D12_SHADER_CACHE_MODE Mode;
+
+    [switch_type(D3D12_SHADER_CACHE_MODE), switch_is(Mode)]
+    union
+    {
+        [case(D3D12_SHADER_CACHE_MODE_MEMORY)]
+        D3D12_SHADER_CACHE_SESSION_MEMORY_DESC Memory;
+        [case(D3D12_SHADER_CACHE_MODE_DISK)]
+        D3D12_SHADER_CACHE_SESSION_DISK_DESC Disk;
+        [case(D3D12_SHADER_CACHE_MODE_REGISTERED)]
+        D3D12_SHADER_CACHE_SESSION_REGISTERED_DESC Registered;
+        [case(D3D12_SHADER_CACHE_MODE_FILE)]
+        D3D12_SHADER_CACHE_SESSION_FILE_DESC File;
+    };
+} D3D12_SHADER_CACHE_SESSION_DESC1;
+
+typedef void* (__stdcall* D3D12CacheSessionAllocationFunc) (
+    SIZE_T SizeInBytes,
+    [annotation("_Inout_opt_")] void* pContext
+    );
 
 cpp_quote("// D3D12_VERSION_NUMBER struct member layout assumes little-endian byte order.")
 cpp_quote("")
@@ -6690,9 +6916,16 @@ typedef struct D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT
     D3D12_VERSION_NUMBER ApplicationProfileVersion;
 } D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT;
 
+typedef enum D3D12_ASYNC_COMMANDS_IMPL
+{
+    D3D12_ASYNC_COMMANDS_IMPL_NOT_SUPPORTED    = 0,
+    D3D12_ASYNC_COMMANDS_IMPL_FALLBACK         = 1,
+    D3D12_ASYNC_COMMANDS_IMPL_NATIVE           = 2,
+} D3D12_ASYNC_COMMANDS_IMPL;
+
 typedef struct D3D12_FEATURE_DATA_ASYNC_COMMANDS
 {
-    BOOL Supported;
+    D3D12_ASYNC_COMMANDS_IMPL Impl;
 } D3D12_FEATURE_DATA_ASYNC_COMMANDS;
 
 cpp_quote("DEFINE_GUID(D3D12_GUID_TEXTURE_LAYOUT_NULL, 0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00); ")
@@ -6847,8 +7080,8 @@ typedef struct D3D12_ROW_MAJOR_TEXTURE_LAYOUT_INFO
     UINT64 SizeInBytes;         // Total size in bytes of this subresource/plane
 } D3D12_ROW_MAJOR_TEXTURE_LAYOUT_INFO;
 
-[uuid(24499bcb-4364-4c06-9007-a334f1748f18), object, local, pointer_default(unique)]
-interface ID3D12GuidTextureLayoutDevice : IUnknown
+[uuid(b34a50dd-e102-428f-82a0-82294a27bbe6), object, local, pointer_default(unique)]
+interface ID3D12Device16 : ID3D12Device15
 {
     HRESULT GetTextureLayoutCount(
         [annotation("_In_")] const D3D12_TEXTURE_LAYOUT_FILTER* pFilter,
@@ -6906,15 +7139,95 @@ interface ID3D12GuidTextureLayoutDevice : IUnknown
         [annotation("_In_range_(0, D3D12_REQ_SUBRESOURCES)")] UINT FirstSubresource,
         [annotation("_In_range_(0, D3D12_REQ_SUBRESOURCES - FirstSubresource)")] UINT NumSubresources,
         [annotation("_Out_writes_opt_(NumSubresources)")] D3D12_ROW_MAJOR_TEXTURE_LAYOUT_INFO* pLayoutInfo);
+
+    HRESULT CreateShaderCacheSession1(
+        [annotation("_In_")] const D3D12_SHADER_CACHE_SESSION_DESC1* pDesc,
+        REFIID riid,
+        [out, iid_is(riid), annotation("_COM_Outptr_opt_")] void** ppvSession
+    );
+
+    HRESULT DeleteShaderCache(
+        [annotation("_In_")] const D3D12_SHADER_CACHE_SESSION_DESC1* pDesc
+    );
+
+    HRESULT CheckFeatureSupport1(
+        D3D12_FEATURE Feature,
+        [annotation("_Inout_updates_bytes_(FeatureSupportDataSize)")] void* pFeatureSupportData,
+        UINT FeatureSupportDataSize,
+        UINT SDKVersion );
 };
 
-[uuid(4f9b2e01-3883-4973-80ca-59d2f45f25b5), object, local, pointer_default(unique)]
-interface ID3D12GuidTextureLayoutResource : IUnknown
+typedef struct D3D12_OPAQUE_TEXTURE_ROW_MAJOR_LAYOUT_INFO
 {
-    D3D12_RESOURCE_DESC2 GetDesc2();
+    BOOL IsRowMajor;            // FALSE => other fields are not meaningful
+    UINT64 Offset;              // Byte offset of subresource from start of underlying allocation
+    UINT64 RowPitch;            // Bytes per row of the row-major image
+    UINT Width;                 // Width in texels (post planar subsampling, for planar formats)
+    UINT Height;                // Height in rows (post planar subsampling, for planar formats)
+} D3D12_OPAQUE_TEXTURE_ROW_MAJOR_LAYOUT_INFO;
+
+[uuid(a7c3f1e8-2b94-4d06-9f5a-e8d1c40b7263), object, local, pointer_default(unique)]
+interface ID3D12ResourceOpaqueTextureLayout : IUnknown
+{
+    HRESULT GetOpaqueTextureRowMajorLayoutInfo(
+        [annotation("_In_range_(0, D3D12_REQ_SUBRESOURCES)")] UINT FirstSubresource,
+        [annotation("_In_range_(0, D3D12_REQ_SUBRESOURCES - FirstSubresource)")] UINT NumSubresources,
+        [annotation("_Out_writes_opt_(NumSubresources)")] D3D12_OPAQUE_TEXTURE_ROW_MAJOR_LAYOUT_INFO* pLayoutInfo);
 };
 
 
+typedef enum D3D12_SHADER_CACHE_STORE_FLAGS
+{
+    D3D12_SHADER_CACHE_STORE_FLAG_NONE = 0x0,
+    D3D12_SHADER_CACHE_STORE_FLAG_OVERWRITE = 0x1,
+    D3D12_SHADER_CACHE_STORE_FLAG_DO_NOT_EVICT = 0x2,
+} D3D12_SHADER_CACHE_STORE_FLAGS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_SHADER_CACHE_STORE_FLAGS )" )
+
+typedef enum D3D12_SHADER_CACHE_TRIM_FLAGS
+{
+    D3D12_SHADER_CACHE_TRIM_FLAG_NONE = 0x0,
+    D3D12_SHADER_CACHE_TRIM_FLAG_KEEP_MAXIMUM_SIZE = 0x1,
+} D3D12_SHADER_CACHE_TRIM_FLAGS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_SHADER_CACHE_TRIM_FLAGS )" )
+
+typedef struct D3D12_SHADER_CACHE_SESSION_INFO
+{
+    UINT64 CurrentSizeBytes;
+    UINT64 MaximumSizeBytes;
+    UINT64 ReservedSizeBytes;
+    UINT EntryCount;
+    UINT64 LifetimeEvictedEntryCount;
+} D3D12_SHADER_CACHE_SESSION_INFO;
+
+[uuid(1c5789ff-9203-490f-b971-984acf1eb5fe), object, local, pointer_default(unique)]
+interface ID3D12ShaderCacheSession1
+    : ID3D12ShaderCacheSession
+{
+    HRESULT FindValue1(
+        [annotation("_In_")] const D3D12_CACHE_VALUE_KEY* pValueKey,
+        [annotation("_Inout_count_(NumTypedValues)")] D3D12_CACHE_TYPED_VALUE* pTypedValues,
+        UINT NumTypedValues,
+        [annotation("_In_opt_")] D3D12CacheSessionAllocationFunc pCallbackFunc,
+        [annotation("_Inout_opt_")] void* pContext
+    );
+
+    HRESULT StoreValue1(
+        [annotation("_In_")] const D3D12_CACHE_VALUE_KEY* pValueKey,
+        [annotation("_In_reads_(NumTypedValues)")] const D3D12_CACHE_TYPED_CONST_VALUE* pTypedValues,
+        UINT NumTypedValues,
+        D3D12_SHADER_CACHE_STORE_FLAGS Flags
+    );
+
+    HRESULT GetSessionInfo(
+        [annotation("_Out_")] D3D12_SHADER_CACHE_SESSION_INFO* pInfo
+    );
+
+    HRESULT TrimTo(
+        UINT64 SizeBytes,
+        D3D12_SHADER_CACHE_TRIM_FLAGS Flags
+    );
+};
 
 [uuid(bc66d368-7373-4943-8757-fc87dc79e476), object, local, pointer_default(unique)]
 interface ID3D12VirtualizationGuestDevice
@@ -7157,46 +7470,18 @@ cpp_quote("    0x42c1,")
 cpp_quote("    {0x96, 0x05, 0x4b, 0xd9, 0x99, 0x9a, 0x61, 0xaf}")
 cpp_quote("};")
 cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
-cpp_quote("// Experimental Feature: D3D12FenceBarriersPreviewCompat")
+cpp_quote("// Preview Feature: D3D12RaytracingPreview")
 cpp_quote("//")
-cpp_quote("// Use with D3D12EnableExperimentalFeatures to enable experimental fence barriers features.")
+cpp_quote("// Use with D3D12EnableExperimentalFeatures to enable preview Raytracing2 features.")
 cpp_quote("//")
-cpp_quote("// Enabling D3D12FenceBarriersPreviewCompat needs no configuration struct, pass NULL in the pConfigurationStructs array.")
-cpp_quote("//")
-cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
-cpp_quote("static const UUID D3D12FenceBarriersPreviewCompat = { /* 9cf69866-1b5b-42b0-8a12-5322dfc54807 */")
-cpp_quote("    0x9cf69866,")
-cpp_quote("    0x1b5b,")
-cpp_quote("    0x42b0,")
-cpp_quote("    {0x8a, 0x12, 0x53, 0x22, 0xdf, 0xc5, 0x48, 0x07}")
-cpp_quote("};")
-cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
-cpp_quote("// Experimental Feature: D3D12FenceBarriersTier2Experiment")
-cpp_quote("//")
-cpp_quote("// Use with D3D12EnableExperimentalFeatures to enable Tier-2 experimental fence barriers features.")
-cpp_quote("//")
-cpp_quote("// Enabling D3D12FenceBarriersTier2Experiment needs no configuration struct, pass NULL in the pConfigurationStructs array.")
+cpp_quote("// Enabling D3D12RaytracingPreview needs no configuration struct, pass NULL in the pConfigurationStructs array.")
 cpp_quote("//")
 cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
-cpp_quote("static const UUID D3D12FenceBarriersTier2Experiment = { /* 4ab3a76b-fa1d-46e0-829a-e2a0c74d8a8f */")
-cpp_quote("    0x4ab3a76b,")
-cpp_quote("    0xfa1d,")
-cpp_quote("    0x46e0,")
-cpp_quote("    {0x82, 0x9a, 0xe2, 0xa0, 0xc7, 0x4d, 0x8a, 0x8f}")
-cpp_quote("};")
-cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
-cpp_quote("// Experimental Feature: D3D12AsyncCommandsExperiment")
-cpp_quote("//")
-cpp_quote("// Use with D3D12EnableExperimentalFeatures to enable experimental async commands features.")
-cpp_quote("//")
-cpp_quote("// Enabling D3D12AsyncCommandsExperiment needs no configuration struct, pass NULL in the pConfigurationStructs array.")
-cpp_quote("//")
-cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
-cpp_quote("static const UUID D3D12AsyncCommandsExperiment = { /* 7adf09d5-b158-4a80-ba0c-cd47eafb8637 */")
-cpp_quote("    0x7adf09d5,")
-cpp_quote("    0xb158,")
-cpp_quote("    0x4a80,")
-cpp_quote("    {0xba, 0x0c, 0xcd, 0x47, 0xea, 0xfb, 0x86, 0x37}")
+cpp_quote("static const UUID D3D12RaytracingPreview = { /* b56e238b-e886-46d8-9be1-341030314509 */")
+cpp_quote("    0xb56e238b,")
+cpp_quote("    0xe886,")
+cpp_quote("    0x46d8,")
+cpp_quote("    {0x9b, 0xe1, 0x34, 0x10, 0x30, 0x31, 0x45, 0x09}")
 cpp_quote("};")
 cpp_quote("// --------------------------------------------------------------------------------------------------------------------------------")
 cpp_quote("// D3D12GetInterface")
@@ -7213,6 +7498,7 @@ cpp_quote("DEFINE_GUID(CLSID_D3D12DSRDeviceFactory,             0xbb6dd27e, 0x94
 cpp_quote("DEFINE_GUID(CLSID_D3D12StateObjectFactory,           0x54e1c9f3, 0x1303, 0x4112, 0xbf, 0x8e, 0x7b, 0xf2, 0xbb, 0x60, 0x6a, 0x73);")
 cpp_quote("DEFINE_GUID(CLSID_D3D12RuntimeValidationControl,     0xe5b53e74, 0x3fca, 0x47b4, 0x88, 0xb9, 0xa8, 0xb4, 0x1e, 0xf8, 0xfb, 0x73);")
 cpp_quote("DEFINE_GUID(CLSID_D3D12ApplicationIdentity,          0x08d8e1e8, 0x75a6, 0x42a7, 0xbf, 0x3a, 0xd0, 0x5f, 0xe5, 0x29, 0xc4, 0x7c);")
+cpp_quote("DEFINE_GUID(CLSID_D3D12AsyncCommandsFallback,        0xef4992f0, 0x0fae, 0x424e, 0xb4, 0x84, 0x7b, 0xcd, 0x8e, 0x56, 0x9e, 0x3e);")
 cpp_quote("DEFINE_GUID(CLSID_D3D12InfoQueue,                    0x4a87fbe2, 0x9e5b, 0x4c5d, 0xa8, 0x21, 0x8e, 0x06, 0xf8, 0x33, 0x71, 0x9a);")
 cpp_quote("DEFINE_GUID(CLSID_D3D12StateObjectDatabaseCapture,   0x2b6c3e2f, 0xeb8e, 0x4db9, 0x8c, 0xf4, 0x1e, 0x04, 0x7e, 0x67, 0x1b, 0x7f);")
 cpp_quote("")
@@ -7301,6 +7587,8 @@ typedef enum D3D12_DEVICE_FLAGS
     D3D12_DEVICE_FLAG_SHADER_INSTRUMENTATION_ENABLED = 0x100,
     D3D12_DEVICE_FLAG_AUTO_DEBUG_NAME_ENABLED = 0x200,
     D3D12_DEVICE_FLAG_FORCE_LEGACY_STATE_VALIDATION = 0x400,
+    D3D12_DEVICE_FLAG_DRIVER_REPORTED_MESSAGES_ENABLED = 0x2000,
+    D3D12_DEVICE_FLAG_ASYNC_COMMANDS_FALLBACK_ENABLED = 0x4000,
 } D3D12_DEVICE_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_DEVICE_FLAGS )")
 
@@ -7390,6 +7678,7 @@ typedef enum D3D12_FIND_PIPELINE_STATE_DESC_FLAGS
 {
     D3D12_FIND_PIPELINE_STATE_DESC_FLAG_NONE = 0x0,
     D3D12_FIND_PIPELINE_STATE_DESC_FLAG_NO_GROUPS = 0x1,
+    D3D12_FIND_PIPELINE_STATE_DESC_FLAG_NO_DESERIALIZE = 0x2,
 } D3D12_FIND_PIPELINE_STATE_DESC_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_FIND_PIPELINE_STATE_DESC_FLAGS )")
 
@@ -7397,6 +7686,7 @@ typedef enum D3D12_FIND_STATE_OBJECT_DESC_FLAGS
 {
     D3D12_FIND_STATE_OBJECT_DESC_FLAG_NONE = 0x0,
     D3D12_FIND_STATE_OBJECT_DESC_FLAG_NO_GROUPS = 0x1,
+    D3D12_FIND_STATE_OBJECT_DESC_FLAG_NO_DESERIALIZE = 0x2,
 } D3D12_FIND_STATE_OBJECT_DESC_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_FIND_STATE_OBJECT_DESC_FLAGS )")
 
@@ -7457,7 +7747,7 @@ typedef void(__stdcall* D3D12PipelineStateFunc1) (
     [annotation("_In_reads_(NumGroupKeys)")] const UINT* pVersions,
     UINT NumGroupKeys,
     [annotation("_In_")] const D3D12_DATABASE_PIPELINE_STATE_KEY* pPipelineStateKey,
-    [annotation("_In_")] const D3D12_PIPELINE_STATE_STREAM_DESC* pDesc,
+    [annotation("_In_opt_")] const D3D12_PIPELINE_STATE_STREAM_DESC* pDesc,
     [annotation("_Inout_opt_")] void* pContext
     );
 
@@ -7466,7 +7756,7 @@ typedef void(__stdcall* D3D12StateObjectFunc1) (
     [annotation("_In_reads_(NumGroupKeys)")] const UINT* pVersions,
     UINT NumGroupKeys,
     [annotation("_In_")] const D3D12_DATABASE_STATE_OBJECT_KEY* pStateObjectKey,
-    [annotation("_In_")] const D3D12_STATE_OBJECT_DESC* pDesc,
+    [annotation("_In_opt_")] const D3D12_STATE_OBJECT_DESC* pDesc,
     [annotation("_In_opt_")] const D3D12_DATABASE_STATE_OBJECT_KEY* pParentKey,
     [annotation("_In_opt_")] const D3D12_DATABASE_GROUP_KEY* pParentGroupKey,
     [annotation("_Inout_opt_")] void* pContext
@@ -7488,7 +7778,20 @@ typedef BOOL(__stdcall* D3D12EnumerateStateObjectFunc) (
     [annotation("_Inout_opt_")] void* pContext
     );
 
-[uuid(c066f807-403d-40a3-b1a3-5f50f912b6e0), object, local, pointer_default(unique)]
+typedef void(__stdcall* D3D12StateObjectDependenciesFunc) (
+    [annotation("_In_opt_")] const D3D12_DATABASE_STATE_OBJECT_KEY* pParentStateObjectKey,
+    UINT NumExistingCollections,
+    [annotation("_In_reads_(NumExistingCollections)")] const D3D12_DATABASE_STATE_OBJECT_KEY* pExistingCollections,
+    [annotation("_Inout_opt_")] void* pContext
+    );
+
+typedef void(__stdcall* D3D12ApplicationDescFunc1) (
+    [annotation("_In_")] const D3D12_APPLICATION_DESC* pApplicationDesc,
+    [annotation("_In_")] REFGUID AppId,
+    [annotation("_Inout_opt_")] void* pContext
+    );
+
+[uuid(c700e43f-47a6-4ec6-ad83-f275400231af), object, local, pointer_default(unique)]
 interface ID3D12StateObjectDatabase1
     : ID3D12StateObjectDatabase
 {
@@ -7498,6 +7801,20 @@ interface ID3D12StateObjectDatabase1
 
     HRESULT EnumerateStateObjects(
         [annotation("_In_")] D3D12EnumerateStateObjectFunc CallbackFunc,
+        [annotation("_Inout_opt_")] void* pContext);
+
+    HRESULT GetStateObjectDependencies(
+        [annotation("_In_opt_")] const D3D12_DATABASE_GROUP_KEY* pGroupKey,
+        [annotation("_In_opt_")] const D3D12_DATABASE_STATE_OBJECT_KEY* pStateObjectKey,
+        [annotation("_In_")] D3D12StateObjectDependenciesFunc CallbackFunc,
+        [annotation("_Inout_opt_")] void* pContext);
+
+    HRESULT SetApplicationDesc1(
+        [annotation("_In_")] const D3D12_APPLICATION_DESC* pApplicationDesc,
+        [annotation("_In_")] REFGUID AppId);
+
+    HRESULT GetApplicationDesc1(
+        [annotation("_In_")] D3D12ApplicationDescFunc1 CallbackFunc,
         [annotation("_Inout_opt_")] void* pContext);
 
     HRESULT FindPipelineStateDesc1(
@@ -7549,6 +7866,10 @@ interface ID3D12StateObjectDatabase1
 };
 
 interface ID3D12InfoQueue;
+cpp_quote("#ifndef __ID3D12InfoQueue_FWD_DEFINED__")
+cpp_quote("#define __ID3D12InfoQueue_FWD_DEFINED__")
+cpp_quote("typedef interface ID3D12InfoQueue ID3D12InfoQueue;")
+cpp_quote("#endif")
 [uuid(68a6585d-0ac7-4fa4-ba33-e3bd442f2833), object, local, pointer_default(unique)]
 interface ID3D12StateObjectDatabaseFactory1
     : ID3D12StateObjectDatabaseFactory
@@ -7568,6 +7889,16 @@ interface ID3D12ApplicationIdentity
     : IUnknown
 {
     HRESULT SetApplicationIdentity(const D3D12_APPLICATION_DESC* pDesc, REFGUID AppId);
+};
+
+// Opt-in permission for runtime Async Commands fallbacks on devices without native support.
+// Unimplemented Clear* fallbacks remove the command list with E_FAIL.
+[uuid(fbddf9e8-33a3-488c-9775-1a970dc54862), object, local, pointer_default(unique)]
+interface ID3D12AsyncCommandsFallback
+    : IUnknown
+{
+    HRESULT SetFallbackLayerEnabled(BOOL Enable);
+    BOOL GetFallbackLayerEnabled();
 };
 
 [uuid(d67447bc-4d6c-4ca5-a2a8-deeea4c145c4), object, local, pointer_default(unique)]
@@ -7709,6 +8040,7 @@ typedef struct D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT
 } D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT;
 
 typedef enum D3D12_LINEAR_ALGEBRA_DATATYPE {
+    D3D12_LINEAR_ALGEBRA_DATATYPE_NONE = 0,
     D3D12_LINEAR_ALGEBRA_DATATYPE_SINT16 = 2,
     D3D12_LINEAR_ALGEBRA_DATATYPE_UINT16 = 3,
     D3D12_LINEAR_ALGEBRA_DATATYPE_SINT32 = 4,
@@ -7741,24 +8073,24 @@ typedef enum D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS
 } D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS;
 cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS )")
 
+typedef struct D3D12_LINEAR_ALGEBRA_MATRIX_SHAPE
+{
+    UINT M;  // Rows in matrix A
+    UINT K;  // Columns in matrix A / Rows in matrix B
+    UINT N;  // Columns in matrix B
+} D3D12_LINEAR_ALGEBRA_MATRIX_SHAPE;
+cpp_quote("typedef D3D12_LINEAR_ALGEBRA_MATRIX_SHAPE D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE;")
+
 typedef struct D3D12_LINEAR_ALGEBRA_MATRIX_CONSTRUCTION_SUPPORT
 {
     // Inputs
     D3D12_LINEAR_ALGEBRA_DATATYPE ComponentType;
     UINT WaveSize;
+    D3D12_LINEAR_ALGEBRA_MATRIX_SHAPE Shape;
 
     // Outputs
-    UINT MinM;
-    UINT MinK;
-    UINT MinN;
+    BOOL Supported;
 } D3D12_LINEAR_ALGEBRA_MATRIX_CONSTRUCTION_SUPPORT;
-
-typedef struct D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE
-{
-    UINT M;  // Rows in matrix A
-    UINT K;  // Columns in matrix A / Rows in matrix B
-    UINT N;  // Columns in matrix B
-} D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE;
 
 typedef struct D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_INPUTS
 {
@@ -7772,18 +8104,17 @@ typedef struct D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_SUPPORT
 {
     // Inputs
     D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_INPUTS Inputs;
+    D3D12_LINEAR_ALGEBRA_MATRIX_SHAPE Shape;
 
     // Outputs
     D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS SupportFlags;
-    UINT NumShapes;
-    D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE *Shapes;
 } D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_SUPPORT;
 
 typedef struct D3D12_LINEAR_ALGEBRA_THREADGROUP_MATRIX_MULTIPLY_SUPPORT
 {
     // Inputs
     D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_INPUTS WaveInputs;
-    D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE Shape;
+    D3D12_LINEAR_ALGEBRA_MATRIX_SHAPE Shape;
 
     // Outputs
     D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS SupportFlags;
@@ -7838,6 +8169,76 @@ typedef struct D3D12_FEATURE_DATA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT
     };
 } D3D12_FEATURE_DATA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT;
 
+typedef struct D3D12_LINEAR_ALGEBRA_MATRIX_CONSTRUCTION_ENUMERATION_ENTRY
+{
+    D3D12_LINEAR_ALGEBRA_DATATYPE ComponentType;
+    UINT MinWaveSize;
+    UINT MaxWaveSize;
+    D3D12_LINEAR_ALGEBRA_MATRIX_SHAPE Shape;
+} D3D12_LINEAR_ALGEBRA_MATRIX_CONSTRUCTION_ENUMERATION_ENTRY;
+
+typedef struct D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY
+{
+    UINT MinWaveSize;
+    UINT MaxWaveSize;
+    D3D12_LINEAR_ALGEBRA_DATATYPE MatrixAComponentType;
+    D3D12_LINEAR_ALGEBRA_DATATYPE MatrixBComponentType;
+    D3D12_LINEAR_ALGEBRA_DATATYPE AccumulatorComponentType;
+    D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS SupportFlags;
+    D3D12_LINEAR_ALGEBRA_MATRIX_SHAPE Shape;
+} D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY;
+
+typedef struct D3D12_LINEAR_ALGEBRA_THREADGROUP_MATRIX_MULTIPLY_ENUMERATION_ENTRY
+{
+    UINT MinWaveSize;
+    UINT MaxWaveSize;
+    D3D12_LINEAR_ALGEBRA_DATATYPE MatrixAComponentType;
+    D3D12_LINEAR_ALGEBRA_DATATYPE MatrixBComponentType;
+    D3D12_LINEAR_ALGEBRA_DATATYPE AccumulatorComponentType;
+    D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS SupportFlags;
+    D3D12_LINEAR_ALGEBRA_MATRIX_SHAPE Shape;
+    UINT MinThreadGroupSize;
+    UINT MaxThreadGroupSize;
+    UINT PreferredThreadGroupSize;
+} D3D12_LINEAR_ALGEBRA_THREADGROUP_MATRIX_MULTIPLY_ENUMERATION_ENTRY;
+
+typedef struct D3D12_LINEAR_ALGEBRA_THREAD_VECTOR_MATRIX_MULTIPLY_ENUMERATION_ENTRY
+{
+    D3D12_LINEAR_ALGEBRA_DATATYPE VectorInputType;
+    D3D12_LINEAR_ALGEBRA_DATATYPE MatrixInputType;
+    D3D12_LINEAR_ALGEBRA_DATATYPE BiasInputType;
+    D3D12_LINEAR_ALGEBRA_DATATYPE VectorResultType;
+    D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS SupportFlags;
+} D3D12_LINEAR_ALGEBRA_THREAD_VECTOR_MATRIX_MULTIPLY_ENUMERATION_ENTRY;
+
+typedef struct D3D12_LINEAR_ALGEBRA_THREAD_OUTER_PRODUCT_ENUMERATION_ENTRY
+{
+    D3D12_LINEAR_ALGEBRA_DATATYPE InputComponentType;
+    D3D12_LINEAR_ALGEBRA_DATATYPE ResultComponentType;
+} D3D12_LINEAR_ALGEBRA_THREAD_OUTER_PRODUCT_ENUMERATION_ENTRY;
+
+typedef struct D3D12_LINEAR_ALGEBRA_ATOMIC_ACCUMULATE_STORE_ENUMERATION_ENTRY
+{
+    D3D12_LINEAR_ALGEBRA_DATATYPE ComponentType;
+    BOOL RWByteAddressBufferSupported;
+    BOOL GroupSharedSupported;
+} D3D12_LINEAR_ALGEBRA_ATOMIC_ACCUMULATE_STORE_ENUMERATION_ENTRY;
+
+typedef struct D3D12_FEATURE_DATA_LINEAR_ALGEBRA_OPERATION_ENUMERATION
+{
+    [annotation("_In_")]  D3D12_LINEAR_ALGEBRA_OPERATION_TYPE OperationType;
+    [annotation("_Inout_")] UINT NumEntries;
+    union
+    {
+        D3D12_LINEAR_ALGEBRA_MATRIX_CONSTRUCTION_ENUMERATION_ENTRY          *MatrixConstruction;
+        D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY         *WaveMatrixMultiply;
+        D3D12_LINEAR_ALGEBRA_THREADGROUP_MATRIX_MULTIPLY_ENUMERATION_ENTRY  *ThreadGroupMatrixMultiply;
+        D3D12_LINEAR_ALGEBRA_THREAD_VECTOR_MATRIX_MULTIPLY_ENUMERATION_ENTRY *ThreadVectorMatrixMultiply;
+        D3D12_LINEAR_ALGEBRA_THREAD_OUTER_PRODUCT_ENUMERATION_ENTRY         *ThreadOuterProduct;
+        D3D12_LINEAR_ALGEBRA_ATOMIC_ACCUMULATE_STORE_ENUMERATION_ENTRY      *AccumulateStore;
+    };
+} D3D12_FEATURE_DATA_LINEAR_ALGEBRA_OPERATION_ENUMERATION;
+
 typedef enum D3D12_LINEAR_ALGEBRA_MATRIX_LAYOUT
 {
     D3D12_LINEAR_ALGEBRA_MATRIX_LAYOUT_ROW_MAJOR,
@@ -7876,6 +8277,11 @@ typedef struct D3D12_LINEAR_ALGEBRA_MATRIX_CONVERSION_INFO {
     D3D12_LINEAR_ALGEBRA_MATRIX_CONVERSION_DATA           DataDesc;
 } D3D12_LINEAR_ALGEBRA_MATRIX_CONVERSION_INFO;
 
+typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2
+{
+    [annotation("_Out_")] BOOL ClustersAndPTLASSupported;
+    [annotation("_Out_")] BOOL TemplateInstancePrefersCOMPRESSED1;
+} D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2;
 
 typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW
 {
@@ -8094,16 +8500,16 @@ typedef enum D3D12_DEVICE_ERROR_CODE
     D3D12_DEVICE_ERROR_UNKNOWN = 0x88000000,
 } D3D12_DEVICE_ERROR_CODE;
 
-
-[uuid(8f0856ad-e37c-4d75-be18-fbb3d8c04ced), object, local, pointer_default(unique)]
-interface ID3D12DevicePreview : IUnknown
+[uuid(db82bfed-784d-40ea-aebf-08bcd7f0a9e4), object, local, pointer_default(unique)]
+interface ID3D12DeviceDumpFile : IUnknown
 {
-    void GetLinearAlgebraMatrixConversionDestinationInfo(
-        [annotation("_Inout_")] D3D12_LINEAR_ALGEBRA_MATRIX_CONVERSION_DEST_INFO* pDesc);
-
     HRESULT ConfigureDumpFile(
         [annotation("_In_")] D3D12_DUMP_FILE_DRIVER_OPTIONS driverOptions);
 
+cpp_quote("// The begin and end callbacks may overlap final device destruction.")
+cpp_quote("// Neither callback may acquire or release owning references to the device,")
+cpp_quote("// or call APIs requiring the global runtime lock (such as device creation).")
+cpp_quote("// The begin callback may call AddBlobToDumpFile without acquiring a device reference.")
     void SetDumpFileCallbacks(
         [annotation("_In_")] D3D12_DUMPFILEBEGINCALLBACK pBeginCallback,
         [annotation("_In_")] D3D12_DUMPFILEENDCALLBACK pEndCallback);
@@ -8119,51 +8525,13 @@ interface ID3D12DevicePreview : IUnknown
     D3D12_DEVICE_ERROR_CODE GetDeviceErrorCode();
 }
 
-[uuid(447e915c-c6f9-47e8-84d9-dc4f4495d230), object, local, pointer_default(unique)]
-interface ID3D12GraphicsCommandListPreview : ID3D12GraphicsCommandList11
-{
-    void SetWorkGraphMaximumGPUInputRecords(
-        [annotation("_In_")] UINT MaxRecords,
-        [annotation("_In_")] UINT MaxNodeInputs);
 
-    void ConvertLinearAlgebraMatrix(
-        [annotation("_In_")] const D3D12_LINEAR_ALGEBRA_MATRIX_CONVERSION_INFO* pDesc,
-        [annotation("_In_")] UINT DescCount);
+[uuid(8f0856ad-e37c-4d75-be18-fbb3d8c04ced), object, local, pointer_default(unique)]
+interface ID3D12DevicePreview : IUnknown
+{
+    void GetLinearAlgebraMatrixConversionDestinationInfo(
+        [annotation("_Inout_")] D3D12_LINEAR_ALGEBRA_MATRIX_CONVERSION_DEST_INFO* pDesc);
 }
-
-// D3D12_FENCE_BARRIERS_TIER
-typedef enum D3D12_FENCE_BARRIERS_TIER
-{
-    D3D12_FENCE_BARRIERS_TIER_NOT_SUPPORTED = 0,
-    D3D12_FENCE_BARRIERS_TIER_1 = 1, // Supports signal barriers
-    D3D12_FENCE_BARRIERS_TIER_2 = 2,
-} D3D12_FENCE_BARRIERS_TIER;
-
-// D3D12_FEATURE_DATA_FENCE_BARRIERS
-typedef struct D3D12_FEATURE_DATA_FENCE_BARRIERS
-{
-    [annotation("_In_")] UINT NodeIndex;
-    [annotation("_Inout_")] D3D12_COMMAND_LIST_TYPE CommandListType;
-    [annotation("_Out_")] D3D12_FENCE_BARRIERS_TIER FenceBarriersTier;
-} D3D12_FEATURE_DATA_FENCE_BARRIERS;
-
-[uuid(012b2bce-a66e-419a-a020-e645dc79f119), object, local, pointer_default(unique)]
-interface ID3D12CommandListFenceBarriers : IUnknown
-{
-    void WaitBarrier(
-        [annotation("_In_")] UINT NumBarrierGroups,
-        [annotation("_In_reads_(NumBarrierGroups)")] const D3D12_BARRIER_GROUP *pBarrierGroups,
-        [annotation("_In_")] UINT NumFences,
-        [annotation("_In_reads_(NumFences)")] ID3D12Fence * const *ppFences,
-        [annotation("_In_reads_(NumFences)")] const UINT64 *pFenceValues);
-
-    void SignalBarrier(
-        [annotation("_In_")] UINT NumBarrierGroups,
-        [annotation("_In_reads_(NumBarrierGroups)")] const D3D12_BARRIER_GROUP *pBarrierGroups,
-        [annotation("_In_")] ID3D12Fence *pFence,
-        [annotation("_In_")] UINT64 FenceValue);
-    }
-
 
 // Async Commands
 typedef struct D3D12_CLEAR_DATA
@@ -8239,8 +8607,8 @@ typedef struct D3D12_FILL_BUFFER_DESC
     UINT RepeatCount;
 } D3D12_FILL_BUFFER_DESC;
 
-[uuid(d7afd225-8c06-41c8-b8a2-6efbe1439ed9), object, local, pointer_default(unique)]
-interface ID3D12CommandListAsyncCommands : IUnknown
+[uuid(9524ea5e-c1b0-4fe5-a203-a75abc5d8e3a), object, local, pointer_default(unique)]
+interface ID3D12GraphicsCommandList12 : ID3D12GraphicsCommandList11
 {
     void CopyBufferRegions(
         UINT NumRegions,
@@ -8318,12 +8686,179 @@ interface ID3D12CommandListAsyncCommands : IUnknown
     );
 }
 
+[uuid(447e915c-c6f9-47e8-84d9-dc4f4495d230), object, local, pointer_default(unique)]
+interface ID3D12GraphicsCommandListPreview : ID3D12GraphicsCommandList12
+{
+    void SetWorkGraphMaximumGPUInputRecords(
+        [annotation("_In_")] UINT MaxRecords,
+        [annotation("_In_")] UINT MaxNodeInputs);
+
+    void ConvertLinearAlgebraMatrix(
+        [annotation("_In_")] const D3D12_LINEAR_ALGEBRA_MATRIX_CONVERSION_INFO* pDesc,
+        [annotation("_In_")] UINT DescCount);
+}
+
+// D3D12_FENCE_BARRIERS_TIER
+typedef enum D3D12_FENCE_BARRIERS_TIER
+{
+    D3D12_FENCE_BARRIERS_TIER_NOT_SUPPORTED = 0,
+    D3D12_FENCE_BARRIERS_TIER_1 = 1, // Supports signal barriers
+    D3D12_FENCE_BARRIERS_TIER_2 = 2,
+} D3D12_FENCE_BARRIERS_TIER;
+
+// D3D12_FENCE_BARRIERS_SUPPORT_FLAGS
+typedef enum D3D12_FENCE_BARRIERS_SUPPORT_FLAGS
+{
+    D3D12_FENCE_BARRIERS_SUPPORT_FLAG_NONE = 0x0,
+    D3D12_FENCE_BARRIERS_SUPPORT_FLAG_SHARED_FENCES = 0x1,
+} D3D12_FENCE_BARRIERS_SUPPORT_FLAGS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_FENCE_BARRIERS_SUPPORT_FLAGS )" )
+
+// D3D12_FEATURE_DATA_FENCE_BARRIERS
+typedef struct D3D12_FEATURE_DATA_FENCE_BARRIERS
+{
+    [annotation("_In_")] UINT NodeIndex;
+    [annotation("_Inout_")] D3D12_COMMAND_LIST_TYPE CommandListType;
+    [annotation("_Out_")] D3D12_FENCE_BARRIERS_TIER FenceBarriersTier;
+    [annotation("_Out_")] D3D12_FENCE_BARRIERS_SUPPORT_FLAGS SupportFlags;
+} D3D12_FEATURE_DATA_FENCE_BARRIERS;
+
+// GPU Copy Descriptors
+[uuid(fee4d6cf-3f7f-4090-8a71-abd58236df08), object, local, pointer_default(unique)]
+interface ID3D12CommandListGpuCopyDescriptors : IUnknown
+{
+    void CopyDescriptors(
+        [annotation("_In_")] UINT NumRanges,
+        [annotation("_In_reads_opt_(NumRanges)")] const D3D12_COPY_DESCRIPTORS_RANGE* pRanges,
+        [annotation("_In_")] D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapsType
+    );
+}
+
+typedef enum D3D12_EXECUTETILEMAPPINGS_TOKEN_TYPES
+{
+    D3D12_EXECUTETILEMAPPINGS_TOKEN_TYPE_NO_OPERATION = 1,
+    D3D12_EXECUTETILEMAPPINGS_TOKEN_TYPE_LINEAR_MAPPING = 128,
+    D3D12_EXECUTETILEMAPPINGS_TOKEN_TYPE_BOX_MAPPING = 129
+} D3D12_EXECUTETILEMAPPINGS_TOKEN_TYPES;
+
+cpp_quote("typedef struct D3D12_EXECUTETILEMAPPINGS_MAPPING_TOKEN_HEADER")
+cpp_quote("{")
+cpp_quote("    UINT TokenType : 8;")
+cpp_quote("    UINT MappingType : 8;")
+cpp_quote("    UINT SubresourceIndex : 16;")
+cpp_quote("} D3D12_EXECUTETILEMAPPINGS_MAPPING_TOKEN_HEADER;")
+
+typedef enum D3D12_EXECUTETILEMAPPINGS_MAPPING_TYPES
+{
+    D3D12_EXECUTETILEMAPPINGS_MAPPING_TYPE_INCREMENTING_TILE_INDICES = 0,
+    D3D12_EXECUTETILEMAPPINGS_MAPPING_TYPE_NULL = 1,
+    D3D12_EXECUTETILEMAPPINGS_MAPPING_TYPE_SKIP = 2,
+    D3D12_EXECUTETILEMAPPINGS_MAPPING_TYPE_REUSE_SINGLE_TILE = 3,
+    D3D12_EXECUTETILEMAPPINGS_MAPPING_TYPE_TILE_INDEX_LIST = 4
+} D3D12_EXECUTETILEMAPPINGS_MAPPING_TYPES;
+
+cpp_quote("typedef struct D3D12_EXECUTETILEMAPPINGS_LINEAR_MAPPING_TOKEN")
+cpp_quote("{")
+cpp_quote("    D3D12_EXECUTETILEMAPPINGS_MAPPING_TOKEN_HEADER Header;")
+cpp_quote("    UINT TilePoolBaseOffsetInTiles;")
+cpp_quote("    UINT SubresourceBaseOffsetInTiles;")
+cpp_quote("    UINT TileCount;")
+cpp_quote("    UINT _Padding;")
+cpp_quote("    UINT TilePoolLayoutIndex;")
+cpp_quote("    UINT ResourceLayoutIndex;")
+cpp_quote("    UINT TileListOffsetDwords;")
+cpp_quote("} D3D12_EXECUTETILEMAPPINGS_LINEAR_MAPPING_TOKEN;")
+
+cpp_quote("typedef struct D3D12_EXECUTETILEMAPPINGS_BOX_MAPPING_TOKEN")
+cpp_quote("{")
+cpp_quote("    D3D12_EXECUTETILEMAPPINGS_MAPPING_TOKEN_HEADER Header;")
+cpp_quote("    UINT TilePoolBaseOffsetInTiles;")
+cpp_quote("    UINT16 X;")
+cpp_quote("    UINT16 Y;")
+cpp_quote("    UINT16 Z;")
+cpp_quote("    UINT16 Width;")
+cpp_quote("    UINT16 Height;")
+cpp_quote("    UINT16 Depth;")
+cpp_quote("    UINT TilePoolLayoutIndex;")
+cpp_quote("    UINT ResourceLayoutIndex;")
+cpp_quote("    UINT TileListOffsetDwords;")
+cpp_quote("} D3D12_EXECUTETILEMAPPINGS_BOX_MAPPING_TOKEN;")
+
+typedef enum D3D12_EXECUTE_TILE_MAPPINGS_FLAGS
+{
+    D3D12_EXECUTE_TILE_MAPPINGS_FLAG_NONE = 0,
+} D3D12_EXECUTE_TILE_MAPPINGS_FLAGS;
+cpp_quote( "DEFINE_ENUM_FLAG_OPERATORS( D3D12_EXECUTE_TILE_MAPPINGS_FLAGS )" )
+
+cpp_quote( "#define D3D12_TILE_NOT_MAPPED UINT_MAX" )
+
+typedef struct D3D12_QUERIED_RESOURCE_MAPPING
+{
+    UINT TilePoolLayoutIndex;
+    UINT TilePoolOffsetInTiles;
+} D3D12_QUERIED_RESOURCE_MAPPING;
+
+[uuid(c4e5e0a6-8f1d-4d2b-9a3c-5f7e6d8b1c0a), object, local, pointer_default(unique)]
+interface ID3D12TileMappingQueue : ID3D12Pageable
+{
+    void ExecuteTileMappings(
+        UINT MaxArgumentDwordCount,
+        [annotation("_In_")] ID3D12Resource* pArgumentBuffer,
+        UINT64 ArgumentBufferOffset,
+        [annotation("_In_opt_")] ID3D12Resource* pCountBuffer,
+        UINT64 CountBufferOffset,
+        [annotation("_In_opt_")] ID3D12Resource* pTileListBuffer,
+        UINT64 TileListBufferOffset,
+        D3D12_EXECUTE_TILE_MAPPINGS_FLAGS Flags
+    );
+
+    HRESULT Signal(
+        [annotation("_In_")] ID3D12Fence* pFence,
+        UINT64 Value
+    );
+
+    HRESULT Wait(
+        [annotation("_In_")] ID3D12Fence* pFence,
+        UINT64 Value
+    );
+
+    HRESULT QueryRegisteredReservedResourceMappings(
+        [annotation("_In_")] ID3D12Resource* pReservedResource,
+        UINT64 ResourceMappingStartOffset,
+        UINT64 ResourceMappingsCount,
+        UINT64 ResourceMappingsOutputOffset,
+        [annotation("_In_")] ID3D12Resource* pResourceMappingsOutput
+    );
+}
+
+[uuid(b3d7e5f2-a1c8-4d6e-9f0b-2c4a8e7d3f1b), object, local, pointer_default(unique)]
+interface ID3D12DeviceExecuteTileMappings : IUnknown
+{
+    HRESULT GetTileMappingQueue(
+        REFIID riid,
+        [out, iid_is(riid), annotation("_COM_Outptr_")] void** ppQueue
+    );
+
+    HRESULT RegisterResourceLayouts(
+        UINT NumResources,
+        [annotation("_In_reads_(NumResources)")] ID3D12Resource** pReservedResourceArray,
+        [annotation("_Out_writes_(NumResources)")] UINT* pResourceLayoutIndexArray
+    );
+
+    HRESULT RegisterHeapLayouts(
+        UINT NumHeaps,
+        [annotation("_In_reads_(NumHeaps)")] ID3D12Heap** pHeapArray,
+        [annotation("_Out_writes_(NumHeaps)")] UINT* pTilePoolLayoutIndexArray
+    );
+}
+
 typedef struct D3D12_FEATURE_DATA_DEBUG_BREAK
 {
     [annotation("_Out_")] BOOL HaltSupported;
     [annotation("_Out_")] BOOL LiveDebuggingSupported;
     [annotation("_Out_")] BOOL CpuSupported;
 } D3D12_FEATURE_DATA_DEBUG_BREAK;
+
 
 
 
@@ -8354,6 +8889,552 @@ interface ID3D12GBVDiagnostics
     void GBVReserved1();
 }
 
+
+typedef enum D3D12_RTAS_OPERATION_TYPE
+{
+    D3D12_RTAS_OPERATION_TYPE_MOVE_CLUSTER_OBJECTS = 0x0,
+    D3D12_RTAS_OPERATION_TYPE_BUILD_BLAS_FROM_CLAS = 0x1,
+    D3D12_RTAS_OPERATION_TYPE_BUILD_CLAS_FROM_TRIANGLES = 0x2,
+    D3D12_RTAS_OPERATION_TYPE_BUILD_CLUSTER_TEMPLATES_FROM_TRIANGLES = 0x3,
+    D3D12_RTAS_OPERATION_TYPE_INSTANTIATE_CLUSTER_TEMPLATES = 0x4,
+    D3D12_RTAS_OPERATION_TYPE_PARTITIONED_TLAS = 0x8,
+} D3D12_RTAS_OPERATION_TYPE;
+
+typedef enum D3D12_RTAS_OPERATION_FLAGS
+{
+    D3D12_RTAS_OPERATION_FLAG_NONE = 0x0,
+    D3D12_RTAS_OPERATION_FLAG_FAST_TRACE = 0x4,
+    D3D12_RTAS_OPERATION_FLAG_FAST_OPERATION = 0x8,
+    D3D12_RTAS_OPERATION_FLAG_ALLOW_DATA_ACCESS = 0x100,
+    D3D12_RTAS_OPERATION_FLAG_ALLOW_OMM = 0x400,
+} D3D12_RTAS_OPERATION_FLAGS;
+cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_RTAS_OPERATION_FLAGS )")
+
+typedef enum D3D12_RTAS_OPERATION_MODE
+{
+    D3D12_RTAS_OPERATION_MODE_IMPLICIT_DESTINATIONS = 0x0,
+    D3D12_RTAS_OPERATION_MODE_EXPLICIT_DESTINATIONS = 0x1,
+    D3D12_RTAS_OPERATION_MODE_GET_SIZES = 0x2,
+} D3D12_RTAS_OPERATION_MODE;
+
+typedef enum D3D12_RTAS_MOVE_OPERATION_TYPE
+{
+    D3D12_RTAS_MOVE_OPERATION_TYPE_CLUSTER_BOTTOM_LEVEL_ACCELERATION_STRUCTURE = 0x0,
+    D3D12_RTAS_MOVE_OPERATION_TYPE_CLUSTER_LEVEL_ACCELERATION_STRUCTURE = 0x1,
+    D3D12_RTAS_MOVE_OPERATION_TYPE_CLUSTER_TEMPLATE = 0x2,
+} D3D12_RTAS_MOVE_OPERATION_TYPE;
+
+typedef enum D3D12_RTAS_CLUSTER_MOVE_OPERATION_FLAGS
+{
+    D3D12_RTAS_CLUSTER_MOVE_OPERATION_FLAG_NONE = 0x0,
+    D3D12_RTAS_CLUSTER_MOVE_OPERATION_FLAG_NO_OVERLAP = 0x200,
+    D3D12_RTAS_CLUSTER_MOVE_OPERATION_FLAG_ALLOW_OMM = 0x400
+} D3D12_RTAS_CLUSTER_MOVE_OPERATION_FLAGS;
+cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_RTAS_CLUSTER_MOVE_OPERATION_FLAGS )")
+
+typedef enum D3D12_RTAS_PARTITIONED_TLAS_FLAGS
+{
+    D3D12_RTAS_PARTITIONED_TLAS_FLAG_NONE = 0x0,
+    D3D12_RTAS_PARTITIONED_TLAS_FLAG_FAST_TRACE = 0x1,
+    D3D12_RTAS_PARTITIONED_TLAS_FLAG_FAST_BUILD = 0x2,
+    D3D12_RTAS_PARTITIONED_TLAS_FLAG_ENABLE_PARTITION_TRANSLATION = 0x4
+} D3D12_RTAS_PARTITIONED_TLAS_FLAGS;
+cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_RTAS_PARTITIONED_TLAS_FLAGS )")
+
+typedef enum D3D12_EXECUTE_INDIRECT_RTAS_OPERATIONS_FLAGS
+{
+    D3D12_EXECUTE_INDIRECT_RTAS_OPERATIONS_FLAG_NONE = 0x0,
+} D3D12_EXECUTE_INDIRECT_RTAS_OPERATIONS_FLAGS;
+cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_EXECUTE_INDIRECT_RTAS_OPERATIONS_FLAGS )")
+
+typedef enum D3D12_VERTEX_FORMAT
+{
+    D3D12_VERTEX_FORMAT_FLOAT32_2 = 1,
+    D3D12_VERTEX_FORMAT_FLOAT32_3 = 2,
+    D3D12_VERTEX_FORMAT_FLOAT16_2 = 3,
+    D3D12_VERTEX_FORMAT_FLOAT16_3 = 4,
+    D3D12_VERTEX_FORMAT_UNORM16_2 = 5,
+    D3D12_VERTEX_FORMAT_UNORM16_3 = 6,
+    D3D12_VERTEX_FORMAT_SNORM16_2 = 7,
+    D3D12_VERTEX_FORMAT_SNORM16_3 = 8,
+    D3D12_VERTEX_FORMAT_UNORM8_2 = 9,
+    D3D12_VERTEX_FORMAT_UNORM8_3 = 10,
+    D3D12_VERTEX_FORMAT_SNORM8_2 = 11,
+    D3D12_VERTEX_FORMAT_SNORM8_3 = 12,
+    D3D12_VERTEX_FORMAT_10_10_10_2_UNORM = 13,
+    D3D12_VERTEX_FORMAT_COMPRESSED1 = 14,
+} D3D12_VERTEX_FORMAT;
+
+typedef enum D3D12_INDEX_FORMAT
+{
+    D3D12_INDEX_FORMAT_NONE = 0x0,
+    D3D12_INDEX_FORMAT_UINT8 = 0x1,
+    D3D12_INDEX_FORMAT_UINT16 = 0x2,
+    D3D12_INDEX_FORMAT_UINT32 = 0x4,
+} D3D12_INDEX_FORMAT;
+
+typedef enum D3D12_RTAS_CLUSTER_OPERATION_CLAS_FLAGS
+{
+    D3D12_RTAS_CLUSTER_OPERATION_CLAS_FLAG_NONE = 0x0,
+    D3D12_RTAS_CLUSTER_OPERATION_CLAS_FLAG_ALLOW_DISABLE_OMMS = 0x1,
+    D3D12_RTAS_CLUSTER_OPERATION_CLAS_FLAG_DISALLOW_DATA_ACCESS = 0x2,
+} D3D12_RTAS_CLUSTER_OPERATION_CLAS_FLAGS;
+cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_RTAS_CLUSTER_OPERATION_CLAS_FLAGS )")
+
+typedef enum D3D12_RTAS_CLUSTERED_GEOMETRY_FLAGS
+{
+    D3D12_RTAS_CLUSTERED_GEOMETRY_FLAG_NONE = 0x0,
+    D3D12_RTAS_CLUSTERED_GEOMETRY_FLAG_OPAQUE = 0x80000000,
+    D3D12_RTAS_CLUSTERED_GEOMETRY_FLAG_NO_DUPLICATE_ANYHIT_INVOCATION = 0x40000000,
+} D3D12_RTAS_CLUSTERED_GEOMETRY_FLAGS;
+cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_RTAS_CLUSTERED_GEOMETRY_FLAGS )")
+
+typedef enum D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAGS
+{
+    D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAG_NONE = 0x0,
+    D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAG_INDIRECTED_BATCH_RESULT = 0x1,
+    D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAG_INDIRECTED_BATCH_SCRATCH = 0x2,
+    D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAG_INDIRECTED_DESTINATION_ADDRESS_ARRAY = 0x4,
+    D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAG_INDIRECTED_RESULT_SIZE_ARRAY = 0x8,
+    D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAG_INDIRECTED_INDIRECT_ARGUMENT_ARRAY = 0x10,
+    D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAG_INDIRECTED_INDIRECT_ARGUMENT_COUNT = 0x20,
+} D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAGS;
+cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAGS )")
+
+typedef enum D3D12_RTAS_PARTITIONED_TLAS_OPERATION_TYPE
+{
+    D3D12_RTAS_PARTITIONED_TLAS_OPERATION_TYPE_WRITE_INSTANCE = 0x0,
+    D3D12_RTAS_PARTITIONED_TLAS_OPERATION_TYPE_UPDATE_INSTANCE = 0x1,
+    D3D12_RTAS_PARTITIONED_TLAS_OPERATION_TYPE_TRANSLATE_PARTITION = 0x2,
+} D3D12_RTAS_PARTITIONED_TLAS_OPERATION_TYPE;
+
+typedef enum D3D12_RTAS_PARTITIONED_TLAS_PARTITION_INDEX
+{
+    D3D12_RTAS_PARTITIONED_TLAS_PARTITION_INDEX_GLOBAL_PARTITION = 0xffffffff,
+} D3D12_RTAS_PARTITIONED_TLAS_PARTITION_INDEX;
+
+typedef enum D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAGS
+{
+    D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAG_NONE = 0x0,
+    D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAG_TRIANGLE_CULL_DISABLE = 0x1,
+    D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAG_TRIANGLE_FRONT_COUNTERCLOCKWISE = 0x2,
+    D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAG_FORCE_OPAQUE = 0x4,
+    D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAG_FORCE_NON_OPAQUE = 0x8,
+    D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAG_FORCE_OMM_2_STATE = 0x10,
+    D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAG_DISABLE_OMMS = 0x20,
+    D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAG_ENABLE_EXPLICIT_AABB = 0x40,
+} D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAGS;
+cpp_quote("DEFINE_ENUM_FLAG_OPERATORS( D3D12_RTAS_PARTITIONED_TLAS_INSTANCE_FLAGS )")
+
+typedef struct D3D12_RTAS_OPERATION_PREBUILD_INFO
+{
+    UINT64 ResultDataMaxSizeInBytes;
+    UINT64 ScratchDataSizeInBytes;
+} D3D12_RTAS_OPERATION_PREBUILD_INFO;
+
+typedef struct D3D12_RTAS_CLUSTER_LIMITS
+{
+    UINT MaxArgCount;
+    UINT MaxGeometryIndexValue;
+    UINT MaxUniqueGeometryIndexAndFlagsCountPerCluster;
+    UINT MaxTriangleCountPerCluster;
+    UINT MaxUniqueVertexIndexCountPerCluster;
+    UINT MaxTotalTriangleCount;
+    UINT MaxSumOfUniqueVertexIndexCounts;
+    UINT MaxOpacityMicromapIndicesPerCluster;
+} D3D12_RTAS_CLUSTER_LIMITS;
+
+typedef struct D3D12_RTAS_CLUSTER_TRIANGLES_INPUTS_DESC
+{
+    D3D12_RTAS_CLUSTER_LIMITS ClusterLimits;
+    D3D12_RTAS_OPERATION_FLAGS Flags;
+    D3D12_RTAS_OPERATION_MODE Mode;
+    D3D12_VERTEX_FORMAT VertexFormat;
+    D3D12_INDEX_FORMAT IndexFormat;
+    D3D12_INDEX_FORMAT GeometryIndexAndFlagsIndexFormat;
+    D3D12_INDEX_FORMAT OpacityMicromapIndexFormat;
+    union
+    {
+        UINT MinPositionTruncateBitCount;
+        UINT MaxCompressedClusterPositionsSize;
+    };
+} D3D12_RTAS_CLUSTER_TRIANGLES_INPUTS_DESC;
+
+typedef struct D3D12_RTAS_CLUSTER_TEMPLATE_TRIANGLES_INPUTS_DESC
+{
+    D3D12_RTAS_CLUSTER_LIMITS ClusterLimits;
+    D3D12_RTAS_OPERATION_FLAGS Flags;
+    D3D12_RTAS_OPERATION_MODE Mode;
+    D3D12_VERTEX_FORMAT VertexHintFormat;
+    D3D12_VERTEX_FORMAT VertexInstantiationFormat;
+    D3D12_INDEX_FORMAT IndexFormat;
+    D3D12_INDEX_FORMAT GeometryIndexAndFlagsIndexFormat;
+    D3D12_INDEX_FORMAT OpacityMicromapIndexFormat;
+} D3D12_RTAS_CLUSTER_TEMPLATE_TRIANGLES_INPUTS_DESC;
+
+typedef struct D3D12_RTAS_INSTANTIATE_CLUSTER_TEMPLATE_INPUTS_DESC
+{
+    D3D12_RTAS_CLUSTER_LIMITS ClusterLimits;
+    D3D12_RTAS_OPERATION_FLAGS Flags;
+    D3D12_RTAS_OPERATION_MODE Mode;
+    D3D12_VERTEX_FORMAT VertexSourceFormat;
+} D3D12_RTAS_INSTANTIATE_CLUSTER_TEMPLATE_INPUTS_DESC;
+
+typedef struct D3D12_RTAS_CLAS_INPUTS_DESC
+{
+    D3D12_RTAS_OPERATION_FLAGS Flags;
+    UINT MaxArgCount;
+    D3D12_RTAS_OPERATION_MODE Mode;
+    UINT MaxTotalClasCount;
+    UINT MaxClasCountPerArg;
+} D3D12_RTAS_CLAS_INPUTS_DESC;
+
+typedef struct D3D12_RTAS_CLUSTER_MOVES_DESC
+{
+    D3D12_RTAS_CLUSTER_MOVE_OPERATION_FLAGS Flags;
+    UINT MaxArgCount;
+    D3D12_RTAS_OPERATION_MODE Mode;
+    D3D12_RTAS_MOVE_OPERATION_TYPE Type;
+    UINT64 MaxBytesMoved;
+} D3D12_RTAS_CLUSTER_MOVES_DESC;
+
+typedef struct D3D12_RTAS_BATCHED_OPERATION_DATA
+{
+    D3D12_RTAS_OPERATION_ADDRESS_RESOLUTION_FLAGS AddressResolutionFlags;
+    D3D12_GPU_VIRTUAL_ADDRESS BatchResultData;
+    D3D12_GPU_VIRTUAL_ADDRESS BatchScratchData;
+    D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE ResultAddressArray;
+    D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE ResultSizeArray;
+    D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE IndirectArgumentArray;
+    D3D12_GPU_VIRTUAL_ADDRESS IndirectArgumentArraySize;
+    D3D12_GPU_VIRTUAL_ADDRESS ToolsInfo;
+} D3D12_RTAS_BATCHED_OPERATION_DATA;
+
+typedef struct D3D12_RTAS_PARTITIONED_TLAS_INPUTS_DESC
+{
+    D3D12_RTAS_PARTITIONED_TLAS_FLAGS Flags;
+    UINT InstanceCount;
+    UINT MaxInstancePerPartitionCount;
+    UINT PartitionCount;
+    UINT MaxInstanceInGlobalPartitionCount;
+} D3D12_RTAS_PARTITIONED_TLAS_INPUTS_DESC;
+
+typedef struct D3D12_RTAS_PARTITIONED_TLAS_OPERATION_DATA
+{
+    D3D12_GPU_VIRTUAL_ADDRESS SourceAccelerationStructureData;
+    D3D12_GPU_VIRTUAL_ADDRESS DestAccelerationStructureData;
+    D3D12_GPU_VIRTUAL_ADDRESS ScratchAccelerationStructureData;
+    D3D12_GPU_VIRTUAL_ADDRESS IndirectPartitionedTlasOpCount;
+    D3D12_GPU_VIRTUAL_ADDRESS IndirectPartitionedTlasOps;
+} D3D12_RTAS_PARTITIONED_TLAS_OPERATION_DATA;
+
+typedef struct D3D12_RTAS_OPERATION_INPUTS
+{
+    D3D12_RTAS_OPERATION_TYPE Type;
+
+    union
+    {
+        const D3D12_RTAS_CLAS_INPUTS_DESC* pClasDesc;
+        const D3D12_RTAS_CLUSTER_TRIANGLES_INPUTS_DESC* pClusterTrianglesDesc;
+        const D3D12_RTAS_CLUSTER_TEMPLATE_TRIANGLES_INPUTS_DESC* pClusterTemplateTrianglesDesc;
+        const D3D12_RTAS_INSTANTIATE_CLUSTER_TEMPLATE_INPUTS_DESC* pInstantiateClusterTemplateDesc;
+        const D3D12_RTAS_CLUSTER_MOVES_DESC* pClusterMovesDesc;
+        const D3D12_RTAS_PARTITIONED_TLAS_INPUTS_DESC* pPartitionedTLASInputsDesc;
+    };
+} D3D12_RTAS_OPERATION_INPUTS;
+
+typedef struct D3D12_RTAS_OPERATION_DESC
+{
+    D3D12_RTAS_OPERATION_INPUTS Inputs;
+    union
+    {
+        const D3D12_RTAS_BATCHED_OPERATION_DATA* pBatchedOperationData;
+        const D3D12_RTAS_PARTITIONED_TLAS_OPERATION_DATA* pPartitionedTlasOperationData;
+    };
+} D3D12_RTAS_OPERATION_DESC;
+
+typedef struct D3D12_RTAS_TOOLS_VISUALIZATION_BUILD_INPUTS_HEADER
+{
+    D3D12_RTAS_OPERATION_TYPE OperationType;
+    UINT BuildInputsSizeInBytes;
+} D3D12_RTAS_TOOLS_VISUALIZATION_BUILD_INPUTS_HEADER;
+
+typedef struct D3D12_RTAS_OPERATION_BUILD_CLAS_FROM_TRIANGLES_ARGS
+{
+    UINT ClusterID;
+    UINT ClusterFlags;
+    UINT16 TriangleCount;
+    UINT16 UniqueVertexIndexCount;
+    UINT BaseGeometryIndexAndFlags;
+    UINT OpacityMicromapBaseLocation;
+    UINT16 VertexBufferStride;
+    UINT16 IndexBufferStride;
+    UINT16 OpacityMicromapIndexBufferStride;
+    UINT16 GeometryIndexAndFlagsArrayStride;
+    UINT16 PositionTruncateBitCount;
+    UINT16 ReservedPadding;
+    D3D12_GPU_VIRTUAL_ADDRESS VertexBuffer;
+    D3D12_GPU_VIRTUAL_ADDRESS IndexBuffer;
+    D3D12_GPU_VIRTUAL_ADDRESS GeometryIndexAndFlagsArray;
+    D3D12_GPU_VIRTUAL_ADDRESS GeometryIndexAndFlagsIndexBuffer;
+    D3D12_GPU_VIRTUAL_ADDRESS OpacityMicromapArray;
+    D3D12_GPU_VIRTUAL_ADDRESS OpacityMicromapIndexBuffer;
+} D3D12_RTAS_OPERATION_BUILD_CLAS_FROM_TRIANGLES_ARGS;
+
+typedef struct D3D12_RTAS_OPERATION_BUILD_BLAS_FROM_CLAS_ARGS
+{
+    UINT ClasAddressCount;
+    UINT ClasAddressStride;
+    D3D12_GPU_VIRTUAL_ADDRESS ClasAddressArray;
+} D3D12_RTAS_OPERATION_BUILD_BLAS_FROM_CLAS_ARGS;
+
+typedef struct D3D12_RTAS_OPERATION_MOVE_CLUSTER_OBJECTS_ARGS
+{
+    D3D12_GPU_VIRTUAL_ADDRESS SourceAccelerationStructure;
+} D3D12_RTAS_OPERATION_MOVE_CLUSTER_OBJECTS_ARGS;
+
+typedef struct D3D12_VERTEX_FORMAT_COMPRESSED1_HEADER
+{
+    UINT field0;
+    UINT field1;
+    UINT field2;
+} D3D12_VERTEX_FORMAT_COMPRESSED1_HEADER;
+
+cpp_quote("//")
+cpp_quote("// D3D12_VERTEX_FORMAT_COMPRESSED1_HEADER bit assignments:")
+cpp_quote("//")
+cpp_quote("// field0:")
+cpp_quote("//  [07:00] exponent   - Float32 scale (exponent-only) with bias 127.")
+cpp_quote("//                       Stored biased range: 1-232 (actual exponent range: [-126..105]).")
+cpp_quote("//                       Must add 127 to the actual exponent before encoding (e.g. via macro).")
+cpp_quote("//                       Must subtract 127 after decoding (e.g. via macro) to get the actual exponent .")
+cpp_quote("//  [31:08] x_anchor   - 24-bit signed two's complement.")
+cpp_quote("//                       0x800000 represents -8,388,608.")
+cpp_quote("//")
+cpp_quote("// field1:")
+cpp_quote("//  [03:00] x_bits     - Component bit count for x, stored as (count - 1).")
+cpp_quote("//                       Must subtract 1 from the actual bit count before encoding (e.g. via macro).")
+cpp_quote("//                       Must add 1 after decoding (e.g. via macro) to get the actual bit count (1-16).")
+cpp_quote("//  [07:04] y_bits     - Component bit count for y, stored as (count - 1). Same bias as x_bits.")
+cpp_quote("//  [31:08] y_anchor   - 24-bit signed two's complement.")
+cpp_quote("//")
+cpp_quote("// field2:")
+cpp_quote("//  [03:00] z_bits     - Component bit count for z, stored as (count - 1). Same bias as x_bits.")
+cpp_quote("//  [07:04] unused")
+cpp_quote("//  [31:08] z_anchor   - 24-bit signed two's complement.")
+cpp_quote("//")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store exponent field (read-modify-write).")
+cpp_quote("// Caller must pass biased exponent (actual + 127).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_EXPONENT(header, exponent) \\")
+cpp_quote("    ((header).field0 = ((header).field0 & ~0xFF) | (UINT(exponent) & 0xFF))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store x_anchor field (read-modify-write).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_X_ANCHOR(header, x_anchor) \\")
+cpp_quote("    ((header).field0 = ((header).field0 & 0xFF) | ((UINT(x_anchor) << 8)))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store x_bits field (read-modify-write). Caller must pass (bit_count - 1).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_X_BITS(header, x_bits) \\")
+cpp_quote("    ((header).field1 = ((header).field1 & ~0xF) | ((UINT(x_bits) & 0xF)))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store y_bits field (read-modify-write). Caller must pass (bit_count - 1).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_Y_BITS(header, y_bits) \\")
+cpp_quote("    ((header).field1 = ((header).field1 & ~0xF0) | ((UINT(y_bits) & 0xF) << 4))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store y_anchor field (read-modify-write).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_Y_ANCHOR(header, y_anchor) \\")
+cpp_quote("    ((header).field1 = ((header).field1 & 0xFF) | ((UINT(y_anchor) << 8)))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store z_bits field (read-modify-write). Caller must pass (bit_count - 1).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_Z_BITS(header, z_bits) \\")
+cpp_quote("    ((header).field2 = ((header).field2 & ~0xF) | ((UINT(z_bits) & 0xF)))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store z_anchor field (read-modify-write).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_Z_ANCHOR(header, z_anchor) \\")
+cpp_quote("    ((header).field2 = ((header).field2 & 0xFF) | ((UINT(z_anchor) << 8)))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO Store all field0 members: exponent and x_anchor.")
+cpp_quote("// Caller must pass biased exponent (actual + 127).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_EXPONENT_X_ANCHOR(header, exponent, x_anchor) \\")
+cpp_quote("    ((header).field0 = ((UINT(exponent) & 0xFF) | (UINT(x_anchor) << 8)))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO Store all field1 members: x_bits, y_bits, and y_anchor.")
+cpp_quote("// Caller must pass (bit_count - 1) for x_bits and y_bits.")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_XY_BITS_Y_ANCHOR(header, x_bits, y_bits, y_anchor) \\")
+cpp_quote("    ((header).field1 = ((UINT(x_bits) & 0xF) | ((UINT(y_bits) & 0xF) << 4) | (UINT(y_anchor) << 8)))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO Store all field2 members: z_bits and z_anchor.")
+cpp_quote("// Caller must pass (bit_count - 1) for z_bits. Bits [07:04] are set to zero (unused).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_Z_BITS_Z_ANCHOR(header, z_bits, z_anchor) \\")
+cpp_quote("    ((header).field2 = ((UINT(z_bits) & 0xF) | (UINT(z_anchor) << 8)))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store all fields. Caller must pass biased exponent")
+cpp_quote("// (actual + 127) and (bit_count - 1) for x_bits, y_bits, and z_bits.")
+cpp_quote("// Bits [07:04] in field2 are set to zero (unused).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1(header, exponent, x_anchor, y_anchor, z_anchor, x_bits, y_bits, z_bits) \\")
+cpp_quote("    ((header).field0 = ((UINT(exponent) & 0xFF) | (UINT(x_anchor) << 8)), \\")
+cpp_quote("     (header).field1 = ((UINT(x_bits) & 0xF) | ((UINT(y_bits) & 0xF) << 4) | (UINT(y_anchor) << 8)), \\")
+cpp_quote("     (header).field2 = ((UINT(z_bits) & 0xF) | (UINT(z_anchor) << 8)))")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 8-bit biased exponent.")
+cpp_quote("// Caller must subtract 127 from result to get the actual exponent.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_EXPONENT(header)  (((header).field0) & 0xFF)")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 24-bit x_anchor as a signed integer.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_X_ANCHOR(header)  (INT((header).field0) >> 8)")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 4-bit x_bits value.")
+cpp_quote("// Caller must add 1 to result to get the actual bit count.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_X_BITS(header)    (((header).field1) & 0xF)")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 4-bit y_bits value.")
+cpp_quote("// Caller must add 1 to result to get the actual bit count.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_Y_BITS(header)    ((((header).field1) >> 4) & 0xF)")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 24-bit y_anchor as a signed integer.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_Y_ANCHOR(header)  (INT((header).field1) >> 8)")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 4-bit z_bits value.")
+cpp_quote("// Caller must add 1 to result to get the actual bit count.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_Z_BITS(header)    (((header).field2) & 0xF)")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 24-bit z_anchor as a signed integer.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_Z_ANCHOR(header)  (INT((header).field2) >> 8)")
+cpp_quote("")
+
+typedef struct D3D12_VERTEX_FORMAT_COMPRESSED1_TEMPLATE_HEADER
+{
+    UINT field0;
+} D3D12_VERTEX_FORMAT_COMPRESSED1_TEMPLATE_HEADER;
+
+cpp_quote("//")
+cpp_quote("// D3D12_VERTEX_FORMAT_COMPRESSED1_TEMPLATE_HEADER bit assignments:")
+cpp_quote("//")
+cpp_quote("// field0:")
+cpp_quote("//  [07:00] exponent   - Float32 scale (exponent-only) with bias 127.")
+cpp_quote("//                       Caller must add 127 to the actual exponent before encoding (e.g. via macro).")
+cpp_quote("//                       Caller must subtract 127 after decoding (e.g. via macro) to get the actual exponent.")
+cpp_quote("//  [11:08] x_bits     - Component bit count for x, stored as (count - 1).")
+cpp_quote("//                       Caller must subtract 1 from the actual bit count before encoding (e.g. via macro).")
+cpp_quote("//                       Caller must add 1 after decoding (e.g. via macro) to get the actual bit count (1-16).")
+cpp_quote("//  [15:12] y_bits     - Component bit count for y, stored as (count - 1). Same bias as x_bits.")
+cpp_quote("//  [19:16] z_bits     - Component bit count for z, stored as (count - 1). Same bias as x_bits.")
+cpp_quote("//  [31:20] unused")
+cpp_quote("//")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store exponent field (read-modify-write). Caller must pass biased exponent (actual + 127).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_TEMPLATE_EXPONENT(header, exponent) \\")
+cpp_quote("    ((header).field0 = ((header).field0 & ~0xFF) | (UINT(exponent) & 0xFF))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store x_bits field (read-modify-write). Caller must pass (bit_count - 1).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_TEMPLATE_X_BITS(header, x_bits) \\")
+cpp_quote("    ((header).field0 = ((header).field0 & ~0xF00) | ((UINT(x_bits) & 0xF) << 8))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store y_bits field (read-modify-write). Caller must pass (bit_count - 1).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_TEMPLATE_Y_BITS(header, y_bits) \\")
+cpp_quote("    ((header).field0 = ((header).field0 & ~0xF000) | ((UINT(y_bits) & 0xF) << 12))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store z_bits field (read-modify-write). Caller must pass (bit_count - 1).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_TEMPLATE_Z_BITS(header, z_bits) \\")
+cpp_quote("    ((header).field0 = ((header).field0 & ~0xF0000) | ((UINT(z_bits) & 0xF) << 16))")
+cpp_quote("")
+cpp_quote("// ENCODER MACRO: Store all members: exponent, x_bits, y_bits, and z_bits.")
+cpp_quote("// Caller must pass biased exponent (actual + 127) and (bit_count - 1) for each bits field.")
+cpp_quote("// Bits [31:20] are set to zero (unused).")
+cpp_quote("#define ENCODE_D3D12_COMPRESSED1_TEMPLATE(header, exponent, x_bits, y_bits, z_bits) \\")
+cpp_quote("    ((header).field0 = ((UINT(exponent) & 0xFF) | ((UINT(x_bits) & 0xF) << 8) | ((UINT(y_bits) & 0xF) << 12) | ((UINT(z_bits) & 0xF) << 16)))")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 8-bit biased exponent. Caller must subtract 127 to get the actual exponent.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_TEMPLATE_EXPONENT(header) \\")
+cpp_quote("    (((header).field0) & 0xFF)")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 4-bit x_bits value. Caller must add 1 to get the actual bit count.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_TEMPLATE_X_BITS(header) \\")
+cpp_quote("    ((((header).field0) >> 8) & 0xF)")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 4-bit y_bits value. Caller must add 1 to get the actual bit count.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_TEMPLATE_Y_BITS(header) \\")
+cpp_quote("    ((((header).field0) >> 12) & 0xF)")
+cpp_quote("")
+cpp_quote("// DECODER MACRO: Extract the 4-bit z_bits value. Caller must add 1 to get the actual bit count.")
+cpp_quote("#define DECODE_D3D12_COMPRESSED1_TEMPLATE_Z_BITS(header) \\")
+cpp_quote("    ((((header).field0) >> 16) & 0xF)")
+cpp_quote("")
+
+cpp_quote("// Compressed1.ReservedPadding pads the format-specific union arm to 64 bits.")
+typedef struct D3D12_RTAS_OPERATION_BUILD_CLUSTER_TEMPLATES_FROM_TRIANGLES_ARGS
+{
+    D3D12_RTAS_OPERATION_BUILD_CLAS_FROM_TRIANGLES_ARGS TrianglesArgs;
+    D3D12_GPU_VIRTUAL_ADDRESS InstantiationBoundingBoxLimit;
+    union
+    {
+        struct
+        {
+            D3D12_VERTEX_FORMAT_COMPRESSED1_TEMPLATE_HEADER Header;
+            UINT ReservedPadding;
+        } Compressed1;
+    };
+} D3D12_RTAS_OPERATION_BUILD_CLUSTER_TEMPLATES_FROM_TRIANGLES_ARGS;
+
+typedef struct D3D12_RTAS_OPERATION_INSTANTIATE_CLUSTER_TEMPLATES_ARGS
+{
+    INT GeometryIndexOffset;
+    UINT ClusterIdOffset;
+    D3D12_GPU_VIRTUAL_ADDRESS ClusterTemplate;
+    D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE VertexBuffer;
+} D3D12_RTAS_OPERATION_INSTANTIATE_CLUSTER_TEMPLATES_ARGS;
+
+typedef struct D3D12_RTAS_PARTITIONED_TLAS_OPERATION
+{
+    D3D12_RTAS_PARTITIONED_TLAS_OPERATION_TYPE Type;
+    UINT ArgCount;
+    D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE ArgData;
+} D3D12_RTAS_PARTITIONED_TLAS_OPERATION;
+
+typedef struct D3D12_RTAS_PARTITIONED_TLAS_OPERATION_WRITE_INSTANCE_ARGS
+{
+    FLOAT Transform[3][4];
+    UINT InstanceID;
+    UINT InstanceMask;
+    UINT InstanceContributionToHitGroupIndex;
+    UINT InstanceFlags;
+    D3D12_GPU_VIRTUAL_ADDRESS AccelerationStructure;
+    UINT InstanceIndex;
+    UINT PartitionIndex;
+    D3D12_RAYTRACING_AABB ExplicitAABB;
+} D3D12_RTAS_PARTITIONED_TLAS_OPERATION_WRITE_INSTANCE_ARGS;
+
+typedef struct D3D12_RTAS_PARTITIONED_TLAS_OPERATION_UPDATE_INSTANCE_ARGS
+{
+    UINT InstanceIndex;
+    UINT InstanceContributionToHitGroupIndex;
+    D3D12_GPU_VIRTUAL_ADDRESS AccelerationStructure;
+} D3D12_RTAS_PARTITIONED_TLAS_OPERATION_UPDATE_INSTANCE_ARGS;
+
+typedef struct D3D12_RTAS_PARTITIONED_TLAS_OPERATION_TRANSLATE_PARTITION_ARGS
+{
+    UINT PartitionIndex;
+    FLOAT PartitionTranslation[3];
+} D3D12_RTAS_PARTITIONED_TLAS_OPERATION_TRANSLATE_PARTITION_ARGS;
+
+[uuid(26f298b3-2e8b-4326-888d-6e06ec5c1982), object, local, pointer_default(unique)]
+interface ID3D12DeviceRaytracing2 : IUnknown
+{
+    void GetRTASOperationPrebuildInfo(
+        [annotation("_In_")] const D3D12_RTAS_OPERATION_INPUTS* pDesc,
+        [annotation("_Out_")] D3D12_RTAS_OPERATION_PREBUILD_INFO* pInfo
+    );
+}
+
+[uuid(7a2f39e7-4db3-4488-b04f-0fb3117a0062), object, local, pointer_default(unique)]
+interface ID3D12CommandListRaytracing2 : IUnknown
+{
+    void ExecuteIndirectRTASOperations(
+        UINT NumOperationDescs,
+        [annotation("_In_reads_(NumOperationDescs)")] const D3D12_RTAS_OPERATION_DESC* pDescs,
+        D3D12_EXECUTE_INDIRECT_RTAS_OPERATIONS_FLAGS Flags
+    );
+};
 
 
 typedef enum D3D12_PARTIAL_GRAPHICS_PROGRAMS_TIER
@@ -8515,6 +9596,7 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12Device7,0x5c014b53,0x68a1,0x4b9b,0x8b,0xd1,0xd
 cpp_quote( "DEFINE_GUID(IID_ID3D12Device8,0x9218E6BB,0xF944,0x4F7E,0xA7,0x5C,0xB1,0xB2,0xC7,0xB7,0x01,0xF3);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Resource1,0x9D5E227A,0x4430,0x4161,0x88,0xB3,0x3E,0xCA,0x6B,0xB1,0x6E,0x19);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Resource2,0xBE36EC3B,0xEA85,0x4AEB,0xA4,0x5A,0xE9,0xD7,0x64,0x04,0xA4,0x95);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12Resource3,0xb5e58a68,0x46f3,0x4ece,0xa2,0x78,0x22,0x46,0xc1,0xeb,0x40,0x93);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Heap1,0x572F7389,0x2168,0x49E3,0x96,0x93,0xD6,0xDF,0x58,0x71,0xBF,0x6D);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList3,0x6FDA83A7,0xB84C,0x4E38,0x9A,0xC8,0xC7,0xBD,0x22,0x01,0x6B,0x3D);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12MetaCommand,0xDBB84C27,0x36CE,0x4FC9,0xB8,0x01,0xF0,0x48,0xC4,0x6A,0xC5,0x70);" )
@@ -8528,8 +9610,9 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12Device13,0x14eecffc,0x4df8,0x40f7,0xa1,0x18,0x
 cpp_quote( "DEFINE_GUID(IID_ID3D12Device14,0x5f6e592d,0xd895,0x44c2,0x8e,0x4a,0x88,0xad,0x49,0x26,0xd3,0x23);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Device15,0x76cff76f,0x1e9b,0x4450,0x8c,0xdc,0x34,0xf1,0xaf,0x78,0x8e,0x5b);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12StateObjectDatabase,0xc56060b7,0xb5fc,0x4135,0x98,0xe0,0xa1,0xe9,0x99,0x7e,0xac,0xe0);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12GuidTextureLayoutDevice,0x24499bcb,0x4364,0x4c06,0x90,0x07,0xa3,0x34,0xf1,0x74,0x8f,0x18);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12GuidTextureLayoutResource,0x4f9b2e01,0x3883,0x4973,0x80,0xca,0x59,0xd2,0xf4,0x5f,0x25,0xb5);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12Device16,0xb34a50dd,0xe102,0x428f,0x82,0xa0,0x82,0x29,0x4a,0x27,0xbb,0xe6);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12ResourceOpaqueTextureLayout,0xa7c3f1e8,0x2b94,0x4d06,0x9f,0x5a,0xe8,0xd1,0xc4,0x0b,0x72,0x63);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12ShaderCacheSession1,0x1c5789ff,0x9203,0x490f,0xb9,0x71,0x98,0x4a,0xcf,0x1e,0xb5,0xfe);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12VirtualizationGuestDevice,0xbc66d368,0x7373,0x4943,0x87,0x57,0xfc,0x87,0xdc,0x79,0xe4,0x76);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Tools,0x7071e1f0,0xe84b,0x4b33,0x97,0x4f,0x12,0xfa,0x49,0xde,0x65,0xc5);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Tools1,0xe4fbc019,0xdd3c,0x43e1,0x8f,0x32,0x7f,0x64,0x95,0x75,0xf0,0xa0);" )
@@ -8545,9 +9628,10 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceFactory,0x61f307d3,0xd34e,0x4e7c,0x83,0x
 cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceConfiguration,0x78dbf87b,0xf766,0x422b,0xa6,0x1c,0xc8,0xc4,0x46,0xbd,0xb9,0xad);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceConfiguration1,0xed342442,0x6343,0x4e16,0xbb,0x82,0xa3,0xa5,0x77,0x87,0x4e,0x56);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12StateObjectDatabaseFactory,0xf5b066f0,0x648a,0x4611,0xbd,0x41,0x27,0xfd,0x09,0x48,0xb9,0xeb);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12StateObjectDatabase1,0xc066f807,0x403d,0x40a3,0xb1,0xa3,0x5f,0x50,0xf9,0x12,0xb6,0xe0);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12StateObjectDatabase1,0xc700e43f,0x47a6,0x4ec6,0xad,0x83,0xf2,0x75,0x40,0x02,0x31,0xaf);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12StateObjectDatabaseFactory1,0x68a6585d,0x0ac7,0x4fa4,0xba,0x33,0xe3,0xbd,0x44,0x2f,0x28,0x33);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12ApplicationIdentity,0x82dc6c85,0x727b,0x4a8d,0x91,0x69,0xdb,0x6c,0xe3,0xe9,0x75,0xa0);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12AsyncCommandsFallback,0xfbddf9e8,0x33a3,0x488c,0x97,0x75,0x1a,0x97,0x0d,0xc5,0x48,0x62);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12StateObjectDatabaseCapture,0xd67447bc,0x4d6c,0x4ca5,0xa2,0xa8,0xde,0xee,0xa4,0xc1,0x45,0xc4);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList5,0x55050859,0x4024,0x474c,0x87,0xf5,0x64,0x72,0xea,0xee,0x44,0xea);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList6,0xc3827890,0xe548,0x4cfa,0x96,0xcf,0x56,0x89,0xa9,0x37,0x0f,0x80);" )
@@ -8558,10 +9642,15 @@ cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList10,0x7013c015,0xd161,0x4b63
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList11,0x823aee5b,0xc932,0x4b15,0xb4,0xc4,0x4a,0x28,0xe7,0xc3,0x4d,0xea);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12Extension,0xb5db626a,0x4411,0x41ec,0x91,0x68,0x38,0x5a,0x35,0x8b,0xa2,0xd6);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceApiExtensions,0xde178544,0x1537,0x41b9,0xb1,0x2e,0x48,0x60,0x88,0x96,0xd4,0x69);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceDumpFile,0xdb82bfed,0x784d,0x40ea,0xae,0xbf,0x08,0xbc,0xd7,0xf0,0xa9,0xe4);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12DevicePreview,0x8f0856ad,0xe37c,0x4d75,0xbe,0x18,0xfb,0xb3,0xd8,0xc0,0x4c,0xed);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandList12,0x9524ea5e,0xc1b0,0x4fe5,0xa2,0x03,0xa7,0x5a,0xbc,0x5d,0x8e,0x3a);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GraphicsCommandListPreview,0x447e915c,0xc6f9,0x47e8,0x84,0xd9,0xdc,0x4f,0x44,0x95,0xd2,0x30);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12CommandListFenceBarriers,0x012b2bce,0xa66e,0x419a,0xa0,0x20,0xe6,0x45,0xdc,0x79,0xf1,0x19);" )
-cpp_quote( "DEFINE_GUID(IID_ID3D12CommandListAsyncCommands,0xd7afd225,0x8c06,0x41c8,0xb8,0xa2,0x6e,0xfb,0xe1,0x43,0x9e,0xd9);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12CommandListGpuCopyDescriptors,0xfee4d6cf,0x3f7f,0x4090,0x8a,0x71,0xab,0xd5,0x82,0x36,0xdf,0x08);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12TileMappingQueue,0xc4e5e0a6,0x8f1d,0x4d2b,0x9a,0x3c,0x5f,0x7e,0x6d,0x8b,0x1c,0x0a);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceExecuteTileMappings,0xb3d7e5f2,0xa1c8,0x4d6e,0x9f,0x0b,0x2c,0x4a,0x8e,0x7d,0x3f,0x1b);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12DSRDeviceFactory,0xf343d1a0,0xafe3,0x439f,0xb1,0x3d,0xcd,0x87,0xa4,0x3b,0x70,0xca);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12GBVDiagnostics,0x597985ab,0x9b75,0x4dbb,0xbe,0x23,0x07,0x61,0x19,0x5b,0xeb,0xee);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceRaytracing2,0x26f298b3,0x2e8b,0x4326,0x88,0x8d,0x6e,0x06,0xec,0x5c,0x19,0x82);" )
+cpp_quote( "DEFINE_GUID(IID_ID3D12CommandListRaytracing2,0x7a2f39e7,0x4db3,0x4488,0xb0,0x4f,0x0f,0xb3,0x11,0x7a,0x00,0x62);" )
 cpp_quote( "DEFINE_GUID(IID_ID3D12DeviceStatistics,0x3d5ca1a8,0xa39e,0x4619,0x95,0xe0,0xf9,0xb0,0xa4,0x03,0x40,0xf5);" )
