@@ -162,6 +162,7 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define _Out_
 #define _Out_opt_
 #define _Outptr_
+#define _Outptr_opt_result_maybenull_
 #define _Outptr_opt_result_z_
 #define _Outptr_opt_result_bytebuffer_(x)
 #define _COM_Outptr_
@@ -180,11 +181,13 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define _Out_writes_bytes_opt_(x)
 #define _Inout_
 #define _Inout_opt_
+#define _Inout_count_(x)
 #define _Inout_updates_(x)
 #define _Inout_updates_bytes_(x)
 #define _Field_size_(x)
 #define _Field_size_opt_(x)
 #define _Field_size_bytes_(x)
+#define _Field_size_bytes_opt_(x)
 #define _Field_size_full_(x)
 #define _Field_size_full_opt_(x)
 #define _Field_size_bytes_full_(x)
@@ -207,6 +210,7 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
 #define _Success_(x)
 #define _In_count_(x)
 #define _In_opt_count_(x)
+#define _Inexpressible_(x)
 #define _Use_decl_annotations_
 #define _Null_terminated_
 
