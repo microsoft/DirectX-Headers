@@ -32,6 +32,11 @@
 #define D3DX12_COM_PTR_ADDRESSOF(x) &x.p
 #endif
 #endif
+
+#ifndef E_ILLEGAL_STATE_CHANGE
+#define E_ILLEGAL_STATE_CHANGE _HRESULT_TYPEDEF_(0x8000000D)
+#endif
+
 //------------------------------------------------------------------------------------------------
 // No-op lock satisfying BasicLockable.  Use as the default TLock template
 // parameter on map types that don't need thread safety.
