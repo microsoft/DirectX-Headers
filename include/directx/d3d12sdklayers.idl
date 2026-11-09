@@ -1612,7 +1612,9 @@ typedef enum D3D12_MESSAGE_ID {
 
     D3D12_MESSAGE_ID_DUMP_FILE_NOT_SUPPORTED_FOR_32BIT_PROCESS = 1512,
 
-    D3D12_MESSAGE_ID_D3D12_MESSAGES_END = 1513, // This must be the last entry in the enum, and must be one past the last enumerant.
+    D3D12_MESSAGE_ID_DUMP_FILE_DRIVER_CONFIGURATION_NOT_AVAILABLE = 1524,
+
+    D3D12_MESSAGE_ID_D3D12_MESSAGES_END = 1525, // This must be the last entry in the enum, and must be one past the last enumerant.
 } D3D12_MESSAGE_ID;
 
 typedef struct D3D12_MESSAGE

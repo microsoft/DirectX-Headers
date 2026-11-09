@@ -4992,13 +4992,13 @@ typedef HRESULT (WINAPI* PFN_D3D12_CREATE_ROOT_SIGNATURE_DESERIALIZER)(
                                      _In_reads_bytes_(SrcDataSizeInBytes) LPCVOID pSrcData,
                                      _In_ SIZE_T SrcDataSizeInBytes,
                                      _In_ REFIID pRootSignatureDeserializerInterface,
-                                     _Out_ void** ppRootSignatureDeserializer);
+                                     _COM_Outptr_ void** ppRootSignatureDeserializer);
 
 HRESULT WINAPI D3D12CreateRootSignatureDeserializer(
                                      _In_reads_bytes_(SrcDataSizeInBytes) LPCVOID pSrcData,
                                      _In_ SIZE_T SrcDataSizeInBytes,
                                      _In_ REFIID pRootSignatureDeserializerInterface,
-                                     _Out_ void** ppRootSignatureDeserializer);
+                                     _COM_Outptr_ void** ppRootSignatureDeserializer);
 
 typedef HRESULT (WINAPI* PFN_D3D12_SERIALIZE_VERSIONED_ROOT_SIGNATURE)(
                             _In_ const D3D12_VERSIONED_ROOT_SIGNATURE_DESC* pRootSignature,
@@ -5014,27 +5014,27 @@ typedef HRESULT (WINAPI* PFN_D3D12_CREATE_VERSIONED_ROOT_SIGNATURE_DESERIALIZER)
                                      _In_reads_bytes_(SrcDataSizeInBytes) LPCVOID pSrcData,
                                      _In_ SIZE_T SrcDataSizeInBytes,
                                      _In_ REFIID pRootSignatureDeserializerInterface,
-                                     _Out_ void** ppRootSignatureDeserializer);
+                                     _COM_Outptr_ void** ppRootSignatureDeserializer);
 
 HRESULT WINAPI D3D12CreateVersionedRootSignatureDeserializer(
                                      _In_reads_bytes_(SrcDataSizeInBytes) LPCVOID pSrcData,
                                      _In_ SIZE_T SrcDataSizeInBytes,
                                      _In_ REFIID pRootSignatureDeserializerInterface,
-                                     _Out_ void** ppRootSignatureDeserializer);
+                                     _COM_Outptr_ void** ppRootSignatureDeserializer);
 
 typedef HRESULT (WINAPI* PFN_D3D12_CREATE_VERSIONED_ROOT_SIGNATURE_DESERIALIZER_FROM_SUBOBJECT_IN_LIBRARY)(
                                      _In_reads_bytes_(SrcDataSizeInBytes) LPCVOID pSrcData,
                                      _In_ SIZE_T SrcDataSizeInBytes,
                                      _In_ LPCWSTR RootSignatureSubobjectName,
                                      _In_ REFIID pRootSignatureDeserializerInterface,
-                                     _Out_ void** ppRootSignatureDeserializer);
+                                     _COM_Outptr_ void** ppRootSignatureDeserializer);
 
 HRESULT WINAPI D3D12CreateVersionedRootSignatureDeserializerFromSubobjectInLibrary(
                                      _In_reads_bytes_(SrcDataSizeInBytes) LPCVOID pSrcData,
                                      _In_ SIZE_T SrcDataSizeInBytes,
                                      _In_opt_ LPCWSTR RootSignatureSubobjectName,
                                      _In_ REFIID pRootSignatureDeserializerInterface,
-                                     _Out_ void** ppRootSignatureDeserializer);
+                                     _COM_Outptr_ void** ppRootSignatureDeserializer);
 
 typedef struct D3D12_CPU_DESCRIPTOR_HANDLE
     {

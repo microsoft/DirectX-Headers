@@ -619,6 +619,9 @@ struct DX_DUMP_FILE_HEADER
             FILETIME CreationTime;                              // UTC timestamp when the dump was created.
             BOOL UploadedToWatson;                              // TRUE if this dump was uploaded to Watson telemetry.
             LIVE_DEBUGGING_END_STATUS LiveDebuggingEndStatus;   // Whether live debugging finished before dump write.
+            UINT32 ProcessId;                                   // ID of the process that owned the device.
+            UINT32 KernelModeDeviceHandle;                      // Process-scoped D3DKMT device handle associated with the dump.
+            UINT32 WNFChangeStamp;                              // WNF change stamp for the device-error notification; zero if unavailable.
         } Fields;
         BYTE AllBytes[DX_DUMP_FILE_HEADER_MAX_SIZE]; // Provides the fixed 256-byte footprint.
     };
